@@ -505,7 +505,7 @@
   function buildPrompt() {
     const s = selection();
     const notes = $("#notes").value.trim();
-    const system = "Eres un escritor de ficción especulativa y, a la vez, un analista de prospectiva que trabaja en un centro de estudios del futuro. Escribes en español, con prosa literaria cuidada y una voz humana. Tu propósito es ayudar a imaginar y visualizar un futuro posible: construyes escenarios plausibles, concretos y sensoriales, donde se entiende qué pasa cuando una idea del futuro se vuelve realidad. Evitas clichés tecnológicos, listas y explicaciones técnicas. Respondes únicamente con la narrativa.";
+    const system = "Eres un escritor de ficción especulativa y, a la vez, un analista de prospectiva que trabaja en un centro de estudios del futuro. Escribes en español muy sencillo y claro, de modo que lo entienda una niña o un niño de 10 años y también una persona adulta, con una voz cálida y humana. Tu propósito es ayudar a imaginar y visualizar un futuro posible: construyes escenarios plausibles, concretos y sensoriales, donde se entiende qué pasa cuando una idea del futuro se vuelve realidad. Evitas palabras rebuscadas, tecnicismos, anglicismos, clichés de ciencia ficción, listas y explicaciones técnicas. Respondes únicamente con la narrativa.";
     const user =
 `Una persona participante de un taller de estudios de futuros eligió estas cartas y es co-creadora de la historia:
 
@@ -527,8 +527,11 @@ Estructura narrativa (déjala implícita: no uses títulos de sección ni nombre
 4. Cierre: termina con la nueva normalidad que deja ese futuro y una consecuencia duradera o una pregunta abierta que invite a pensar.
 
 Requisitos:
-- Extensión aproximada de media página (400 a 480 palabras), en 5 a 7 párrafos breves.
-- Tono literario, apropiado para una feria del libro, y plausible: las causas y consecuencias deben ser razonables, sin soluciones mágicas. Muestra efectos directos y también indirectos.
+- Extensión aproximada de media página (350 a 450 palabras), en 5 a 7 párrafos breves.
+- Lenguaje sencillo: usa palabras de todos los días y oraciones cortas (de unas 20 palabras o menos), con una sola idea por oración. No uses palabras rebuscadas, tecnicismos ni anglicismos. Si necesitas una idea técnica, cuéntala con palabras simples o con una comparación de la vida diaria, sin nombrar el término técnico.
+- Imágenes concretas y cercanas: apóyate en cosas que cualquiera conoce (la comida, la casa, la escuela, los juegos, los gestos) para que niñas, niños y personas adultas entiendan y se imaginen la escena.
+- Coherencia: todas las cartas elegidas deben aparecer y conectarse en una sola historia, con causa y efecto claros (pasa esto, por eso ocurre aquello). Sin saltos, sin elementos sueltos y sin personajes que aparecen y desaparecen. El año, el lugar y los personajes se mantienen iguales de principio a fin. Antes de escribir, piensa en silencio cómo se relacionan las cartas, sin mostrarlo.
+- Tono cálido y narrativo, adecuado para una feria del libro y para todo público. Plausible: las causas y consecuencias deben ser razonables, sin soluciones mágicas. Muestra efectos directos y también indirectos.
 - Que el tipo de historia (${s[0].text}) defina la atmósfera y el tono, sin volver el escenario una caricatura de utopía o distopía.
 - Que el lector pueda visualizar el futuro: usa lugares, objetos, sonidos y gestos específicos del año ${s[1].text}.
 - No moralices ni expliques el método.
