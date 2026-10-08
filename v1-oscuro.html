@@ -351,9 +351,9 @@
   function buildPrompt() {
     const s = selection();
     const notes = $("#notes").value.trim();
-    const system = "Eres un escritor de ficción especulativa y prospectiva. Escribes en español, con prosa literaria cuidada, imágenes sensoriales y una voz humana; evitas clichés tecnológicos, listas y explicaciones técnicas. Respondes únicamente con la narrativa.";
+    const system = "Eres un escritor de ficción especulativa y, a la vez, un analista de prospectiva que trabaja en un centro de estudios del futuro. Escribes en español, con prosa literaria cuidada y una voz humana. Tu propósito es ayudar a imaginar y visualizar un futuro posible: construyes escenarios plausibles, concretos y sensoriales, donde se entiende qué pasa cuando una idea del futuro se vuelve realidad. Evitas clichés tecnológicos, listas y explicaciones técnicas. Respondes únicamente con la narrativa.";
     const user =
-`Escribe una narrativa de futuro con estas características, elegidas por una persona participante de un taller de estudios de futuros (es co-creadora de la historia):
+`Una persona participante de un taller de estudios de futuros eligió estas cartas y es co-creadora de la historia:
 
 - Tipo de historia: ${s[0].text}
 - Horizonte temporal (año en que ocurre): ${s[1].text}
@@ -361,13 +361,23 @@
 - Lo que sucede: ${s[3].text}
 - A quién o dónde le sucede: ${s[4].text}
 
-Ideas y comentarios de la persona participante sobre este futuro (incorpóralos de forma natural y respétalos):
+Ideas y comentarios de la persona participante sobre este futuro (incorpóralos como hechos o rasgos de ese mundo y respétalos):
 ${notes ? notes : "(No añadió comentarios; usa tu criterio dentro de los parámetros anteriores.)"}
 
+Premisa: imagina que en el año ${s[1].text}, en el ámbito de «${s[2].text}», ya es realidad que «${s[3].text}», y que esto afecta sobre todo a «${s[4].text}». Escribe una narrativa que haga visible qué implica ese futuro: cómo se vive, qué cambió, quién gana, quién pierde y qué queda abierto.
+
+Estructura narrativa (déjala implícita: no uses títulos de sección ni nombres las fases, solo dale hilo y coherencia al relato):
+1. Contexto: pinta el mundo de ese año con detalles cotidianos concretos (rutinas, objetos, lugares, reglas sociales, economía, sensaciones) y deja ver, sin explicarlo largo, qué cambió para que esto fuera posible.
+2. Conflicto: muestra la tensión que aparece cuando esto se vuelve real: un dilema, un efecto secundario no previsto, una desigualdad, una dependencia o una resistencia ligada directamente a lo elegido.
+3. Clímax: resuelve esa tensión en una escena concreta y de mayor intensidad, vivida por un personaje o grupo que sirva de hilo conductor.
+4. Cierre: termina con la nueva normalidad que deja ese futuro y una consecuencia duradera o una pregunta abierta que invite a pensar.
+
 Requisitos:
-- Extensión aproximada de media página (350 a 450 palabras).
-- Tono literario, apropiado para presentarse en una feria del libro: imágenes, ritmo, un personaje o escena concreta.
-- Ambienta la historia explícitamente en el año ${s[1].text} y deja que el tipo de historia (${s[0].text}) defina su atmósfera.
+- Extensión aproximada de media página (400 a 480 palabras), en 5 a 7 párrafos breves.
+- Tono literario, apropiado para una feria del libro, y plausible: las causas y consecuencias deben ser razonables, sin soluciones mágicas. Muestra efectos directos y también indirectos.
+- Que el tipo de historia (${s[0].text}) defina la atmósfera y el tono, sin volver el escenario una caricatura de utopía o distopía.
+- Que el lector pueda visualizar el futuro: usa lugares, objetos, sonidos y gestos específicos del año ${s[1].text}.
+- No moralices ni expliques el método.
 - Primera línea: un título breve, sin comillas ni símbolos de formato. Después una línea en blanco y la narrativa en párrafos.`;
     return { system, user };
   }
