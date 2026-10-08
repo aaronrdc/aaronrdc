@@ -227,6 +227,16 @@
   #ask h2 { color: var(--ink); }
   #ask .hint, #ask .ahead p { color: var(--muted); }
 
+
+  /* ---------- Descripción al pasar el cursor ---------- */
+  #tip { position: fixed; z-index: 60; width: min(300px, calc(100vw - 24px)); padding: 14px 16px; border-radius: 16px; pointer-events: none; opacity: 0; transform: translateY(6px); transition: opacity .18s, transform .18s; --c: #fff; }
+  #tip.show { opacity: 1; transform: none; }
+  #tip .tt-tag { display: block; font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; color: var(--c); margin-bottom: 4px; }
+  #tip .tt-title { display: block; font-family: Georgia, "Times New Roman", serif; font-size: 1.25rem; line-height: 1.2; margin-bottom: 6px; }
+  #tip p { margin: 0; font-size: .92rem; line-height: 1.5; }
+  #tip { background: #131938; color: var(--ink); border: 1px solid var(--c); box-shadow: 0 14px 40px rgba(0,0,0,.55), 0 0 24px color-mix(in srgb, var(--c) 28%, transparent); }
+  #tip p { color: #c4cbe6; }
+
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 </head>
@@ -288,6 +298,7 @@
     <button class="ghost" id="askNext" aria-label="Pregunta siguiente">Siguiente ▶</button>
   </div>
 </dialog>
+<div id="tip" role="tooltip"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -325,9 +336,49 @@
     del(k) { try { localStorage.removeItem(k); } catch {} },
   };
 
+  /* ============ Descripciones al pasar el cursor ============ */
+  const DESC = {
+    "Inspiradora": "Un futuro que motiva: muestra logros, esperanza y personas que se atreven a cambiar las cosas.",
+    "Misteriosa": "Un futuro lleno de preguntas: secretos, hallazgos y cosas que no se explican del todo.",
+    "Utópica": "Un futuro ideal, donde la sociedad resolvió sus grandes problemas. La pregunta es a qué costo y para quién.",
+    "Surrealista": "Un futuro con lógica de sueño: lo imposible se vuelve cotidiano y la realidad se dobla sin avisar.",
+    "2045": "Futuro cercano, a unos 20 años: lo que hoy son señales débiles ya es parte de la vida diaria.",
+    "2055": "Una generación adelante, a unos 30 años: quienes nacen hoy ya son adultos y las tecnologías actuales maduraron.",
+    "2074": "Largo plazo, a casi 50 años: instituciones, costumbres y tecnologías muy distintas a las de hoy.",
+    "2099": "Fin de siglo, a más de 70 años: un mundo difícil de reconocer, donde se ven los efectos de largo plazo.",
+    "Sociedad": "Cómo vivimos juntos: comunidades, trabajo, educación, gobierno, cuidados y desigualdades.",
+    "Tecnología": "Herramientas e inventos que cambian lo que podemos hacer, y quién puede hacerlo.",
+    "Ecología": "La relación con la naturaleza: clima, especies, recursos y el cuidado del planeta.",
+    "Todos los alimentos se imprimen en casa con impresoras 3D": "La comida se produce en cada hogar. Cambia la cocina, el comercio, la agricultura y quién controla los alimentos.",
+    "Especies extintas son resucitadas y reintroducidas en sus hábitats": "Se recupera la vida perdida. Abre debates sobre ética, ecosistemas y qué significa conservar.",
+    "Los humanos pueden comunicarse sin hablar ni escribir": "Las mentes se conectan de forma directa. Cambian la privacidad, el lenguaje y las relaciones.",
+    "Los humanos habitan Marte de forma permanente": "La humanidad vive en más de un planeta: nuevas comunidades, leyes y formas de vida lejos de la Tierra.",
+    "Fábricas automatizadas": "Lugares donde las máquinas producen casi todo. ¿Qué pasa con el trabajo, la producción y quienes dependen de ellas?",
+    "Personas con más de 120 años": "Vidas muy largas que cambian la familia, el trabajo, la memoria y la relación entre generaciones.",
+    "Una ciudad flotante que viaja por los océanos": "Una comunidad móvil sobre el mar, sin territorio fijo y con sus propias reglas y recursos.",
+    "Personas que optaron por vivir en cuerpos robóticos": "Personas que dejaron el cuerpo biológico. Plantean preguntas sobre identidad, derechos y qué es ser humano.",
+    "Niños y niñas menores de 10 años": "La primera generación que crece en ese futuro y lo vive como lo normal.",
+  };
+  const tip = $("#tip");
+  function showTip(btn, d) {
+    const text = d.drawn[+btn.dataset.k], info = DESC[text];
+    if (!info) return;
+    tip.style.setProperty("--c", d.color);
+    tip.innerHTML = `<span class="tt-tag">${d.name}</span>${text.length <= 30 ? `<strong class="tt-title">${text}</strong>` : ""}<p>${info}</p>`;
+    const deck = btn.closest(".deck").getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+    const left = Math.min(Math.max(12, deck.left + deck.width / 2 - tw / 2), innerWidth - tw - 12);
+    let top = deck.bottom + 12;
+    if (top + th > innerHeight - 12) top = Math.max(12, deck.top - th - 12);
+    tip.style.left = left + "px"; tip.style.top = top + "px";
+    tip.classList.add("show");
+  }
+  const hideTip = () => tip.classList.remove("show");
+  window.addEventListener("scroll", hideTip, { passive: true });
+
   /* ============ Render de mazos ============ */
   const table = $("#table");
   function build() {
+    hideTip();
     table.innerHTML = "";
     state.forEach((d, i) => {
       d.drawn = shuffle(d.items).slice(0, 2);
@@ -356,6 +407,12 @@
         </div>`;
       const deck = slot.querySelector(".deck");
       slot.querySelector(".back").addEventListener("click", () => { d.flipped = true; deck.classList.add("flipped"); refresh(); });
+      slot.querySelectorAll(".opt").forEach(b => {
+        b.addEventListener("pointerenter", () => showTip(b, d));
+        b.addEventListener("pointerleave", hideTip);
+        b.addEventListener("focus", () => showTip(b, d));
+        b.addEventListener("blur", hideTip);
+      });
       slot.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
         d.choice = +b.dataset.k;
         deck.classList.add("has-choice");
