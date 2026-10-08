@@ -189,6 +189,89 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%); }
 
+
+  /* ---------- Escena visual ---------- */
+  #visual { margin-top: 26px; border-color: #3a4478; }
+  #visual h3.ph { margin: 26px 0 4px; font-size: 1.05rem; font-weight: 600; }
+  #visual .meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  #story .viz { border-color: #6d7bd4; color: #cdd6ff; }
+  .stage { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 16 / 9; background: #000; max-width: 100%; }
+  .stage:fullscreen { border-radius: 0; border: 0; width: 100vw; height: 100vh; aspect-ratio: auto; cursor: pointer; }
+  .stage svg { display: block; width: 100%; height: 100%; }
+  .cap { position: absolute; inset: auto 0 0 0; padding: 40px clamp(16px, 3vw, 36px) clamp(12px, 2vw, 24px); background: linear-gradient(transparent, rgba(3,5,12,.86)); color: #fff; pointer-events: none; }
+  .cap-n { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: #aab6ee; margin-bottom: 6px; }
+  .cap p { margin: 0; font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: clamp(1rem, 2.1vw, 1.7rem); line-height: 1.35; text-wrap: balance; }
+  @media (max-width: 700px) {
+    .stage { aspect-ratio: auto; background: #05070f; }
+    .stage svg { height: auto; aspect-ratio: 16 / 9; }
+    .cap { position: static; background: #05070f; padding: 12px 14px 14px; }
+  }
+  .ctrl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px; }
+  .sdots { display: flex; gap: 8px; }
+  .sdot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #6d7bd4; background: transparent; padding: 0; cursor: pointer; }
+  .sdot.on { background: #9fb4ff; border-color: #9fb4ff; box-shadow: 0 0 10px #9fb4ff; }
+  .prompts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  @media (max-width: 900px) { .prompts { grid-template-columns: minmax(0, 1fr); } }
+  .pcard { background: #090d19; border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .pcard .ph2 { display: flex; align-items: center; gap: 10px; }
+  .pcard .ph2 span { width: 24px; height: 24px; border-radius: 50%; background: #1b2140; color: #9fb4ff; display: grid; place-items: center; font-size: .8rem; font-weight: 700; flex: none; }
+  .pcard h4 { margin: 0; font-size: .95rem; font-weight: 600; }
+  .pcard p { margin: 0; font-size: .9rem; line-height: 1.5; color: #c4cbe6; flex: 1; overflow-wrap: anywhere; }
+  .pcard .ghost { align-self: flex-start; }
+
+  /* animación de siluetas */
+  .scene { opacity: 0; transition: opacity 1.1s ease; transform-box: view-box; transform-origin: 50% 60%; }
+  .scene.on { opacity: 1; animation: kb 14s ease-out forwards; }
+  .scene:not(.on) * { animation-play-state: paused !important; }
+  .scene .win { opacity: var(--wo, 1); }
+  .lay { animation: drift 60s ease-in-out infinite alternate; }
+  .lay.far { animation-duration: 90s; } .lay.near { animation-duration: 45s; }
+  .an { transform-box: fill-box; transform-origin: 50% 100%; }
+  .a-float { animation: bob 4.5s ease-in-out infinite; }
+  .a-sway { animation: sway 5s ease-in-out infinite alternate; }
+  .a-pulse { animation: pulse 3.5s ease-in-out infinite; }
+  .a-walk { animation: walk 22s linear infinite alternate; }
+  .a-fly { animation: fly 26s linear infinite alternate; }
+  .tw { animation: tw 3s ease-in-out infinite; }
+  .cloud { animation: cl 70s linear infinite alternate; }
+  .auro { animation: au 16s ease-in-out infinite alternate; }
+  .pulseS { animation: pulse 8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .rain { animation: rainfall 1s linear infinite; }
+  .snow { animation: snowfall 10s linear infinite; }
+  .dust { animation: dustdrift 12s linear infinite; }
+  .fog { animation: fogdrift 20s ease-in-out infinite alternate; }
+  .ff { animation: ffl 7s ease-in-out infinite; }
+  .smoke { animation: smoke 8s linear infinite; transform-box: fill-box; transform-origin: center; opacity: 0; }
+  .flap { animation: flap .9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .rot { animation: rot .12s linear infinite alternate; transform-box: fill-box; transform-origin: center; }
+  .flame { animation: flame .25s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: top; }
+  .beam { animation: beam 4s ease-in-out infinite; }
+  .blink { animation: tw 1.2s steps(2, end) infinite; }
+  .shim { animation: wave 9s linear infinite alternate; }
+  .wake { animation: wave 5s ease-in-out infinite alternate; }
+  .spout { animation: tw 4s ease-in-out infinite; }
+  @keyframes kb { from { transform: scale(1); } to { transform: scale(1.07); } }
+  @keyframes drift { from { transform: translateX(0); } to { transform: translateX(-40px); } }
+  @keyframes tw { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+  @keyframes sway { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @keyframes walk { from { transform: translateX(-40px); } to { transform: translateX(60px); } }
+  @keyframes fly { from { transform: translateX(-140px); } to { transform: translateX(240px); } }
+  @keyframes cl { from { transform: translateX(-80px); } to { transform: translateX(120px); } }
+  @keyframes au { from { opacity: .35; transform: translateX(-30px); } to { opacity: .8; transform: translateX(30px); } }
+  @keyframes rainfall { from { transform: translate(0, -60px); } to { transform: translate(-80px, 960px); } }
+  @keyframes snowfall { from { transform: translate(0, -20px); } to { transform: translate(40px, 940px); } }
+  @keyframes dustdrift { from { transform: translateX(-80px); } to { transform: translateX(1700px); } }
+  @keyframes fogdrift { from { transform: translateX(-140px); } to { transform: translateX(140px); } }
+  @keyframes ffl { 0%, 100% { transform: translate(0, 0); opacity: .1; } 50% { transform: translate(26px, -34px); opacity: 1; } }
+  @keyframes smoke { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 20% { opacity: .5; } 100% { transform: translate(34px, -130px) scale(2.2); opacity: 0; } }
+  @keyframes flap { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(-.8); } }
+  @keyframes rot { from { transform: scaleX(1); } to { transform: scaleX(.35); } }
+  @keyframes flame { from { opacity: .95; transform: scaleY(1); } to { opacity: .55; transform: scaleY(1.3); } }
+  @keyframes beam { 0%, 100% { opacity: .06; } 50% { opacity: .36; } }
+  @keyframes wave { from { transform: translateX(0); } to { transform: translateX(-70px); } }
+
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <div class="wrap">
@@ -214,6 +297,7 @@
   </section>
 
   <section class="panel" id="story" aria-live="polite"></section>
+  <section class="panel" id="visual" hidden></section>
 </div>
 
 <div class="fab-wrap">
@@ -368,10 +452,13 @@ Requisitos:
       (final ? `<div class="meta">
         <button class="ghost" id="cpStory">⧉ Copiar narrativa</button>
         <button class="ghost" id="regen">↻ Generar otra versión</button>
+        <button class="ghost viz" id="btnViz">🎞 Visualizar escena</button>
       </div>` : "");
     if (final) {
       $("#cpStory").onclick = async () => toast((await copy(title + "\n\n" + parts.join("\n\n"))) ? "Narrativa copiada" : "No se pudo copiar");
       $("#regen").onclick = generate;
+      lastStory = { title, body: parts.join("\n\n") };
+      $("#btnViz").onclick = visualize;
     }
   }
   function showError(msg) {
@@ -381,7 +468,7 @@ Requisitos:
 
   async function generate() {
     if (generating || selection().some(x => !x)) return;
-    generating = true; refresh();
+    generating = true; refresh(); clearViz(); lastStory = null;
     $("#btnGenerate").textContent = "✦ Escribiendo…";
     showStory(`<div class="loading"><div class="spin"></div>Tejiendo tu futuro…</div>`);
     try {
@@ -403,6 +490,386 @@ Requisitos:
       generating = false; $("#btnGenerate").textContent = "✦ Generar narrativa"; refresh();
     }
   }
+  /* ============ Escena visual: motor de siluetas animadas ============ */
+  const VW = 1600, VH = 900, HZ = 600, LAND = 655;
+  const BASEY = { far: 676, mid: 744, near: 826 };
+  const DSC = { far: .62, mid: 1, near: 1.4 };
+  const LD = { far: { base: 612, hmax: 270, t: .22 }, mid: { base: 646, hmax: 170, t: .42 }, near: { base: 670, hmax: 95, t: .58 } };
+  const TIMES = {
+    dawn:  { top: "#2b2f6b", bottom: "#f4a77a", glow: "#ffd9a0", ink: "#1a1633", win: .45 },
+    day:   { top: "#3f86d9", bottom: "#bfe3ff", glow: "#fff4cf", ink: "#1c2a44", win: .15 },
+    dusk:  { top: "#3b2a6d", bottom: "#ff7a59", glow: "#ffc27a", ink: "#1a1030", win: .85 },
+    night: { top: "#070b1f", bottom: "#1c2a5e", glow: "#8fb8ff", ink: "#04060f", win: 1 },
+  };
+  const SKY_T = ["sun", "moon", "stars", "planet_mars", "planet_ring", "earth", "clouds", "aurora", "comet", "nebula"];
+  const LAYER_T = ["skyline", "mountains", "dunes", "hills", "ocean", "forest", "factory"];
+  const ACTOR_T = ["person", "child", "children", "elder", "crowd", "robot", "mammoth", "dodo", "whale", "deer", "bird_flock", "drone",
+                   "printer3d", "floating_city", "dome_colony", "rover", "rocket", "house", "lighthouse", "wind_turbine", "tree", "boat", "book"];
+  const WEATHER = ["none", "rain", "snow", "dust", "fog", "fireflies"];
+  const ANIMS = ["none", "float", "walk", "sway", "pulse", "fly"];
+  const DEPTHS = ["far", "mid", "near"];
+  const FLYERS = { bird_flock: 1, drone: 1, rocket: 1 };
+  const hexRe = /^#[0-9a-f]{6}$/i;
+
+  const clampN = (v, a, b, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(b, Math.max(a, v)) : d; };
+  const f1 = (n) => Math.round(n * 10) / 10;
+  const mix = (a, b, t) => {
+    const p = (h) => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+    const A = p(a), B = p(b);
+    return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, "0")).join("");
+  };
+  const mulberry = (seed) => { let t = seed >>> 0; return () => { t += 0x6D2B79F5; let r = Math.imul(t ^ t >>> 15, 1 | t); r ^= r + Math.imul(r ^ r >>> 7, 61 | r); return ((r ^ r >>> 14) >>> 0) / 4294967296; }; };
+  const strSeed = (s) => [...s].reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619), 2166136261) >>> 0;
+  const arr = (v) => Array.isArray(v) ? v : [];
+
+  /* ---- Siluetas (origen: centro-base; color = currentColor; detalles luminosos = var(--glow)) ---- */
+  const G = "var(--glow)";
+  const A = {};
+  A.person = () => `<circle cy="-92" r="8"/><path d="M-12-83Q0-88 12-83L14-48H-14Z"/><path d="M-12-82L-19-52L-14-50L-8-70ZM12-82L19-52L14-50L8-70Z"/><path d="M-13-50H-1L-3 0H-10ZM1-50H13L10 0H3Z"/>`;
+  A.child = () => `<circle cy="-62" r="9"/><path d="M-8-53Q0-57 8-53L9-34H-9Z"/><path d="M-8-52L-14-34L-10-32L-5-44ZM8-52L14-34L10-32L5-44Z"/><path d="M-8-35H-1L-2 0H-7ZM1-35H8L7 0H2Z"/>`;
+  A.children = () => `<g transform="translate(-20 0)">${A.child()}</g><g transform="translate(20 0) scale(.92)">${A.child()}</g><path d="M-12-40Q0-30 12-40" fill="none" stroke="currentColor" stroke-width="3"/>`;
+  A.elder = () => `<circle cx="5" cy="-88" r="8"/><path d="M-9-80Q5-87 14-77L11-46H-9Z"/><path d="M-9-78L-16-52L-11-50L-5-66Z"/><path d="M13-76L21-58L25-60L17-72Z"/><path d="M-10-48H-1L-3 0H-9ZM1-48H11L9 0H3Z"/><path d="M23-62L27 0" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  A.crowd = () => [[-70, A.person(), .92], [-38, A.child(), 1], [0, A.person(), 1.05], [38, A.elder(), .95], [68, A.child(), .9]].map(([x, s, k]) => `<g transform="translate(${x} 0) scale(${k})">${s}</g>`).join("");
+  A.robot = () => `<path d="M0-122V-112" stroke="currentColor" stroke-width="3"/><circle cy="-124" r="3.5"/><rect x="-11" y="-112" width="22" height="18" rx="5"/><rect x="-7" y="-106" width="14" height="4" rx="2" fill="${G}"/><rect x="-4" y="-94" width="8" height="5"/><rect x="-16" y="-89" width="32" height="42" rx="6"/><circle cy="-70" r="4" fill="${G}"/><rect x="-24" y="-88" width="8" height="34" rx="4"/><rect x="16" y="-88" width="8" height="34" rx="4"/><rect x="-12" y="-47" width="9" height="47" rx="3"/><rect x="3" y="-47" width="9" height="47" rx="3"/>`;
+  A.mammoth = () => `<path d="M-98-50C-100-118-48-142 6-138C58-134 98-112 102-72L102-46H-98Z"/><ellipse cx="-86" cy="-92" rx="34" ry="42"/><path d="M-104-84Q-132-62-124-30Q-121-12-106-12" fill="none" stroke="currentColor" stroke-width="15" stroke-linecap="round"/><path d="M-100-70Q-138-66-146-38Q-132-52-104-58Z" fill="#d8d0bc" fill-opacity=".85"/><rect x="-84" y="-52" width="22" height="52" rx="6"/><rect x="-54" y="-52" width="22" height="52" rx="6"/><rect x="50" y="-52" width="22" height="52" rx="6"/><rect x="78" y="-52" width="22" height="52" rx="6"/><path d="M-98-50L-90-34L-82-50L-74-30L-66-50L-58-28L-50-50L-42-30L-34-50L-26-32L-18-50L-10-30L-2-50L6-32L14-50L22-30L30-50L38-32L46-50L54-30L62-50L70-32L78-50L86-30L94-50Z"/><path d="M100-100Q116-90 112-60L104-70Z"/><circle cx="-96" cy="-98" r="2.5" fill="${G}"/>`;
+  A.dodo = () => `<ellipse cx="4" cy="-34" rx="27" ry="22" transform="rotate(-12 4 -34)"/><path d="M26-44Q46-62 40-30Q34-38 28-36Z"/><path d="M-26-52Q-18-40-8-36L2-52Z"/><circle cx="-22" cy="-58" r="11"/><path d="M-30-62Q-58-60-54-42Q-46-50-31-50Z"/><path d="M-6-14L-8-2M6-14L8-2M-13 0H-4M4 0H13" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="-25" cy="-60" r="1.8" fill="${G}"/>`;
+  A.whale = () => `<path d="M-200 4C-200-40-140-76-60-74C20-72 100-50 170-34L212-56C224-64 236-82 232-100C248-92 262-92 276-100C274-76 254-56 228-40C216-28 196-16 168-8C100 8-60 16-140 12C-180 10-200 8-200 4Z"/><path d="M-170-14Q-100-2-20-6" fill="none" stroke="${G}" stroke-opacity=".25" stroke-width="3"/><circle cx="-158" cy="-34" r="3" fill="${G}"/><g class="spout"><path d="M-110-76Q-114-110-126-124M-110-76Q-104-112-92-124" stroke="${G}" stroke-width="4" fill="none" stroke-linecap="round" opacity=".6"/></g>`;
+  A.deer = () => `<ellipse cx="4" cy="-64" rx="34" ry="15"/><path d="M-26-70Q-40-90-42-104" stroke="currentColor" stroke-width="9" fill="none" stroke-linecap="round"/><ellipse cx="-46" cy="-108" rx="11" ry="6" transform="rotate(-25 -46 -108)"/><path d="M-44-114L-52-140M-48-127L-62-131M-44-114L-34-138M-38-127L-26-132" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M-22-52L-24 0M-10-52L-8 0M22-52L24 0M32-54L36 0" stroke="currentColor" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M36-70L46-78L40-62Z"/>`;
+  A.bird_flock = () => [[0, 0], [-30, 14], [30, 14], [-60, 30], [60, 30], [-92, 46], [92, 46]].map(([x, y], i) =>
+    `<g transform="translate(${x} ${y})"><path class="flap" style="animation-delay:-${(i * .17).toFixed(2)}s" d="M-10 0Q-5-9 0 0Q5-9 10 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></g>`).join("");
+  A.drone = () => `<ellipse rx="16" ry="6"/><path d="M-14-2L-32-12M14-2L32-12" stroke="currentColor" stroke-width="3" fill="none"/><ellipse class="rot" cx="-32" cy="-14" rx="13" ry="2"/><ellipse class="rot" cx="32" cy="-14" rx="13" ry="2"/><circle cy="6" r="2.5" fill="${G}"/>`;
+  A.printer3d = () => `<rect x="-38" y="-14" width="76" height="14" rx="3"/><rect x="-38" y="-104" width="6" height="92"/><rect x="32" y="-104" width="6" height="92"/><rect x="-38" y="-104" width="76" height="8"/><rect x="-10" y="-96" width="20" height="10" rx="2"/><path d="M-4-86H4L0-74Z"/><ellipse cy="-16" rx="22" ry="3" fill="${G}" fill-opacity=".5"/><rect x="-14" y="-24" width="28" height="5" fill="${G}"/><rect x="-12" y="-29" width="24" height="5" fill="${G}"/><rect x="-9" y="-34" width="18" height="5" fill="${G}"/><rect x="-5" y="-39" width="10" height="5" fill="${G}"/><path d="M0-74V-42" stroke="${G}" stroke-width="1.5" opacity=".7"/>`;
+  A.floating_city = (rnd) => {
+    let t = "", w = "", x = -340;
+    while (x < 320) {
+      const tw = 22 + rnd() * 26, th = 44 + rnd() * 120;
+      t += `<path d="M${f1(x)} -14V${f1(-14 - th)}Q${f1(x + tw / 2)} ${f1(-28 - th)} ${f1(x + tw)} ${f1(-14 - th)}V-14Z"/>`;
+      for (let k = 0; k < 4; k++) if (rnd() < .8) w += `<rect class="win" x="${f1(x + 4 + rnd() * (tw - 10))}" y="${f1(-24 - rnd() * (th - 14))}" width="4" height="6" fill="${G}"/>`;
+      x += tw + 6 + rnd() * 14;
+    }
+    const dome = (cx, r) => `<path d="M${cx - r} -14A${r} ${r} 0 0 1 ${cx + r} -14Z" fill="${G}" fill-opacity=".22" stroke="currentColor" stroke-width="4"/>`;
+    const turb = (cx) => `<path d="M${cx} -14V-120" stroke="currentColor" stroke-width="4"/><g><animateTransform attributeName="transform" type="rotate" from="0 ${cx} -120" to="360 ${cx} -120" dur="7s" repeatCount="indefinite"/><path d="M${cx} -120V-170M${cx} -120L${cx - 43} -95M${cx} -120L${cx + 43} -95" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></g>`;
+    return `<path d="M-384 -2H384L344 38Q0 74-344 38Z"/><rect x="-372" y="-16" width="744" height="16" rx="4"/>${t}<path d="M-18-14L-11-250L0-304L11-250L18-14Z"/><ellipse cy="-176" rx="46" ry="6"/><ellipse cy="-120" rx="38" ry="5"/><circle cy="-306" r="3.5" fill="${G}"/>${dome(-210, 54)}${dome(236, 42)}${turb(-300)}${turb(330)}${w}<path class="wake" d="M-430 6H-320M326 6H436" stroke="${G}" stroke-opacity=".35" stroke-width="3"/>`;
+  };
+  A.dome_colony = () => {
+    const dome = (x, r) => `<path d="M${x - r} 0A${r} ${r} 0 0 1 ${x + r} 0Z" fill="${G}" fill-opacity=".2" stroke="currentColor" stroke-width="5"/><path d="M${x} 0V${-r}M${x - r * .62} 0Q${x - r * .55} ${-r * .75} ${x} ${-r}M${x + r * .62} 0Q${x + r * .55} ${-r * .75} ${x} ${-r}" stroke="currentColor" stroke-width="2" fill="none"/><rect x="${x - r * .35}" y="${-r * .32}" width="${r * .22}" height="${r * .32}"/><rect x="${x + r * .05}" y="${-r * .48}" width="${r * .2}" height="${r * .48}"/><circle cx="${x - r * .55}" cy="${-r * .12}" r="${r * .12}"/>`;
+    return `${dome(-170, 96)}${dome(0, 62)}${dome(130, 46)}<rect x="-80" y="-16" width="52" height="10" rx="3"/><rect x="40" y="-14" width="48" height="9" rx="3"/><path d="M230 0V-140" stroke="currentColor" stroke-width="4"/><circle class="blink" cx="230" cy="-143" r="4.5" fill="#ff5a5a"/><path d="M-12 0M270 0L300 -28H344L314 0Z"/><path d="M322 0L350 -26H394L366 0Z"/>`;
+  };
+  A.rover = () => `<rect x="-34" y="-34" width="68" height="16" rx="4"/><circle cx="-26" cy="-8" r="9"/><circle cx="0" cy="-8" r="9"/><circle cx="26" cy="-8" r="9"/><path d="M-30-18L-24-8M30-18L24-8" stroke="currentColor" stroke-width="3"/><path d="M20-34V-58" stroke="currentColor" stroke-width="3"/><rect x="11" y="-66" width="18" height="9" rx="2"/><path d="M-32-34L-42-50H-6L-8-34Z"/><circle cx="20" cy="-62" r="2.2" fill="${G}"/>`;
+  A.rocket = () => `<path d="M0-300Q32-250 32-170V-60H-32V-170Q-32-250 0-300Z"/><path d="M-32-130L-62-44V-22H-32ZM32-130L62-44V-22H32Z"/><rect x="-14" y="-60" width="28" height="12"/><circle cy="-204" r="12" fill="${G}"/><path class="flame" d="M-18-48Q0 30 18-48Z" fill="${G}"/>`;
+  A.house = () => `<rect x="-50" y="-70" width="100" height="70"/><path d="M-64-70L0-122L64-70Z"/><rect x="28" y="-120" width="12" height="32"/><rect class="win" x="-32" y="-54" width="22" height="22" fill="${G}"/><rect class="win" x="12" y="-54" width="22" height="22" fill="${G}"/><rect x="-6" y="-40" width="14" height="40" fill="${G}" fill-opacity=".25"/>`;
+  A.lighthouse = () => `<path d="M-28 0L-17-190H17L28 0Z"/><rect x="-26" y="-206" width="52" height="16"/><rect x="-15" y="-240" width="30" height="34" fill="${G}"/><path d="M-22-240H22L0-268Z"/><path class="beam" d="M0-224L560-300V-148Z" fill="${G}" opacity=".25"/>`;
+  A.wind_turbine = () => `<path d="M-6 0L-2-188H2L6 0Z"/><rect x="-7" y="-196" width="18" height="10" rx="3"/><g><animateTransform attributeName="transform" type="rotate" from="0 0 -190" to="360 0 -190" dur="9s" repeatCount="indefinite"/><path d="M0-190L-4-262L0-270L4-262Z"/><path transform="rotate(120 0 -190)" d="M0-190L-4-262L0-270L4-262Z"/><path transform="rotate(240 0 -190)" d="M0-190L-4-262L0-270L4-262Z"/></g><circle cy="-190" r="5"/>`;
+  A.tree = () => `<rect x="-4" y="-52" width="8" height="52"/><circle cy="-92" r="34"/><circle cx="-24" cy="-68" r="24"/><circle cx="24" cy="-68" r="24"/><circle cy="-124" r="22"/>`;
+  A.boat = () => `<path d="M-92-10H92L72 12H-72Z"/><rect x="-2" y="-134" width="4" height="124"/><path d="M8-128L72-26H8Z"/><path d="M-8-112L-56-26H-8Z"/>`;
+  A.book = () => `<path d="M-48-6Q-24-20 0-8Q24-20 48-6V-32Q24-44 0-34Q-24-44-48-32Z"/><path d="M0-8V-34" stroke="${G}" stroke-width="2" opacity=".6"/>`;
+
+  /* ---- Cuerpos celestes ---- */
+  const SKYD = {
+    sun: (s, P, n) => `<circle r="${200 * s}" fill="url(#halo${n})"/><circle r="${46 * s}" fill="${P.glow}"/>`,
+    moon: (s, P, n) => `<circle r="${150 * s}" fill="url(#halo${n})" opacity=".6"/><circle r="${40 * s}" fill="#eceadf"/><circle cx="${-12 * s}" cy="${-8 * s}" r="${9 * s}" fill="#000" opacity=".08"/><circle cx="${14 * s}" cy="${10 * s}" r="${12 * s}" fill="#000" opacity=".08"/><circle cx="${6 * s}" cy="${-18 * s}" r="${5 * s}" fill="#000" opacity=".08"/>`,
+    planet_mars: (s) => `<circle r="${70 * s}" fill="url(#mars)"/><ellipse cx="${-20 * s}" cy="${-14 * s}" rx="${14 * s}" ry="${8 * s}" fill="#000" opacity=".12"/><ellipse cx="${22 * s}" cy="${16 * s}" rx="${18 * s}" ry="${9 * s}" fill="#000" opacity=".12"/><path d="M${-26 * s} ${-62 * s}Q0 ${-76 * s} ${26 * s} ${-62 * s}Q0 ${-56 * s} ${-26 * s} ${-62 * s}Z" fill="#fff" opacity=".6"/>`,
+    planet_ring: (s) => `<g transform="rotate(-16)"><ellipse rx="${118 * s}" ry="${26 * s}" fill="none" stroke="#e8d2a0" stroke-width="${7 * s}" opacity=".8"/><circle r="${58 * s}" fill="url(#gas)"/><path d="M${-118 * s} 0A${118 * s} ${26 * s} 0 0 0 ${118 * s} 0" fill="none" stroke="#e8d2a0" stroke-width="${7 * s}"/></g>`,
+    earth: (s) => `<circle r="${44 * s}" fill="url(#earth)"/><path d="M${-26 * s} ${-12 * s}Q${-12 * s} ${-30 * s} ${4 * s} ${-18 * s}Q${10 * s} ${-4 * s} ${-6 * s} ${4 * s}Q${-22 * s} ${6 * s} ${-26 * s} ${-12 * s}ZM${12 * s} ${10 * s}Q${28 * s} ${6 * s} ${26 * s} ${22 * s}Q${16 * s} ${30 * s} ${10 * s}  ${22 * s}Z" fill="#59b36a"/><circle r="${44 * s}" fill="none" stroke="#bfe3ff" stroke-width="${2 * s}" opacity=".6"/>`,
+    comet: (s, P) => Array.from({ length: 8 }, (_, k) => `<path d="M${-k * 32 * s} ${-k * 11 * s}L${-(k + 1) * 32 * s} ${-(k + 1) * 11 * s}" stroke="${P.glow}" stroke-opacity="${(.85 - k * .1).toFixed(2)}" stroke-width="${f1((9 - k) * s)}" stroke-linecap="round"/>`).join("") + `<circle r="${9 * s}" fill="${P.glow}"/>`,
+  };
+
+  /* ---- Fondos procedurales ---- */
+  const waveD = (rnd, L, amp, fr, sharp) => {
+    const a = rnd() * 6, b = rnd() * 6; let p = `M-50 ${L.base}`;
+    for (let x = -50; x <= 1650; x += 40) {
+      const k = sharp ? 1 - Math.abs(Math.sin(x * fr + a)) : .55 + .3 * Math.sin(x * fr + a) + .15 * Math.sin(x * fr * 2.7 + b);
+      p += `L${x} ${f1(L.base - L.hmax * amp * (sharp ? .35 + .65 * k : k))}`;
+    }
+    return p + `L1650 ${L.base}Z`;
+  };
+  const LAY = {
+    skyline: (rnd, tone, d, den) => {
+      const L = LD[d]; let x = -40, p = "", ant = "", wins = "";
+      while (x < 1650) {
+        const w = 28 + rnd() * (d === "far" ? 36 : 56), h = L.hmax * (.2 + .8 * Math.pow(rnd(), 1.5)) * (.5 + .5 * den);
+        p += `M${f1(x)} ${L.base}V${f1(L.base - h)}H${f1(x + w)}V${L.base}Z`;
+        if (rnd() < .3) p += `M${f1(x + w * .22)} ${f1(L.base - h)}V${f1(L.base - h - 12 - rnd() * 20)}H${f1(x + w * .72)}V${f1(L.base - h)}Z`;
+        if (rnd() < .35) ant += `<path d="M${f1(x + w / 2)} ${f1(L.base - h)}V${f1(L.base - h - 26 - rnd() * 46)}" stroke="${tone}" stroke-width="2"/>`;
+        if (d !== "far") {
+          const cols = Math.max(1, Math.floor(w / 12)), rows = Math.floor(h / 18);
+          for (let c = 0; c < cols; c++) for (let r = 0; r < rows; r++) if (rnd() < .15) wins += `<rect x="${f1(x + 5 + c * 12)}" y="${f1(L.base - h + 8 + r * 18)}" width="5" height="7"/>`;
+        }
+        x += w + rnd() * 12 * (1.2 - den);
+      }
+      return `<path d="${p}" fill="${tone}"/>${ant}<g class="win" fill="${G}">${wins}</g>`;
+    },
+    mountains: (rnd, tone, d) => {
+      const L = LD[d]; let p = `M-50 ${L.base}`, x = -50;
+      while (x < 1650) { p += `L${f1(x)} ${f1(L.base - L.hmax * (.3 + .7 * rnd()))}`; x += 70 + rnd() * 110; p += `L${f1(x - 30)} ${f1(L.base - L.hmax * .12 * rnd())}`; }
+      return `<path d="${p}L1650 ${L.base}Z" fill="${tone}"/>`;
+    },
+    hills: (rnd, tone, d) => `<path d="${waveD(rnd, LD[d], .6, .0032, false)}" fill="${tone}"/>`,
+    dunes: (rnd, tone, d) => {
+      const L = LD[d]; let rocks = "";
+      if (d !== "far") for (let i = 0; i < 7; i++) { const x = rnd() * 1600, s = 8 + rnd() * 16; rocks += `<path d="M${f1(x - s)} ${L.base}L${f1(x - s * .5)} ${f1(L.base - s)}L${f1(x + s * .6)} ${f1(L.base - s * .8)}L${f1(x + s)} ${L.base}Z" fill="${tone}"/>`; }
+      return `<path d="${waveD(rnd, L, .75, .0042, true)}" fill="${tone}"/>${rocks}`;
+    },
+    ocean: (rnd, tone, d, den, P) => {
+      let s = "";
+      for (let i = 0; i < 46; i++) { const y = HZ + 6 + Math.pow(rnd(), 1.4) * 280, w = 30 + (y - HZ) * .35 * (.4 + rnd()); s += `<rect x="${f1(rnd() * 1700 - 50)}" y="${f1(y)}" width="${f1(w)}" height="${f1(1.5 + (y - HZ) / 90)}" rx="1.5"/>`; }
+      return `<g class="shim" fill="${P.glow}" opacity=".28">${s}</g>`;
+    },
+    forest: (rnd, tone, d, den) => {
+      const L = LD[d]; let x = -30, s = "";
+      while (x < 1650) {
+        const h = (30 + rnd() * L.hmax * .42) * (d === "near" ? 1.2 : 1), w = h * .26;
+        if (rnd() < .72) s += `<path d="M${f1(x - w * 1.2)} ${f1(L.base - h * .1)}L${f1(x)} ${f1(L.base - h * .72)}L${f1(x + w * 1.2)} ${f1(L.base - h * .1)}ZM${f1(x - w * .8)} ${f1(L.base - h * .46)}L${f1(x)} ${f1(L.base - h)}L${f1(x + w * .8)} ${f1(L.base - h * .46)}ZM${f1(x - 2)} ${L.base}V${f1(L.base - h * .14)}H${f1(x + 2)}V${L.base}Z"/>`;
+        else s += `<circle cx="${f1(x)}" cy="${f1(L.base - h * .62)}" r="${f1(h * .3)}"/><rect x="${f1(x - 2)}" y="${f1(L.base - h * .4)}" width="4" height="${f1(h * .4)}"/>`;
+        x += (9 + rnd() * 18) / (.5 + den * .8);
+      }
+      return `<g fill="${tone}">${s}</g>`;
+    },
+    factory: (rnd, tone, d, den, P) => {
+      const L = LD[d], base = L.base; let x = -20, s = "", smoke = "", k = 0;
+      while (x < 1620) {
+        const w = 110 + rnd() * 110, h = 46 + rnd() * L.hmax * .3, teeth = Math.max(2, Math.round(w / 42));
+        let p = `M${f1(x)} ${base}V${f1(base - h)}`;
+        for (let i = 0; i < teeth; i++) { const tx = x + i * w / teeth; p += `L${f1(tx)} ${f1(base - h - 22)}L${f1(tx + w / teeth)} ${f1(base - h)}`; }
+        s += `<path d="${p}V${base}Z" fill="${tone}"/>`;
+        if (d !== "far") s += `<rect class="win" x="${f1(x + 8)}" y="${f1(base - h + 12)}" width="${f1(w - 16)}" height="4" fill="${G}"/>`;
+        if (rnd() < .62) {
+          const cx = x + w * (.2 + .6 * rnd()), ch = 60 + rnd() * L.hmax * .5;
+          s += `<rect x="${f1(cx - 8)}" y="${f1(base - h - ch)}" width="16" height="${f1(ch)}" fill="${tone}"/><rect x="${f1(cx - 11)}" y="${f1(base - h - ch)}" width="22" height="6" fill="${tone}"/>`;
+          for (let j = 0; j < 3; j++) smoke += `<circle class="smoke" cx="${f1(cx)}" cy="${f1(base - h - ch - 6)}" r="${12 + j * 3}" style="animation-delay:-${(k * 1.3 + j * 2.1).toFixed(1)}s"/>`;
+          k++;
+        }
+        x += w + 8 + rnd() * 30;
+      }
+      for (let i = 0; i < 2; i++) { const cx = 300 + i * 760 + rnd() * 160; s += `<path d="M${f1(cx)} ${base}L${f1(cx + 8)} ${base - L.hmax * .62}M${f1(cx + 62)} ${base}L${f1(cx + 54)} ${base - L.hmax * .62}M${f1(cx - 24)} ${f1(base - L.hmax * .62)}H${f1(cx + 130)}M${f1(cx + 100)} ${f1(base - L.hmax * .62)}V${f1(base - L.hmax * .42)}" stroke="${tone}" stroke-width="5" fill="none"/><rect x="${f1(cx + 92)}" y="${f1(base - L.hmax * .42)}" width="16" height="12" fill="${tone}"/>`; }
+      if (d !== "far") {
+        for (let i = 0; i < 3; i++) {
+          const ax = 140 + i * 520 + rnd() * 120, dur = (3 + rnd() * 2).toFixed(1);
+          s += `<g transform="translate(${f1(ax)} ${base})" fill="${tone}"><rect x="-18" y="-14" width="36" height="14" rx="3"/><g><animateTransform attributeName="transform" type="rotate" values="-28;18;-28" dur="${dur}s" repeatCount="indefinite"/><path d="M-6 -10L-4-70L4-70L6-10Z"/><g transform="translate(0 -70)"><g><animateTransform attributeName="transform" type="rotate" values="30;-40;30" dur="${(dur * .8).toFixed(1)}s" repeatCount="indefinite"/><path d="M-4 0L-3-48L3-48L4 0Z"/><path d="M-9-48L-3-58H3L9-48Z"/><circle cy="-52" r="2" fill="${G}"/></g></g></g></g>`;
+        }
+        s += `<rect x="-20" y="${base - 12}" width="1680" height="7" fill="${tone}"/><g fill="${mix(tone, P.glow, .35)}"><animateTransform attributeName="transform" type="translate" from="0 0" to="140 0" dur="5s" repeatCount="indefinite"/>${Array.from({ length: 13 }, (_, i) => `<rect x="${-20 + i * 140}" y="${base - 24}" width="26" height="12"/>`).join("")}</g>`;
+      }
+      return s + `<g fill="${mix(tone, "#ffffff", .22)}">${smoke}</g>`;
+    },
+  };
+
+  /* ---- Clima ---- */
+  const WX = {
+    rain: (rnd, P) => `<g stroke="${P.glow}" stroke-opacity=".4" stroke-width="1.6">${Array.from({ length: 80 }, () => { const x = f1(rnd() * 1700), l = 14 + rnd() * 18; return `<path class="rain" style="animation-duration:${(.7 + rnd() * .6).toFixed(2)}s;animation-delay:-${(rnd() * 1.4).toFixed(2)}s" d="M${x} 0l-3 ${f1(l)}"/>`; }).join("")}</g>`,
+    snow: (rnd) => `<g fill="#fff" fill-opacity=".8">${Array.from({ length: 80 }, () => `<circle class="snow" style="animation-duration:${(7 + rnd() * 8).toFixed(1)}s;animation-delay:-${(rnd() * 14).toFixed(1)}s" cx="${f1(rnd() * 1650)}" cy="0" r="${f1(1.5 + rnd() * 2.5)}"/>`).join("")}</g>`,
+    dust: (rnd, P) => `<rect width="${VW}" height="${VH}" fill="${P.glow}" opacity=".08"/><g fill="${P.glow}" fill-opacity=".45">${Array.from({ length: 46 }, () => `<rect class="dust" style="animation-duration:${(9 + rnd() * 10).toFixed(1)}s;animation-delay:-${(rnd() * 18).toFixed(1)}s" x="0" y="${f1(HZ - 80 + rnd() * 330)}" width="${f1(10 + rnd() * 30)}" height="2" rx="1"/>`).join("")}</g>`,
+    fog: (rnd, P, n) => `<g filter="url(#blur${n})" fill="${mix(P.bottom, "#ffffff", .5)}" opacity=".32">${[0, 1, 2].map(i => `<ellipse class="fog" style="animation-duration:${18 + i * 7}s" cx="${400 + i * 400}" cy="${HZ + 20 + i * 70}" rx="520" ry="46"/>`).join("")}</g>`,
+    fireflies: (rnd, P) => `<g fill="${P.glow}">${Array.from({ length: 30 }, () => `<circle class="ff" style="animation-duration:${(5 + rnd() * 5).toFixed(1)}s;animation-delay:-${(rnd() * 8).toFixed(1)}s" cx="${f1(rnd() * 1600)}" cy="${f1(HZ - 40 + rnd() * 280)}" r="${f1(1.8 + rnd() * 2.2)}"/>`).join("")}</g>`,
+  };
+
+  /* ---- Normalización de lo que devuelve Claude ---- */
+  function normScene(o, i) {
+    o = o && typeof o === "object" ? o : {};
+    const time = TIMES[o.time] ? o.time : "dusk", base = TIMES[time], pal = { win: base.win };
+    ["top", "bottom", "glow", "ink"].forEach(k => { pal[k] = hexRe.test(o.palette && o.palette[k]) ? o.palette[k] : base[k]; });
+    const sky = arr(o.sky).filter(e => e && SKY_T.includes(e.type)).slice(0, 4).map(e => ({ type: e.type, x: clampN(e.x, 0, 100, 50), y: clampN(e.y, 0, 100, 25), s: clampN(e.s, .3, 3, 1) }));
+    const layers = arr(o.layers).filter(e => e && LAYER_T.includes(e.type)).slice(0, 5).map(e => ({ type: e.type, depth: DEPTHS.includes(e.depth) ? e.depth : "mid", density: clampN(e.density, .3, 1, .7) }));
+    if (!layers.length) layers.push({ type: "hills", depth: "far", density: .7 });
+    const actors = arr(o.actors).filter(e => e && ACTOR_T.includes(e.type)).slice(0, 7).map(e => ({
+      type: e.type, x: clampN(e.x, 0, 100, 50), y: e.y == null ? null : clampN(e.y, 0, 100, 50), s: clampN(e.s, .4, 2.5, 1),
+      depth: DEPTHS.includes(e.depth) ? e.depth : "mid", anim: ANIMS.includes(e.anim) ? e.anim : (FLYERS[e.type] ? "fly" : "none"),
+    }));
+    const effects = arr(o.effects).filter(e => e && e.type === "link").slice(0, 2).map(e => ({ type: "link", x1: clampN(e.x1, 0, 100, 40), x2: clampN(e.x2, 0, 100, 60), y: clampN(e.y, 0, 100, 62) }));
+    return {
+      i, time, pal, sky, layers, actors, effects,
+      weather: WEATHER.includes(o.weather) ? o.weather : "none",
+      title: String(o.title || "").slice(0, 70), caption: String(o.caption || "").slice(0, 170),
+    };
+  }
+  function normPrompts(a) {
+    return arr(a).filter(p => p && typeof p.prompt === "string" && p.prompt.trim()).slice(0, 3)
+      .map((p, i) => ({ title: String(p.title || "Escena " + (i + 1)).slice(0, 80), prompt: p.prompt.trim().slice(0, 1400) }));
+  }
+
+  /* ---- Ensamble de una escena ---- */
+  function sceneSvg(sc) {
+    const n = sc.i, P = sc.pal, rndB = mulberry(strSeed(sc.time) + n * 7919);
+    const tone = (t) => mix(P.bottom, P.ink, t);
+    const haveOcean = sc.layers.some(l => l.type === "ocean");
+    let s = `<g class="scene${n === 0 ? " on" : ""}" id="sc${n}" style="--glow:${P.glow};--wo:${P.win}">`;
+    s += `<defs>
+      <linearGradient id="sk${n}" x1="0" y1="0" x2="0" y2="${HZ + 50}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${P.top}"/><stop offset=".72" stop-color="${P.bottom}"/><stop offset="1" stop-color="${mix(P.bottom, P.glow, .5)}"/></linearGradient>
+      <radialGradient id="halo${n}"><stop offset="0" stop-color="${P.glow}" stop-opacity=".7"/><stop offset="1" stop-color="${P.glow}" stop-opacity="0"/></radialGradient>
+      <radialGradient id="hz${n}" cx=".5" cy="1" r=".75"><stop offset="0" stop-color="${P.glow}" stop-opacity=".55"/><stop offset="1" stop-color="${P.glow}" stop-opacity="0"/></radialGradient>
+      <linearGradient id="gr${n}" x1="0" y1="${LAND}" x2="0" y2="${VH}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${mix(tone(.5), P.glow, .1)}"/><stop offset="1" stop-color="${tone(.66)}"/></linearGradient>
+      <linearGradient id="wt${n}" x1="0" y1="${HZ}" x2="0" y2="${VH}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${mix(P.bottom, P.glow, .35)}"/><stop offset=".25" stop-color="${mix(P.bottom, P.ink, .35)}"/><stop offset="1" stop-color="${mix(P.bottom, P.ink, .72)}"/></linearGradient>
+      <radialGradient id="vg${n}" cx=".5" cy=".5" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></radialGradient>
+      <filter id="blur${n}" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="28"/></filter>
+      <filter id="blurS${n}" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+      <radialGradient id="mars"><stop offset="0" stop-color="#f0956a"/><stop offset="1" stop-color="#8a3a22"/></radialGradient>
+      <radialGradient id="gas"><stop offset="0" stop-color="#f2c98a"/><stop offset="1" stop-color="#b7773f"/></radialGradient>
+      <radialGradient id="earth" cx=".38" cy=".35"><stop offset="0" stop-color="#7cc3ff"/><stop offset="1" stop-color="#1c4f9c"/></radialGradient>
+    </defs>`;
+    s += `<rect width="${VW}" height="${HZ + 60}" fill="url(#sk${n})"/>`;
+    if (sc.time === "night" || sc.sky.some(e => e.type === "stars")) {
+      s += `<g fill="#fff">${Array.from({ length: 130 }, () => `<circle class="tw" style="animation-duration:${(2 + rndB() * 4).toFixed(1)}s;animation-delay:-${(rndB() * 6).toFixed(1)}s" cx="${f1(rndB() * VW)}" cy="${f1(rndB() * 520)}" r="${f1(.6 + rndB() * 1.5)}"/>`).join("")}</g>`;
+    }
+    sc.sky.forEach((e, k) => {
+      const x = f1(e.x / 100 * VW), y = f1(e.y / 100 * (HZ - 40));
+      if (e.type === "clouds") {
+        const c = mix(P.bottom, "#ffffff", sc.time === "night" ? .25 : .75);
+        s += `<g transform="translate(${x} ${y})"><g class="cloud" style="animation-duration:${60 + k * 17}s"><g transform="scale(${e.s})" fill="${c}" opacity="${sc.time === "night" ? .35 : .85}"><ellipse rx="90" ry="22"/><ellipse cx="-50" cy="6" rx="55" ry="18"/><ellipse cx="60" cy="8" rx="60" ry="18"/><ellipse cx="10" cy="-14" rx="48" ry="20"/></g></g></g>`;
+      } else if (e.type === "aurora") {
+        s += `<g transform="translate(0 ${f1(y - 100)})"><g filter="url(#blurS${n})" opacity=".55" class="auro">${["#5cf2b0", "#6fa8ff", "#b46cff"].map((c, j) => `<path d="M-50 ${130 + j * 36}Q300 ${40 + j * 30} 640 ${120 + j * 30}T1300 ${100 + j * 36}T1700 ${130 + j * 30}V${200 + j * 36}Q1300 ${170 + j * 30} 640 ${200 + j * 30}T-50 ${210 + j * 36}Z" fill="${c}" opacity=".5"/>`).join("")}</g></g>`;
+      } else if (e.type === "nebula") {
+        s += `<g filter="url(#blur${n})" opacity=".4" transform="translate(${x} ${y})"><circle r="${150 * e.s}" fill="#b46cff"/><circle cx="${120 * e.s}" cy="${30 * e.s}" r="${120 * e.s}" fill="#6fa8ff"/><circle cx="${-100 * e.s}" cy="${50 * e.s}" r="${100 * e.s}" fill="#ff6fae"/></g>`;
+      } else if (SKYD[e.type]) {
+        s += `<g transform="translate(${x} ${y})"><g class="${e.type === "sun" || e.type === "moon" ? "pulseS" : ""}">${SKYD[e.type](e.s, P, n)}</g></g>`;
+      }
+    });
+    s += `<rect y="${HZ - 220}" width="${VW}" height="${220 + 55}" fill="url(#hz${n})"/>`;
+    ["far", "mid", "near"].forEach((d) => {
+      sc.layers.filter(l => l.depth === d && l.type !== "ocean").forEach((l, k) => {
+        const rnd = mulberry(strSeed(l.type) + n * 131 + k * 17);
+        s += `<g class="lay ${d}">${LAY[l.type](rnd, tone(LD[d].t), d, l.density, P)}</g>`;
+      });
+    });
+    if (haveOcean) {
+      const rnd = mulberry(n * 977 + 5);
+      s += `<rect y="${HZ}" width="${VW}" height="${VH - HZ}" fill="url(#wt${n})"/><rect y="${HZ - 1}" width="${VW}" height="3" fill="${P.glow}" opacity=".5"/>${LAY.ocean(rnd, "", "far", .7, P)}`;
+    } else {
+      s += `<rect y="${LAND}" width="${VW}" height="${VH - LAND}" fill="url(#gr${n})"/>`;
+    }
+    if (sc.weather === "fog") s += `<g class="wx">${WX.fog(mulberry(n * 31 + 9), P, n)}</g>`;
+    const actorTone = { far: tone(.84), mid: tone(.93), near: tone(1) };
+    const sorted = sc.actors.map((a, k) => ({ ...a, k })).sort((a, b) => (DEPTHS.indexOf(a.depth) - DEPTHS.indexOf(b.depth)) || (a.y || 0) - (b.y || 0));
+    sorted.forEach((a) => {
+      const rnd = mulberry(strSeed(a.type) + n * 53 + a.k * 11);
+      const x = f1(a.x / 100 * VW), y = f1(a.y != null ? a.y / 100 * VH : BASEY[a.depth]), sc2 = f1(DSC[a.depth] * a.s * 100) / 100;
+      const an = a.anim !== "none" ? `a-${a.anim}` : "";
+      s += `<g transform="translate(${x} ${y}) scale(${sc2})" style="color:${actorTone[a.depth]}" fill="currentColor"><g class="an ${an}" style="animation-delay:-${(rnd() * 5).toFixed(1)}s">${A[a.type](rnd)}</g></g>`;
+    });
+    sc.effects.forEach((e) => {
+      const x1 = f1(e.x1 / 100 * VW), x2 = f1(e.x2 / 100 * VW), y = f1(e.y / 100 * VH), mx = f1((x1 + x2) / 2);
+      s += `<g fill="none" stroke="${P.glow}"><path d="M${x1} ${y}Q${mx} ${f1(y - 90)} ${x2} ${y}" stroke-width="3" stroke-dasharray="6 10" opacity=".85"><animate attributeName="stroke-dashoffset" from="0" to="-64" dur="2s" repeatCount="indefinite"/></path>${[x1, x2].map((cx, j) => `<circle cx="${cx}" cy="${y}" r="10" stroke-width="2"><animate attributeName="r" values="10;70" dur="2.4s" begin="${j * .8}s" repeatCount="indefinite"/><animate attributeName="opacity" values=".8;0" dur="2.4s" begin="${j * .8}s" repeatCount="indefinite"/></circle>`).join("")}</g>`;
+    });
+    if (sc.weather !== "none" && sc.weather !== "fog") s += `<g class="wx">${WX[sc.weather](mulberry(n * 31 + 9), P, n)}</g>`;
+    s += `<rect width="${VW}" height="${VH}" fill="url(#vg${n})"/></g>`;
+    return s;
+  }
+
+  /* ---- Panel visual: petición a Claude, escenas, prompts ---- */
+  const viz = $("#visual");
+  let lastStory = null, vizCtl = null, vizTimer = null, vizIdx = 0, vizCount = 0, vizPlaying = true;
+  const reduceMotion = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function buildVizPrompt() {
+    const s = selection();
+    return `Eres director de arte y animador de ilustración vectorial. Convierte la narración en 3 escenas visuales que una página dibujará con un catálogo FIJO de siluetas, y en 3 prompts para un generador de imágenes.
+
+NARRACIÓN
+Título: ${lastStory.title}
+${lastStory.body}
+
+PARÁMETROS ELEGIDOS: ${s.map(x => x.cat + ": " + x.text).join(" | ")}
+
+CATÁLOGO (usa SOLO estos nombres exactos)
+- sky (cuerpos celestes): sun, moon, stars, planet_mars, planet_ring, earth, clouds, aurora, comet, nebula
+- layers (fondos): skyline (ciudad de rascacielos), mountains, dunes (desierto o superficie de Marte), hills, ocean (mar), forest, factory (fábrica automatizada con chimeneas, grúas, brazos robóticos y banda transportadora)
+- actors: person, child, children (dos niños), elder (persona mayor con bastón), crowd (grupo de personas), robot, mammoth, dodo, whale, deer, bird_flock, drone, printer3d (impresora 3D de alimentos), floating_city (ciudad flotante sobre el mar), dome_colony (domos habitables), rover, rocket, house, lighthouse, wind_turbine, tree, boat, book
+- effects: {"type":"link","x1":30,"x2":60,"y":60} = ondas entre dos puntos, para comunicación sin palabras
+- weather: none, rain, snow, dust, fog, fireflies
+- time: dawn, day, dusk, night
+
+REGLAS DE FIDELIDAD
+1. Antes de elegir, detecta en la narración: lugar, momento del día, clima, personajes, criaturas, objetos y tecnología. Cada uno que exista en el catálogo debe aparecer en la escena donde la narración lo menciona.
+2. No añadas nada que la narración no sugiera. Si algo no existe en el catálogo, elige lo más cercano.
+3. Haz 3 escenas en el orden de la narración (inicio, desarrollo, cierre). Cada una es un momento distinto y puede cambiar la hora, el clima y el encuadre.
+4. Máximo por escena: 4 sky, 4 layers, 6 actors, 2 effects.
+5. depth puede ser far, mid o near. Pon el lugar al fondo (far) y a los protagonistas al frente (mid o near). x e y van de 0 a 100 (x de izquierda a derecha, y de arriba abajo). En actors, y es opcional: úsalo solo para lo que vuela (bird_flock, drone, rocket). s es el tamaño relativo (0.5 a 2, normal 1). anim de actors: none, float, walk, sway, pulse o fly. density de layers: 0.3 a 1.
+6. Si usas el layer ocean, no uses otros layers salvo far. floating_city, boat y whale van sobre el mar (depth far o mid). dome_colony, rover y rocket van sobre dunes.
+7. palette: 4 colores #rrggbb coherentes con la hora y la atmósfera: top (cielo alto), bottom (cielo en el horizonte), glow (luz principal: sol, ventanas, luces), ink (siluetas, el más oscuro). Debe haber buen contraste entre bottom e ink.
+8. caption: una frase en español tomada de la narración o muy cercana, de máximo 110 caracteres.
+
+PROMPTS DE IMAGEN
+Escribe 3 prompts en inglés, uno por escena, listos para pegar en Midjourney, DALL·E o Gemini. Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo artístico claro y el mismo en los 3 prompts. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
+
+RESPONDE SOLO CON ESTE JSON, sin texto adicional:
+{"scenes":[{"title":"...","caption":"...","time":"dusk","weather":"fog","palette":{"top":"#000000","bottom":"#000000","glow":"#000000","ink":"#000000"},"sky":[{"type":"moon","x":70,"y":22,"s":1}],"layers":[{"type":"skyline","depth":"far","density":0.8}],"actors":[{"type":"elder","x":30,"depth":"near","s":1,"anim":"walk"}],"effects":[]}],"prompts":[{"title":"...","prompt":"..."}]}`;
+  }
+  function parseJSON(t) {
+    t = String(t || "").trim();
+    const f = t.match(/```(?:json)?\s*([\s\S]*?)```/); if (f) t = f[1];
+    const a = t.indexOf("{"), b = t.lastIndexOf("}");
+    return JSON.parse(t.slice(a, b + 1));
+  }
+  function stopViz() { clearInterval(vizTimer); vizTimer = null; if (vizCtl) { vizCtl.abort(); vizCtl = null; } }
+  function vizMessage(html) { viz.hidden = false; $("#visual").innerHTML = `<h2>Escena visual</h2>${html}`; }
+
+  async function visualize() {
+    if (!lastStory || generating) return;
+    stopViz();
+    vizMessage(`<div class="loading"><div class="spin"></div><span id="vizWait">Claude está imaginando las escenas… puede tardar hasta un minuto.</span></div><div class="meta"><button class="ghost" id="vizStop">■ Detener</button></div>`);
+    viz.scrollIntoView({ behavior: "smooth", block: "start" });
+    const ctl = new AbortController(); vizCtl = ctl;
+    $("#vizStop").onclick = () => { ctl.abort(); };
+    try {
+      const sample = await window.claude?.use("sample");
+      if (!sample) throw { message: "Esta función solo está disponible al abrir la página como Artifact en claude.ai, con la sesión iniciada." };
+      const r = await sample(buildVizPrompt(), { cache: false, signal: ctl.signal, onText: ({ text }) => { const w = $("#vizWait"); if (w) w.textContent = "Dibujando la escena… " + Math.min(99, Math.round(text.length / 60)) + "%"; } });
+      const data = parseJSON(r.text);
+      const scenes = arr(data.scenes).slice(0, 3).map(normScene).map((sc, i) => ({ ...sc, i }));
+      if (!scenes.length) throw { message: "Claude no devolvió ninguna escena. Inténtalo de nuevo." };
+      renderVisual(scenes, normPrompts(data.prompts));
+    } catch (e) {
+      if (e && e.code === "cancelled") { vizMessage(`<p class="help">Se detuvo la generación de la escena.</p><div class="meta"><button class="ghost" id="retryViz">↻ Intentar de nuevo</button></div>`); $("#retryViz").onclick = visualize; return; }
+      const m = { not_granted: "No diste permiso para que la página consulte a Claude.", rate_limited: "Se alcanzó el límite de uso por ahora. Espera un momento e inténtalo de nuevo.", invalid_json: "La respuesta de Claude no tenía el formato esperado. Inténtalo de nuevo." }[e && e.code];
+      vizMessage(`<div class="error">${esc(m || String((e && e.message) || e))}</div><div class="meta"><button class="ghost" id="retryViz">↻ Intentar de nuevo</button></div>`);
+      $("#retryViz").onclick = visualize;
+    } finally { if (vizCtl === ctl) vizCtl = null; }
+  }
+
+  function showScene(i) {
+    vizIdx = (i + vizCount) % vizCount;
+    document.querySelectorAll("#sv .scene").forEach((g, k) => g.classList.toggle("on", k === vizIdx));
+    document.querySelectorAll(".sdot").forEach((d, k) => d.classList.toggle("on", k === vizIdx));
+    const sc = vizScenes[vizIdx];
+    $("#capN").textContent = `Escena ${vizIdx + 1} de ${vizCount}` + (sc.title ? " · " + sc.title : "");
+    $("#capT").textContent = sc.caption;
+  }
+  function setPlaying(on) {
+    vizPlaying = on; clearInterval(vizTimer); vizTimer = null;
+    if (on && !reduceMotion()) vizTimer = setInterval(() => showScene(vizIdx + 1), 8500);
+    const b = $("#playS"); if (b) b.textContent = on ? "⏸ Pausar" : "▶ Reanudar";
+  }
+  let vizScenes = [];
+  function renderVisual(scenes, prompts) {
+    vizScenes = scenes; vizCount = scenes.length; vizIdx = 0;
+    viz.hidden = false;
+    viz.innerHTML = `<h2>Escena visual</h2>
+      <div class="stage" id="stage">
+        <svg id="sv" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Escena animada de la narrativa">${scenes.map(sceneSvg).join("")}</svg>
+        <div class="cap"><div class="cap-n" id="capN"></div><p id="capT"></p></div>
+      </div>
+      <div class="ctrl">
+        <button class="ghost" id="prevS" aria-label="Escena anterior">◀</button>
+        <div class="sdots">${scenes.map((_, k) => `<button class="sdot${k === 0 ? " on" : ""}" data-k="${k}" aria-label="Ir a la escena ${k + 1}"></button>`).join("")}</div>
+        <button class="ghost" id="nextS" aria-label="Escena siguiente">▶</button>
+        <button class="ghost" id="playS">⏸ Pausar</button>
+        <button class="ghost" id="fsS">⛶ Pantalla completa</button>
+      </div>
+      ${prompts.length ? `<h3 class="ph">Prompts para generar imágenes</h3>
+      <p class="help">Pégalos en tu generador de imágenes favorito (Midjourney, DALL·E, Gemini…). Los tres comparten el mismo estilo.</p>
+      <div class="prompts">${prompts.map((p, k) => `<article class="pcard"><div class="ph2"><span>${k + 1}</span><h4>${esc(p.title)}</h4></div><p>${esc(p.prompt)}</p><button class="ghost cpP" data-k="${k}">⧉ Copiar</button></article>`).join("")}</div>` : ""}
+      <div class="meta"><button class="ghost" id="cpAllP"${prompts.length ? "" : " hidden"}>⧉ Copiar los 3 prompts</button><button class="ghost" id="regenViz">↻ Otra interpretación visual</button></div>`;
+    showScene(0); setPlaying(true);
+    $("#prevS").onclick = () => { showScene(vizIdx - 1); setPlaying(vizPlaying); };
+    $("#nextS").onclick = () => { showScene(vizIdx + 1); setPlaying(vizPlaying); };
+    $("#playS").onclick = () => setPlaying(!vizPlaying);
+    document.querySelectorAll(".sdot").forEach(d => d.onclick = () => { showScene(+d.dataset.k); setPlaying(vizPlaying); });
+    $("#fsS").onclick = async () => { try { await $("#stage").requestFullscreen(); } catch { toast("Tu navegador no permitió la pantalla completa"); } };
+    $("#stage").onclick = () => { if (document.fullscreenElement) { showScene(vizIdx + 1); setPlaying(vizPlaying); } };
+    document.querySelectorAll(".cpP").forEach(b => b.onclick = async () => toast((await copy(prompts[+b.dataset.k].prompt)) ? "Prompt copiado" : "No se pudo copiar"));
+    $("#cpAllP").onclick = async () => toast((await copy(prompts.map((p, k) => `${k + 1}. ${p.title}\n${p.prompt}`).join("\n\n"))) ? "Prompts copiados" : "No se pudo copiar");
+    $("#regenViz").onclick = visualize;
+  }
+  function clearViz() { stopViz(); viz.hidden = true; viz.innerHTML = ""; }
+
   $("#btnGenerate").addEventListener("click", generate);
 
   /* ============ Reinicio ============ */
@@ -414,7 +881,7 @@ Requisitos:
       armT = setTimeout(disarm, 3000); return;
     }
     disarm(); clearTimeout(armT);
-    $("#notes").value = ""; story.classList.remove("show"); story.innerHTML = "";
+    $("#notes").value = ""; story.classList.remove("show"); story.innerHTML = ""; clearViz(); lastStory = null;
     build(); window.scrollTo({ top: 0, behavior: "smooth" });
   });
   function disarm() { armed = false; rb.textContent = "↺ Reiniciar mazos"; rb.classList.remove("warn"); }
