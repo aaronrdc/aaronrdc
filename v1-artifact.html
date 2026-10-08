@@ -214,6 +214,7 @@
   @media (max-width: 900px) { .prompts { grid-template-columns: minmax(0, 1fr); } }
   .pcard { background: #090d19; border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
   .pcard .ph2 { display: flex; align-items: center; gap: 10px; }
+  .vcard { margin-top: 4px; border-color: #3a4478; }
   .pcard .ph2 span { width: 24px; height: 24px; border-radius: 50%; background: #1b2140; color: #9fb4ff; display: grid; place-items: center; font-size: .8rem; font-weight: 700; flex: none; }
   .pcard h4 { margin: 0; font-size: .95rem; font-weight: 600; }
   .pcard p { margin: 0; font-size: .9rem; line-height: 1.5; color: #c4cbe6; flex: 1; overflow-wrap: anywhere; }
@@ -760,7 +761,7 @@ Requisitos:
 
   function buildVizPrompt() {
     const s = selection();
-    return `Eres director de arte y animador de ilustración vectorial. Convierte la narración en 3 escenas visuales que una página dibujará con un catálogo FIJO de siluetas, y en 3 prompts para un generador de imágenes.
+    return `Eres director de arte y animador de ilustración vectorial. Convierte la narración en 3 escenas visuales que una página dibujará con un catálogo FIJO de siluetas, y en 3 prompts para un generador de imágenes, más 1 prompt para un generador de video.
 
 NARRACIÓN
 Título: ${lastStory.title}
@@ -789,8 +790,11 @@ REGLAS DE FIDELIDAD
 PROMPTS DE IMAGEN
 Escribe 3 prompts en inglés, uno por escena, listos para pegar en Midjourney, DALL·E o Gemini. Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo artístico claro y el mismo en los 3 prompts. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
 
+PROMPT DE VIDEO
+Escribe 1 prompt en inglés para Google Veo y Runway: un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo visual de los prompts de imagen. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
+
 RESPONDE SOLO CON ESTE JSON, sin texto adicional:
-{"scenes":[{"title":"...","caption":"...","time":"dusk","weather":"fog","palette":{"top":"#000000","bottom":"#000000","glow":"#000000","ink":"#000000"},"sky":[{"type":"moon","x":70,"y":22,"s":1}],"layers":[{"type":"skyline","depth":"far","density":0.8}],"actors":[{"type":"elder","x":30,"depth":"near","s":1,"anim":"walk"}],"effects":[]}],"prompts":[{"title":"...","prompt":"..."}]}`;
+{"scenes":[{"title":"...","caption":"...","time":"dusk","weather":"fog","palette":{"top":"#000000","bottom":"#000000","glow":"#000000","ink":"#000000"},"sky":[{"type":"moon","x":70,"y":22,"s":1}],"layers":[{"type":"skyline","depth":"far","density":0.8}],"actors":[{"type":"elder","x":30,"depth":"near","s":1,"anim":"walk"}],"effects":[]}],"prompts":[{"title":"...","prompt":"..."}],"video":{"title":"...","prompt":"..."}}`;
   }
   function parseJSON(t) {
     t = String(t || "").trim();
@@ -815,7 +819,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       const data = parseJSON(r.text);
       const scenes = arr(data.scenes).slice(0, 3).map(normScene).map((sc, i) => ({ ...sc, i }));
       if (!scenes.length) throw { message: "Claude no devolvió ninguna escena. Inténtalo de nuevo." };
-      renderVisual(scenes, normPrompts(data.prompts));
+      renderVisual(scenes, normPrompts(data.prompts), normPrompts([data.video])[0] || null);
     } catch (e) {
       if (e && e.code === "cancelled") { vizMessage(`<p class="help">Se detuvo la generación de la escena.</p><div class="meta"><button class="ghost" id="retryViz">↻ Intentar de nuevo</button></div>`); $("#retryViz").onclick = visualize; return; }
       const m = { not_granted: "No diste permiso para que la página consulte a Claude.", rate_limited: "Se alcanzó el límite de uso por ahora. Espera un momento e inténtalo de nuevo.", invalid_json: "La respuesta de Claude no tenía el formato esperado. Inténtalo de nuevo." }[e && e.code];
@@ -838,7 +842,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     const b = $("#playS"); if (b) b.textContent = on ? "⏸ Pausar" : "▶ Reanudar";
   }
   let vizScenes = [];
-  function renderVisual(scenes, prompts) {
+  function renderVisual(scenes, prompts, video) {
     vizScenes = scenes; vizCount = scenes.length; vizIdx = 0;
     viz.hidden = false;
     viz.innerHTML = `<h2>Escena visual</h2>
@@ -856,7 +860,10 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       ${prompts.length ? `<h3 class="ph">Prompts para generar imágenes</h3>
       <p class="help">Pégalos en tu generador de imágenes favorito (Midjourney, DALL·E, Gemini…). Los tres comparten el mismo estilo.</p>
       <div class="prompts">${prompts.map((p, k) => `<article class="pcard"><div class="ph2"><span>${k + 1}</span><h4>${esc(p.title)}</h4></div><p>${esc(p.prompt)}</p><button class="ghost cpP" data-k="${k}">⧉ Copiar</button></article>`).join("")}</div>` : ""}
-      <div class="meta"><button class="ghost" id="cpAllP"${prompts.length ? "" : " hidden"}>⧉ Copiar los 3 prompts</button><button class="ghost" id="regenViz">↻ Otra interpretación visual</button></div>`;
+      ${video ? `<h3 class="ph">Prompt para video</h3>
+      <p class="help">Pensado para Google Veo y Runway: un plano continuo de unos 8 segundos. Runway ignora la última frase («Audio:»). Para más coherencia, genera antes la imagen 1 y úsala como imagen inicial del video.</p>
+      <article class="pcard vcard"><div class="ph2"><span>▶</span><h4>${esc(video.title)}</h4></div><p>${esc(video.prompt)}</p><button class="ghost" id="cpVideo">⧉ Copiar prompt de video</button></article>` : ""}
+      <div class="meta"><button class="ghost" id="cpAllP"${prompts.length || video ? "" : " hidden"}>⧉ Copiar todos los prompts</button><button class="ghost" id="regenViz">↻ Otra interpretación visual</button></div>`;
     showScene(0); setPlaying(true);
     $("#prevS").onclick = () => { showScene(vizIdx - 1); setPlaying(vizPlaying); };
     $("#nextS").onclick = () => { showScene(vizIdx + 1); setPlaying(vizPlaying); };
@@ -865,7 +872,8 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     $("#fsS").onclick = async () => { try { await $("#stage").requestFullscreen(); } catch { toast("Tu navegador no permitió la pantalla completa"); } };
     $("#stage").onclick = () => { if (document.fullscreenElement) { showScene(vizIdx + 1); setPlaying(vizPlaying); } };
     document.querySelectorAll(".cpP").forEach(b => b.onclick = async () => toast((await copy(prompts[+b.dataset.k].prompt)) ? "Prompt copiado" : "No se pudo copiar"));
-    $("#cpAllP").onclick = async () => toast((await copy(prompts.map((p, k) => `${k + 1}. ${p.title}\n${p.prompt}`).join("\n\n"))) ? "Prompts copiados" : "No se pudo copiar");
+    if (video) $("#cpVideo").onclick = async () => toast((await copy(video.prompt)) ? "Prompt de video copiado" : "No se pudo copiar");
+    $("#cpAllP").onclick = async () => toast((await copy(prompts.map((p, k) => `IMAGE ${k + 1}: ${p.title}\n${p.prompt}`).concat(video ? [`VIDEO: ${video.title}\n${video.prompt}`] : []).join("\n\n"))) ? "Prompts copiados" : "No se pudo copiar");
     $("#regenViz").onclick = visualize;
   }
   function clearViz() { stopViz(); viz.hidden = true; viz.innerHTML = ""; }
