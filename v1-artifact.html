@@ -181,6 +181,9 @@
   .fab:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(34,211,238,.4); }
   .fab:disabled { background: #1b2140; color: #6a739a; cursor: not-allowed; box-shadow: none; }
   .fab.sec { background: #131938; color: var(--ink); border: 1px solid #3a4478; box-shadow: none; padding: 14px 20px; }
+  a.fab { display: inline-block; text-decoration: none; }
+  .fab[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+  a.ghost.lnk { text-decoration: none; display: inline-block; }
   .fab.sec:disabled { color: #6a739a; border-color: var(--line); background: #0f1426; }
 
   .toast {
@@ -303,6 +306,7 @@
 
 <div class="fab-wrap">
   <button class="fab sec" id="btnCopyPrompt" disabled title="Copia el prompt para usarlo en cualquier IA">⧉ Copiar prompt</button>
+  <a class="fab sec" id="lnkClaude" target="_blank" rel="noopener" aria-disabled="true" title="Abre un chat nuevo en Claude con el prompt ya escrito">↗ Abrir en Claude</a>
   <button class="fab" id="btnGenerate" disabled>✦ Generar narrativa</button>
 </div>
 
@@ -396,6 +400,9 @@
     $("#btnGenerate").disabled = !ok || generating;
     $("#btnCopyPrompt").disabled = !ok;
     $("#btnGenerate").title = ok ? "" : "Elige una carta de cada mazo";
+    const lk = $("#lnkClaude");
+    if (ok) { lk.href = claudeUrl(joinPrompt(buildPrompt())); lk.removeAttribute("aria-disabled"); }
+    else { lk.removeAttribute("href"); lk.setAttribute("aria-disabled", "true"); }
   }
 
   /* ============ Prompt ============ */
@@ -424,6 +431,16 @@ Requisitos:
   }
 
   /* ============ Utilidades UI ============ */
+  const joinPrompt = (p) => p.system + "\n\n" + p.user;
+  const claudeUrl = (text) => "https://claude.ai/new?q=" + encodeURIComponent(text);
+  const claudeLink = (text, label) => `<a class="ghost lnk" href="${claudeUrl(text)}" target="_blank" rel="noopener" data-copy="1">${label || "↗ Abrir en Claude"}</a>`;
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest && e.target.closest("a[data-copy], #lnkClaude");
+    if (!a) return;
+    if (a.getAttribute("aria-disabled") === "true") { e.preventDefault(); return; }
+    // copia el prompt por si el chat nuevo no lo recibe prellenado
+    try { const q = new URL(a.href).searchParams.get("q"); if (q) copy(q).then(ok => ok && toast("Prompt copiado, por si necesitas pegarlo en el chat")); } catch {}
+  });
   const toastEl = $("#toast"); let tT;
   function toast(msg) { toastEl.textContent = msg; toastEl.classList.add("show"); clearTimeout(tT); tT = setTimeout(() => toastEl.classList.remove("show"), 2200); }
   async function copy(text) {
@@ -435,8 +452,7 @@ Requisitos:
   }
 
   $("#btnCopyPrompt").addEventListener("click", async () => {
-    const { system, user } = buildPrompt();
-    toast((await copy(system + "\n\n" + user)) ? "Prompt copiado al portapapeles" : "No se pudo copiar");
+    toast((await copy(joinPrompt(buildPrompt()))) ? "Prompt copiado al portapapeles" : "No se pudo copiar");
   });
 
   /* ============ Generación con Claude (capacidad "sample" del Artifact) ============ */
@@ -464,7 +480,7 @@ Requisitos:
   }
   function showError(msg) {
     story.innerHTML = `<h2>No se pudo generar la narrativa</h2><div class="error">${esc(msg)}</div>
-      <p class="help" style="margin-top:12px">Puedes usar «Copiar prompt» y pegarlo en un chat con Claude.</p>`;
+      <p class="help" style="margin-top:12px">Puedes usar «Copiar prompt» y pegarlo en un chat con Claude, o abrirlo directamente:</p><div class="meta">${claudeLink(joinPrompt(buildPrompt()))}</div>`;
   }
 
   async function generate() {
@@ -823,7 +839,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     } catch (e) {
       if (e && e.code === "cancelled") { vizMessage(`<p class="help">Se detuvo la generación de la escena.</p><div class="meta"><button class="ghost" id="retryViz">↻ Intentar de nuevo</button></div>`); $("#retryViz").onclick = visualize; return; }
       const m = { not_granted: "No diste permiso para que la página consulte a Claude.", rate_limited: "Se alcanzó el límite de uso por ahora. Espera un momento e inténtalo de nuevo.", invalid_json: "La respuesta de Claude no tenía el formato esperado. Inténtalo de nuevo." }[e && e.code];
-      vizMessage(`<div class="error">${esc(m || String((e && e.message) || e))}</div><div class="meta"><button class="ghost" id="retryViz">↻ Intentar de nuevo</button></div>`);
+      vizMessage(`<div class="error">${esc(m || String((e && e.message) || e))}</div><div class="meta"><button class="ghost" id="retryViz">↻ Intentar de nuevo</button>${claudeLink(buildVizPrompt(), "↗ Pedir las escenas en Claude")}</div><p class="help" style="margin-top:12px">En el chat de Claude recibirás el JSON de las escenas y los prompts de imagen y video.</p>`);
       $("#retryViz").onclick = visualize;
     } finally { if (vizCtl === ctl) vizCtl = null; }
   }
@@ -893,7 +909,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     build(); window.scrollTo({ top: 0, behavior: "smooth" });
   });
   function disarm() { armed = false; rb.textContent = "↺ Reiniciar mazos"; rb.classList.remove("warn"); }
-  $("#notes").addEventListener("input", () => {}); // el texto se lee al generar
+  $("#notes").addEventListener("input", refresh);
 
   build();
 })();
