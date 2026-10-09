@@ -1090,7 +1090,7 @@ Requisitos:
       r = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST", signal,
         headers: { "content-type": "application/json", "x-api-key": cfg.anthropicKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-        body: JSON.stringify({ model: cfg.claudeModel, max_tokens: 4000, stream: true, messages: [{ role: "user", content: prompt }] }),
+        body: JSON.stringify({ model: cfg.claudeModel, max_tokens: 8000, stream: true, messages: [{ role: "user", content: prompt }] }),
       });
     } catch (e) { if (e && e.name === "AbortError") throw { code: "cancelled" }; throw { message: "No se pudo conectar con Anthropic. Revisa tu conexión." }; }
     if (!r.ok) { const d = await r.json().catch(() => ({})); throw { code: r.status === 429 ? "rate_limited" : "api_error", message: (d.error && d.error.message) || `Error ${r.status}` }; }
@@ -1484,14 +1484,37 @@ Escribe 3 prompts, uno por escena, listos para pegar en Midjourney, DALL·E o Ge
 PROMPT DE VIDEO
 Escribe 1 prompt para Google Veo y Runway, en dos idiomas: "prompt" en español natural y claro (lo leerá el público) y "prompt_en" en inglés (la misma descripción, para el generador de video): un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo visual de los prompts de imagen. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
 
+El JSON debe ser válido: dentro de los textos no uses comillas dobles (usa « » o comillas simples), no pongas saltos de línea dentro de los textos y no dejes comas al final de una lista.
+
 RESPONDE SOLO CON ESTE JSON, sin texto adicional:
 {"scenes":[{"title":"...","caption":"...","time":"dusk","weather":"fog","palette":{"top":"#000000","bottom":"#000000","glow":"#000000","ink":"#000000"},"sky":[{"type":"moon","x":70,"y":22,"s":1}],"layers":[{"type":"skyline","depth":"far","density":0.8}],"actors":[{"type":"elder","x":30,"depth":"near","s":1,"anim":"walk"}],"effects":[]}],"prompts":[{"title":"...","prompt":"...","prompt_en":"..."}],"video":{"title":"...","prompt":"...","prompt_en":"..."}}`;
   }
+  const RETRY_NOTE = "\n\nIMPORTANTE: tu respuesta anterior no era un JSON válido. Responde de nuevo SOLO con el JSON, bien formado: sin comillas dobles dentro de los textos (usa « » o comillas simples), sin saltos de línea dentro de los textos y sin comas finales.";
   function parseJSON(t) {
     t = String(t || "").trim();
     const f = t.match(/```(?:json)?\s*([\s\S]*?)```/); if (f) t = f[1];
     const a = t.indexOf("{"), b = t.lastIndexOf("}");
-    return JSON.parse(t.slice(a, b + 1));
+    const body = t.slice(a, b + 1);
+    try { return JSON.parse(body); } catch (e1) {
+      try { return JSON.parse(repairJSON(body)); } catch (e2) { throw { code: "invalid_json", message: "La respuesta de Claude no tenía el formato esperado." }; }
+    }
+  }
+  /* Repara fallas comunes: comillas dobles sin escapar dentro de textos, saltos de línea y comas finales */
+  function repairJSON(t) {
+    let out = "", inStr = false, esc = false;
+    for (let i = 0; i < t.length; i++) {
+      const c = t[i];
+      if (!inStr) { out += c; if (c === '"') inStr = true; continue; }
+      if (esc) { out += c; esc = false; continue; }
+      if (c === "\\") { out += c; esc = true; continue; }
+      if (c === '"') {
+        const nx = t.slice(i + 1).match(/^\s*(.)/);
+        if (!nx || ",}]:".includes(nx[1])) { out += c; inStr = false; } else out += '\\"';
+        continue;
+      }
+      out += (c === "\n" || c === "\r" || c === "\t") ? " " : c;
+    }
+    return out.replace(/,\s*([}\]])/g, "$1");
   }
   function stopViz() { clearInterval(vizTimer); vizTimer = null; if (vizCtl) { vizCtl.abort(); vizCtl = null; } }
   function vizMessage(html) { viz.hidden = false; $("#visual").innerHTML = `<h2>Escena visual</h2>${html}`; }
@@ -1505,7 +1528,12 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     $("#vizStop").onclick = () => { ctl.abort(); };
     try {
       const r = await callClaudeAny(buildVizPrompt(), { signal: ctl.signal, onText: ({ text }) => { const w = $("#vizWait"); if (w) w.textContent = "Dibujando la escena… " + Math.min(99, Math.round(text.length / 60)) + "%"; } });
-      const data = parseJSON(r.text);
+      let data;
+      try { data = parseJSON(r.text); } catch (e1) {
+        const w = $("#vizWait"); if (w) w.textContent = "Ajustando el formato… segundo intento";
+        const r2 = await callClaudeAny(buildVizPrompt() + RETRY_NOTE, { signal: ctl.signal });
+        data = parseJSON(r2.text);
+      }
       const scenes = arr(data.scenes).slice(0, 3).map(normScene).map((sc, i) => ({ ...sc, i }));
       if (!scenes.length) throw { message: "Claude no devolvió ninguna escena. Inténtalo de nuevo." };
       renderVisual(scenes, normPrompts(data.prompts), normPrompts([data.video])[0] || null);
