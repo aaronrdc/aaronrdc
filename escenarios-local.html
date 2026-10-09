@@ -345,6 +345,9 @@
   .veo label { display: flex; flex-direction: column; gap: 6px; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   .veo .cost { font-size: .88rem; color: var(--muted); margin: 4px 0 10px; }
   #veoOut video { width: 100%; max-width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; margin-top: 12px; background: #000; }
+
+  .pcard .pbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pcard .lang { margin-left: auto; font-style: normal; font-size: .68rem; letter-spacing: .14em; font-weight: 700; color: var(--muted); border: 1px solid color-mix(in srgb, var(--muted) 50%, transparent); border-radius: 999px; padding: 2px 8px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   #cfg { background: #0e1322; color: var(--ink); border: 1px solid #3a4478; border-radius: 22px; padding: 24px; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
   #cfg::backdrop { background: rgba(3,5,12,.72); }
@@ -718,6 +721,9 @@
   .veo label { display: flex; flex-direction: column; gap: 6px; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   .veo .cost { font-size: .88rem; color: var(--muted); margin: 4px 0 10px; }
   #veoOut video { width: 100%; max-width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; margin-top: 12px; background: #000; }
+
+  .pcard .pbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pcard .lang { margin-left: auto; font-style: normal; font-size: .68rem; letter-spacing: .14em; font-weight: 700; color: var(--muted); border: 1px solid color-mix(in srgb, var(--muted) 50%, transparent); border-radius: 999px; padding: 2px 8px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <script>
@@ -1126,7 +1132,7 @@ Requisitos:
     $("#veoCost").textContent = `Costo estimado: ≈ US$ ${c.toFixed(2)} por video de 8 segundos (cifra aproximada; confirma en la página de precios de Google).`;
     return c;
   }
-  function initVeo(prompt) {
+  function initVeo(video) {
     const box = $("#veoBox"); if (!box) return;
     $("#veoModel").innerHTML = Object.entries(VEO_MODELS).map(([id, m]) => `<option value="${id}">${m.name}</option>`).join("");
     $("#veoModel").value = VEO_MODELS[cfg.veoModel] ? cfg.veoModel : CFG_DEFAULT.veoModel;
@@ -1136,7 +1142,7 @@ Requisitos:
     btn.onclick = () => {
       if (!cfg.geminiKey) { openCfg(); toast("Agrega tu clave de Gemini para usar Veo"); return; }
       if (Date.now() > veoArm) { veoArm = Date.now() + 5000; btn.textContent = `¿Seguro? Cuesta ≈ US$ ${veoCost().toFixed(2)}. Clic otra vez`; setTimeout(() => { if (Date.now() >= veoArm) btn.textContent = "🎬 Generar video con Veo"; }, 5100); return; }
-      veoArm = 0; btn.textContent = "🎬 Generar video con Veo"; runVeo(prompt);
+      veoArm = 0; btn.textContent = "🎬 Generar video con Veo"; runVeo(($("#veoLang").value === "en" && video.en) ? video.en : video.prompt);
     };
     $("#btnVeoStop").onclick = () => { if (veoCtl) veoCtl.abort(); };
   }
@@ -1369,7 +1375,7 @@ Requisitos:
   }
   function normPrompts(a) {
     return arr(a).filter(p => p && typeof p.prompt === "string" && p.prompt.trim()).slice(0, 3)
-      .map((p, i) => ({ title: String(p.title || "Escena " + (i + 1)).slice(0, 80), prompt: p.prompt.trim().slice(0, 1400) }));
+      .map((p, i) => ({ title: String(p.title || "Escena " + (i + 1)).slice(0, 80), prompt: p.prompt.trim().slice(0, 1600), en: typeof p.prompt_en === "string" ? p.prompt_en.trim().slice(0, 1600) : "" }));
   }
 
   /* ---- Ensamble de una escena ---- */
@@ -1473,13 +1479,13 @@ REGLAS DE FIDELIDAD
 8. caption: una frase en español tomada de la narración o muy cercana, de máximo 110 caracteres.
 
 PROMPTS DE IMAGEN
-Escribe 3 prompts en inglés, uno por escena, listos para pegar en Midjourney, DALL·E o Gemini. Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo artístico claro y el mismo en los 3 prompts. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
+Escribe 3 prompts, uno por escena, listos para pegar en Midjourney, DALL·E o Gemini. Cada uno va en dos idiomas: "prompt" en español natural y claro (lo leerá el público de una feria del libro, todo hispanohablante) y "prompt_en" en inglés (la misma descripción, para el generador de imágenes). Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo artístico claro y el mismo en los 3 prompts. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
 
 PROMPT DE VIDEO
-Escribe 1 prompt en inglés para Google Veo y Runway: un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo visual de los prompts de imagen. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
+Escribe 1 prompt para Google Veo y Runway, en dos idiomas: "prompt" en español natural y claro (lo leerá el público) y "prompt_en" en inglés (la misma descripción, para el generador de video): un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo visual de los prompts de imagen. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
 
 RESPONDE SOLO CON ESTE JSON, sin texto adicional:
-{"scenes":[{"title":"...","caption":"...","time":"dusk","weather":"fog","palette":{"top":"#000000","bottom":"#000000","glow":"#000000","ink":"#000000"},"sky":[{"type":"moon","x":70,"y":22,"s":1}],"layers":[{"type":"skyline","depth":"far","density":0.8}],"actors":[{"type":"elder","x":30,"depth":"near","s":1,"anim":"walk"}],"effects":[]}],"prompts":[{"title":"...","prompt":"..."}],"video":{"title":"...","prompt":"..."}}`;
+{"scenes":[{"title":"...","caption":"...","time":"dusk","weather":"fog","palette":{"top":"#000000","bottom":"#000000","glow":"#000000","ink":"#000000"},"sky":[{"type":"moon","x":70,"y":22,"s":1}],"layers":[{"type":"skyline","depth":"far","density":0.8}],"actors":[{"type":"elder","x":30,"depth":"near","s":1,"anim":"walk"}],"effects":[]}],"prompts":[{"title":"...","prompt":"...","prompt_en":"..."}],"video":{"title":"...","prompt":"...","prompt_en":"..."}}`;
   }
   function parseJSON(t) {
     t = String(t || "").trim();
@@ -1541,14 +1547,14 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
         <button class="ghost" id="fsS">⛶ Pantalla completa</button>
       </div>
       ${prompts.length ? `<h3 class="ph">Prompts para generar imágenes</h3>
-      <p class="help">Pégalos en tu generador de imágenes favorito (Midjourney, DALL·E, Gemini…). Los tres comparten el mismo estilo.</p>
-      <div class="prompts">${prompts.map((p, k) => `<article class="pcard"><div class="ph2"><span>${k + 1}</span><h4>${esc(p.title)}</h4></div><p>${esc(p.prompt)}</p><button class="ghost cpP" data-k="${k}">⧉ Copiar</button></article>`).join("")}</div>` : ""}
+      <p class="help">Pégalos en tu generador de imágenes favorito (Midjourney, DALL·E, Gemini…). Los tres comparten el mismo estilo. Aquí se ven en español; con «Ver en inglés» tienes la versión que suelen entender mejor los generadores.</p>
+      <div class="prompts">${prompts.map((p, k) => `<article class="pcard" data-k="${k}"><div class="ph2"><span>${k + 1}</span><h4>${esc(p.title)}</h4><em class="lang">ES</em></div><p class="ptxt">${esc(p.prompt)}</p><div class="pbtns"><button class="ghost cpP">⧉ Copiar</button>${p.en ? `<button class="ghost tgl">Ver en inglés</button>` : ""}</div></article>`).join("")}</div>` : ""}
       ${video ? `<h3 class="ph">Prompt para video</h3>
-      <p class="help">Pensado para Google Veo y Runway: un plano continuo de unos 8 segundos. Runway ignora la última frase («Audio:»). Para más coherencia, genera antes la imagen 1 y úsala como imagen inicial del video.</p>
-      <article class="pcard vcard"><div class="ph2"><span>▶</span><h4>${esc(video.title)}</h4></div><p>${esc(video.prompt)}</p><button class="ghost" id="cpVideo">⧉ Copiar prompt de video</button></article>
+      <p class="help">Pensado para Google Veo y Runway: un plano continuo de unos 8 segundos. Runway ignora la última frase («Audio:»). Para más coherencia, genera antes la imagen 1 y úsala como imagen inicial del video. Se ve en español para el público; «Ver en inglés» muestra la versión para el generador.</p>
+      <article class="pcard vcard" id="vcard"><div class="ph2"><span>▶</span><h4>${esc(video.title)}</h4><em class="lang">ES</em></div><p class="ptxt">${esc(video.prompt)}</p><div class="pbtns"><button class="ghost cpP" id="cpVideo">⧉ Copiar prompt de video</button>${video.en ? `<button class="ghost tgl">Ver en inglés</button>` : ""}</div></article>
       <div class="veo" id="veoBox"><h4>Generar el video aquí con Veo</h4>
         <p class="help">Usa tu clave de Gemini (⚙ Ajustes). Genera un clip de 8 segundos con audio, en formato horizontal 16:9.</p>
-        <div class="veo-row"><label>Modelo<select id="veoModel"></select></label><label>Resolución<select id="veoRes"><option value="720p">720p</option><option value="1080p">1080p</option></select></label></div>
+        <div class="veo-row"><label>Modelo<select id="veoModel"></select></label><label>Resolución<select id="veoRes"><option value="720p">720p</option><option value="1080p">1080p</option></select></label><label>Idioma del prompt<select id="veoLang"><option value="en">Inglés (recomendado)</option><option value="es">Español</option></select></label></div>
         <p class="cost" id="veoCost"></p>
         <div class="meta" style="margin-top:0"><button class="ghost" id="btnVeo">🎬 Generar video con Veo</button><button class="ghost" id="btnVeoStop" hidden>■ Cancelar</button></div>
         <div id="veoOut"></div></div>` : ""}
@@ -1560,11 +1566,17 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     document.querySelectorAll(".sdot").forEach(d => d.onclick = () => { showScene(+d.dataset.k); setPlaying(vizPlaying); });
     $("#fsS").onclick = async () => { try { await $("#stage").requestFullscreen(); } catch { toast("Tu navegador no permitió la pantalla completa"); } };
     $("#stage").onclick = () => { if (document.fullscreenElement) { showScene(vizIdx + 1); setPlaying(vizPlaying); } };
-    document.querySelectorAll(".cpP").forEach(b => b.onclick = async () => toast((await copy(prompts[+b.dataset.k].prompt)) ? "Prompt copiado" : "No se pudo copiar"));
-    if (video) $("#cpVideo").onclick = async () => toast((await copy(video.prompt)) ? "Prompt de video copiado" : "No se pudo copiar");
-    $("#cpAllP").onclick = async () => toast((await copy(prompts.map((p, k) => `IMAGE ${k + 1}: ${p.title}\n${p.prompt}`).concat(video ? [`VIDEO: ${video.title}\n${video.prompt}`] : []).join("\n\n"))) ? "Prompts copiados" : "No se pudo copiar");
+    const wireCard = (card, item, okMsg) => {
+      let en = false;
+      const txt = card.querySelector(".ptxt"), lang = card.querySelector(".lang"), tgl = card.querySelector(".tgl");
+      card.querySelector(".cpP").onclick = async () => toast((await copy(en && item.en ? item.en : item.prompt)) ? okMsg : "No se pudo copiar");
+      if (tgl) tgl.onclick = () => { en = !en; txt.textContent = en ? item.en : item.prompt; lang.textContent = en ? "EN" : "ES"; tgl.textContent = en ? "Ver en español" : "Ver en inglés"; };
+    };
+    document.querySelectorAll(".pcard[data-k]").forEach(c => wireCard(c, prompts[+c.dataset.k], "Prompt copiado"));
+    if (video) wireCard($("#vcard"), video, "Prompt de video copiado");
+    $("#cpAllP").onclick = async () => toast((await copy(prompts.map((p, k) => `IMAGEN ${k + 1}: ${p.title}\nEspañol: ${p.prompt}` + (p.en ? `\nEnglish: ${p.en}` : "")).concat(video ? [`VIDEO: ${video.title}\nEspañol: ${video.prompt}` + (video.en ? `\nEnglish: ${video.en}` : "")] : []).join("\n\n"))) ? "Prompts copiados" : "No se pudo copiar");
     $("#regenViz").onclick = visualize;
-    if (video) initVeo(video.prompt);
+    if (video) initVeo(video);
   }
   function clearViz() { if (veoCtl) veoCtl.abort(); stopViz(); viz.hidden = true; viz.innerHTML = ""; }
 

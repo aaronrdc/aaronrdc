@@ -328,6 +328,9 @@
   .mode .knob { background: #9fb4ff; color: #0b0e17; box-shadow: 0 0 14px rgba(159,180,255,.45); }
   .blob3 { display: none; }
 
+
+  .pcard .pbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pcard .lang { margin-left: auto; font-style: normal; font-size: .68rem; letter-spacing: .14em; font-weight: 700; color: var(--muted); border: 1px solid color-mix(in srgb, var(--muted) 50%, transparent); border-radius: 999px; padding: 2px 8px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <style id="css-light" media="not all">
@@ -682,6 +685,9 @@
   .mode .ic { color: #9a9db3; }
   .mode .knob { background: linear-gradient(160deg, #ffffff, #e6ebff); color: #3a3fd1; box-shadow: 0 3px 10px rgba(60,70,140,.28), inset 0 1px 0 #fff; }
 
+
+  .pcard .pbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pcard .lang { margin-left: auto; font-style: normal; font-size: .68rem; letter-spacing: .14em; font-weight: 700; color: var(--muted); border: 1px solid color-mix(in srgb, var(--muted) 50%, transparent); border-radius: 999px; padding: 2px 8px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <script>
@@ -1199,7 +1205,7 @@ Requisitos:
   }
   function normPrompts(a) {
     return arr(a).filter(p => p && typeof p.prompt === "string" && p.prompt.trim()).slice(0, 3)
-      .map((p, i) => ({ title: String(p.title || "Escena " + (i + 1)).slice(0, 80), prompt: p.prompt.trim().slice(0, 1400) }));
+      .map((p, i) => ({ title: String(p.title || "Escena " + (i + 1)).slice(0, 80), prompt: p.prompt.trim().slice(0, 1600), en: typeof p.prompt_en === "string" ? p.prompt_en.trim().slice(0, 1600) : "" }));
   }
 
   /* ---- Ensamble de una escena ---- */
@@ -1303,13 +1309,13 @@ REGLAS DE FIDELIDAD
 8. caption: una frase en español tomada de la narración o muy cercana, de máximo 110 caracteres.
 
 PROMPTS DE IMAGEN
-Escribe 3 prompts en inglés, uno por escena, listos para pegar en Midjourney, DALL·E o Gemini. Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo artístico claro y el mismo en los 3 prompts. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
+Escribe 3 prompts, uno por escena, listos para pegar en Midjourney, DALL·E o Gemini. Cada uno va en dos idiomas: "prompt" en español natural y claro (lo leerá el público de una feria del libro, todo hispanohablante) y "prompt_en" en inglés (la misma descripción, para el generador de imágenes). Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo artístico claro y el mismo en los 3 prompts. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
 
 PROMPT DE VIDEO
-Escribe 1 prompt en inglés para Google Veo y Runway: un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo visual de los prompts de imagen. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
+Escribe 1 prompt para Google Veo y Runway, en dos idiomas: "prompt" en español natural y claro (lo leerá el público) y "prompt_en" en inglés (la misma descripción, para el generador de video): un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo visual de los prompts de imagen. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
 
 RESPONDE SOLO CON ESTE JSON, sin texto adicional:
-{"scenes":[{"title":"...","caption":"...","time":"dusk","weather":"fog","palette":{"top":"#000000","bottom":"#000000","glow":"#000000","ink":"#000000"},"sky":[{"type":"moon","x":70,"y":22,"s":1}],"layers":[{"type":"skyline","depth":"far","density":0.8}],"actors":[{"type":"elder","x":30,"depth":"near","s":1,"anim":"walk"}],"effects":[]}],"prompts":[{"title":"...","prompt":"..."}],"video":{"title":"...","prompt":"..."}}`;
+{"scenes":[{"title":"...","caption":"...","time":"dusk","weather":"fog","palette":{"top":"#000000","bottom":"#000000","glow":"#000000","ink":"#000000"},"sky":[{"type":"moon","x":70,"y":22,"s":1}],"layers":[{"type":"skyline","depth":"far","density":0.8}],"actors":[{"type":"elder","x":30,"depth":"near","s":1,"anim":"walk"}],"effects":[]}],"prompts":[{"title":"...","prompt":"...","prompt_en":"..."}],"video":{"title":"...","prompt":"...","prompt_en":"..."}}`;
   }
   function parseJSON(t) {
     t = String(t || "").trim();
@@ -1373,11 +1379,11 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
         <button class="ghost" id="fsS">⛶ Pantalla completa</button>
       </div>
       ${prompts.length ? `<h3 class="ph">Prompts para generar imágenes</h3>
-      <p class="help">Pégalos en tu generador de imágenes favorito (Midjourney, DALL·E, Gemini…). Los tres comparten el mismo estilo.</p>
-      <div class="prompts">${prompts.map((p, k) => `<article class="pcard"><div class="ph2"><span>${k + 1}</span><h4>${esc(p.title)}</h4></div><p>${esc(p.prompt)}</p><button class="ghost cpP" data-k="${k}">⧉ Copiar</button></article>`).join("")}</div>` : ""}
+      <p class="help">Pégalos en tu generador de imágenes favorito (Midjourney, DALL·E, Gemini…). Los tres comparten el mismo estilo. Aquí se ven en español; con «Ver en inglés» tienes la versión que suelen entender mejor los generadores.</p>
+      <div class="prompts">${prompts.map((p, k) => `<article class="pcard" data-k="${k}"><div class="ph2"><span>${k + 1}</span><h4>${esc(p.title)}</h4><em class="lang">ES</em></div><p class="ptxt">${esc(p.prompt)}</p><div class="pbtns"><button class="ghost cpP">⧉ Copiar</button>${p.en ? `<button class="ghost tgl">Ver en inglés</button>` : ""}</div></article>`).join("")}</div>` : ""}
       ${video ? `<h3 class="ph">Prompt para video</h3>
-      <p class="help">Pensado para Google Veo y Runway: un plano continuo de unos 8 segundos. Runway ignora la última frase («Audio:»). Para más coherencia, genera antes la imagen 1 y úsala como imagen inicial del video.</p>
-      <article class="pcard vcard"><div class="ph2"><span>▶</span><h4>${esc(video.title)}</h4></div><p>${esc(video.prompt)}</p><button class="ghost" id="cpVideo">⧉ Copiar prompt de video</button></article>` : ""}
+      <p class="help">Pensado para Google Veo y Runway: un plano continuo de unos 8 segundos. Runway ignora la última frase («Audio:»). Para más coherencia, genera antes la imagen 1 y úsala como imagen inicial del video. Se ve en español para el público; «Ver en inglés» muestra la versión para el generador.</p>
+      <article class="pcard vcard" id="vcard"><div class="ph2"><span>▶</span><h4>${esc(video.title)}</h4><em class="lang">ES</em></div><p class="ptxt">${esc(video.prompt)}</p><div class="pbtns"><button class="ghost cpP" id="cpVideo">⧉ Copiar prompt de video</button>${video.en ? `<button class="ghost tgl">Ver en inglés</button>` : ""}</div></article>` : ""}
       <div class="meta"><button class="ghost" id="cpAllP"${prompts.length || video ? "" : " hidden"}>⧉ Copiar todos los prompts</button><button class="ghost" id="regenViz">↻ Otra interpretación visual</button></div>`;
     showScene(0); setPlaying(true);
     $("#prevS").onclick = () => { showScene(vizIdx - 1); setPlaying(vizPlaying); };
@@ -1386,9 +1392,15 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     document.querySelectorAll(".sdot").forEach(d => d.onclick = () => { showScene(+d.dataset.k); setPlaying(vizPlaying); });
     $("#fsS").onclick = async () => { try { await $("#stage").requestFullscreen(); } catch { toast("Tu navegador no permitió la pantalla completa"); } };
     $("#stage").onclick = () => { if (document.fullscreenElement) { showScene(vizIdx + 1); setPlaying(vizPlaying); } };
-    document.querySelectorAll(".cpP").forEach(b => b.onclick = async () => toast((await copy(prompts[+b.dataset.k].prompt)) ? "Prompt copiado" : "No se pudo copiar"));
-    if (video) $("#cpVideo").onclick = async () => toast((await copy(video.prompt)) ? "Prompt de video copiado" : "No se pudo copiar");
-    $("#cpAllP").onclick = async () => toast((await copy(prompts.map((p, k) => `IMAGE ${k + 1}: ${p.title}\n${p.prompt}`).concat(video ? [`VIDEO: ${video.title}\n${video.prompt}`] : []).join("\n\n"))) ? "Prompts copiados" : "No se pudo copiar");
+    const wireCard = (card, item, okMsg) => {
+      let en = false;
+      const txt = card.querySelector(".ptxt"), lang = card.querySelector(".lang"), tgl = card.querySelector(".tgl");
+      card.querySelector(".cpP").onclick = async () => toast((await copy(en && item.en ? item.en : item.prompt)) ? okMsg : "No se pudo copiar");
+      if (tgl) tgl.onclick = () => { en = !en; txt.textContent = en ? item.en : item.prompt; lang.textContent = en ? "EN" : "ES"; tgl.textContent = en ? "Ver en español" : "Ver en inglés"; };
+    };
+    document.querySelectorAll(".pcard[data-k]").forEach(c => wireCard(c, prompts[+c.dataset.k], "Prompt copiado"));
+    if (video) wireCard($("#vcard"), video, "Prompt de video copiado");
+    $("#cpAllP").onclick = async () => toast((await copy(prompts.map((p, k) => `IMAGEN ${k + 1}: ${p.title}\nEspañol: ${p.prompt}` + (p.en ? `\nEnglish: ${p.en}` : "")).concat(video ? [`VIDEO: ${video.title}\nEspañol: ${video.prompt}` + (video.en ? `\nEnglish: ${video.en}` : "")] : []).join("\n\n"))) ? "Prompts copiados" : "No se pudo copiar");
     $("#regenViz").onclick = visualize;
   }
   function clearViz() { stopViz(); viz.hidden = true; viz.innerHTML = ""; }
