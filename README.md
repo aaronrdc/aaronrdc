@@ -11,7 +11,7 @@ visualizar con escenas animadas y generar prompts de imagen y de video.
 | Archivo | Dónde se usa | Cómo se conecta con la IA |
 |---|---|---|
 | `escenarios-artifact.html` | Publicada como Artifact en claude.ai | Claude desde la propia página, con tu sesión de claude.ai. No necesita claves. No puede llamar a Veo. |
-| `escenarios-local.html` | Se abre desde tu computadora (doble clic) | Con tus claves de API en **⚙ Ajustes**: Anthropic para Claude y Gemini para Veo. |
+| `escenarios-local.html` | Se abre desde tu computadora (doble clic) | Con tus claves de API en **⚙ Ajustes**: Anthropic para Claude, y Gemini para imágenes hiperrealistas (Nano Banana) y video (Veo 3.1). |
 
 Las dos tienen el interruptor de modo oscuro y claro, el botón **? Consulta**,
 las descripciones al pasar el cursor, la escena animada y los prompts.

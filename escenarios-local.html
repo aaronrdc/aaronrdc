@@ -348,6 +348,25 @@
 
   .pcard .pbtns { display: flex; flex-wrap: wrap; gap: 8px; }
   .pcard .lang { margin-left: auto; font-style: normal; font-size: .68rem; letter-spacing: .14em; font-weight: 700; color: var(--muted); border: 1px solid color-mix(in srgb, var(--muted) 50%, transparent); border-radius: 999px; padding: 2px 8px; }
+
+  /* ---------- Imágenes de referencia y prompt editable ---------- */
+  [hidden] { display: none !important; }
+  .imgs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  @media (max-width: 900px) { .imgs { grid-template-columns: minmax(0, 1fr); } }
+  .imgcard { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .imgframe { aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; display: grid; place-items: center; text-align: center; padding: 12px; font-size: .88rem; color: var(--muted); background: color-mix(in srgb, var(--ink) 7%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); }
+  .imgframe.ok { padding: 0; }
+  .imgframe img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .imgcard figcaption { font-size: .9rem; }
+  .imgbtns { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .useref { display: flex; gap: 6px; align-items: center; font-size: .85rem; cursor: pointer; }
+  .imgcost, .vnote { font-size: .85rem; color: var(--muted); }
+  .vtxt { width: 100%; min-height: 150px; resize: vertical; background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink); border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); border-radius: 12px; padding: 12px 14px; font: inherit; line-height: 1.5; }
+  .vtxt:focus { outline: 2px solid color-mix(in srgb, var(--ink) 40%, transparent); }
+  .vnote { margin: 0; }
+  #cfg select { width: 100%; background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink); border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); border-radius: 10px; padding: 10px 12px; font: inherit; }
+  #cfg input[type=checkbox] { width: auto; }
+  #cfg label.chk { display: flex; gap: 8px; align-items: center; text-transform: none; letter-spacing: 0; font-size: .9rem; color: var(--ink); font-weight: 500; margin-top: 14px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   #cfg { background: #0e1322; color: var(--ink); border: 1px solid #3a4478; border-radius: 22px; padding: 24px; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
   #cfg::backdrop { background: rgba(3,5,12,.72); }
@@ -724,6 +743,25 @@
 
   .pcard .pbtns { display: flex; flex-wrap: wrap; gap: 8px; }
   .pcard .lang { margin-left: auto; font-style: normal; font-size: .68rem; letter-spacing: .14em; font-weight: 700; color: var(--muted); border: 1px solid color-mix(in srgb, var(--muted) 50%, transparent); border-radius: 999px; padding: 2px 8px; }
+
+  /* ---------- Imágenes de referencia y prompt editable ---------- */
+  [hidden] { display: none !important; }
+  .imgs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  @media (max-width: 900px) { .imgs { grid-template-columns: minmax(0, 1fr); } }
+  .imgcard { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .imgframe { aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; display: grid; place-items: center; text-align: center; padding: 12px; font-size: .88rem; color: var(--muted); background: color-mix(in srgb, var(--ink) 7%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); }
+  .imgframe.ok { padding: 0; }
+  .imgframe img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .imgcard figcaption { font-size: .9rem; }
+  .imgbtns { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .useref { display: flex; gap: 6px; align-items: center; font-size: .85rem; cursor: pointer; }
+  .imgcost, .vnote { font-size: .85rem; color: var(--muted); }
+  .vtxt { width: 100%; min-height: 150px; resize: vertical; background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink); border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); border-radius: 12px; padding: 12px 14px; font: inherit; line-height: 1.5; }
+  .vtxt:focus { outline: 2px solid color-mix(in srgb, var(--ink) 40%, transparent); }
+  .vnote { margin: 0; }
+  #cfg select { width: 100%; background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink); border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); border-radius: 10px; padding: 10px 12px; font: inherit; }
+  #cfg input[type=checkbox] { width: auto; }
+  #cfg label.chk { display: flex; gap: 8px; align-items: center; text-transform: none; letter-spacing: 0; font-size: .9rem; color: var(--ink); font-weight: 500; margin-top: 14px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <script>
@@ -784,6 +822,9 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
   <input id="cfgClaudeModel" type="text" autocomplete="off">
   <label for="cfgGem">Clave de Gemini (Veo)</label>
   <input id="cfgGem" type="password" placeholder="AIza…" autocomplete="off">
+  <label for="cfgImgModel">Modelo de imágenes (Nano Banana)</label>
+  <select id="cfgImgModel"><option value="gemini-3-pro-image-preview">Nano Banana Pro (más realista)</option><option value="gemini-2.5-flash-image">Nano Banana (más rápido y barato)</option></select>
+  <label class="chk"><input id="cfgAuto" type="checkbox"> Generar las 3 imágenes al pulsar «Visualizar escena»</label>
   <p class="small">La clave de Gemini se obtiene en Google AI Studio (aistudio.google.com/apikey). Veo requiere facturación activa y cada video cuesta dinero.</p>
   <div id="cfgTestOut" class="small" aria-live="polite"></div>
   <div class="row">
@@ -1066,20 +1107,21 @@ Requisitos:
     }
   }
   /* ============ Conexiones de la versión local: Claude y Veo ============ */
-  const CFG_DEFAULT = { anthropicKey: "", claudeModel: "claude-sonnet-5-5", geminiKey: "", veoModel: "veo-3.1-fast-generate-preview", veoRes: "720p" };
+  const CFG_DEFAULT = { anthropicKey: "", claudeModel: "claude-sonnet-5-5", geminiKey: "", imgModel: "gemini-3-pro-image-preview", autoImages: true, veoModel: "veo-3.1-fast-generate-preview", veoRes: "720p" };
   const loadCfg = () => { try { return { ...CFG_DEFAULT, ...JSON.parse(localStorage.getItem("cfg") || "{}") }; } catch { return { ...CFG_DEFAULT }; } };
   const saveCfg = (c) => { try { localStorage.setItem("cfg", JSON.stringify(c)); } catch {} };
   let cfg = loadCfg();
   const cfgDlg = $("#cfg");
   function openCfg() {
     $("#cfgAnth").value = cfg.anthropicKey; $("#cfgClaudeModel").value = cfg.claudeModel; $("#cfgGem").value = cfg.geminiKey;
+    $("#cfgImgModel").value = cfg.imgModel; $("#cfgAuto").checked = !!cfg.autoImages;
     cfgDlg.showModal();
   }
   $("#btnCfg").addEventListener("click", openCfg);
   $("#cfgCancel").addEventListener("click", () => cfgDlg.close());
   $("#cfgClear").addEventListener("click", () => { cfg = { ...cfg, anthropicKey: "", geminiKey: "" }; saveCfg(cfg); $("#cfgAnth").value = ""; $("#cfgGem").value = ""; toast("Claves borradas"); });
   $("#cfgSave").addEventListener("click", () => {
-    cfg = { ...cfg, anthropicKey: $("#cfgAnth").value.trim(), claudeModel: $("#cfgClaudeModel").value.trim() || CFG_DEFAULT.claudeModel, geminiKey: $("#cfgGem").value.trim() };
+    cfg = { ...cfg, anthropicKey: $("#cfgAnth").value.trim(), claudeModel: $("#cfgClaudeModel").value.trim() || CFG_DEFAULT.claudeModel, geminiKey: $("#cfgGem").value.trim(), imgModel: $("#cfgImgModel").value, autoImages: $("#cfgAuto").checked };
     saveCfg(cfg); cfgDlg.close(); toast("Ajustes guardados");
   });
   cfgDlg.addEventListener("click", (e) => { if (e.target === cfgDlg) cfgDlg.close(); });
@@ -1161,16 +1203,16 @@ Requisitos:
     $("#veoModel").innerHTML = Object.entries(VEO_MODELS).map(([id, m]) => `<option value="${id}">${m.name}</option>`).join("");
     $("#veoModel").value = VEO_MODELS[cfg.veoModel] ? cfg.veoModel : CFG_DEFAULT.veoModel;
     $("#veoRes").value = cfg.veoRes === "1080p" ? "1080p" : "720p";
-    veoCost(); $("#veoModel").onchange = $("#veoRes").onchange = veoCost;
+    veoCost(); refreshRefs(); $("#veoModel").onchange = $("#veoRes").onchange = veoCost;
     const btn = $("#btnVeo");
     btn.onclick = () => {
       if (!cfg.geminiKey) { openCfg(); toast("Agrega tu clave de Gemini para usar Veo"); return; }
       if (Date.now() > veoArm) { veoArm = Date.now() + 5000; btn.textContent = `¿Seguro? Cuesta ≈ US$ ${veoCost().toFixed(2)}. Clic otra vez`; setTimeout(() => { if (Date.now() >= veoArm) btn.textContent = "🎬 Generar video con Veo"; }, 5100); return; }
-      veoArm = 0; btn.textContent = "🎬 Generar video con Veo"; runVeo(($("#veoLang").value === "en" && video.en) ? video.en : video.prompt);
+      veoArm = 0; btn.textContent = "🎬 Generar video con Veo"; const pr = getVideoPrompt(); if (!pr) { toast("El prompt de video está vacío"); return; } runVeo(pr);
     };
     $("#btnVeoStop").onclick = () => { if (veoCtl) veoCtl.abort(); };
   }
-  async function runVeo(prompt) {
+  async function runVeo(prompt, opts = {}) {
     const out = $("#veoOut"), btn = $("#btnVeo"), stop = $("#btnVeoStop");
     const model = $("#veoModel").value, res = $("#veoRes").value;
     cfg.veoModel = model; cfg.veoRes = res; saveCfg(cfg);
@@ -1182,10 +1224,25 @@ Requisitos:
     out.innerHTML = `<div class="loading"><div class="spin"></div><span id="veoWait">Enviando el prompt a Veo…</span></div>`;
     const tick = setInterval(() => { const w = $("#veoWait"); if (w) w.textContent = `Veo está generando el video… ${Math.floor((Date.now() - t0) / 1000)} s (suele tardar varios minutos)`; }, 1000);
     try {
-      const r = await fetch(`${GEM}/models/${model}:predictLongRunning`, { method: "POST", headers: H, signal: sg,
-        body: JSON.stringify({ instances: [{ prompt }], parameters: { aspectRatio: "16:9", resolution: res, durationSeconds: 8 } }) });
-      let op = await r.json().catch(() => ({}));
-      if (!r.ok) throw { message: (op.error && op.error.message) || `Error ${r.status}` };
+      const refs = opts.noRefs ? [] : readyRefs();
+      const variants = refs.length ? [
+        { label: "imágenes de referencia", inst: { prompt, referenceImages: refs.map(x => ({ image: { inlineData: { mimeType: x.mime, data: x.b64 } }, referenceType: "asset" })) } },
+        { label: "imágenes de referencia (formato alterno)", inst: { prompt, referenceImages: refs.map(x => ({ image: { bytesBase64Encoded: x.b64, mimeType: x.mime }, referenceType: "asset" })) } },
+        { label: "primera imagen como fotograma inicial", inst: { prompt, image: { inlineData: { mimeType: refs[0].mime, data: refs[0].b64 } } } },
+        { label: "primera imagen como fotograma inicial (formato alterno)", inst: { prompt, image: { bytesBase64Encoded: refs[0].b64, mimeType: refs[0].mime } } },
+      ] : [{ label: "solo texto", inst: { prompt } }];
+      let op = null, used = "", lastMsg = "";
+      for (let i = 0; i < variants.length; i++) {
+        const v = variants[i], w = $("#veoWait");
+        if (i > 0 && w) w.textContent = `Probando otro formato de referencia (${i + 1} de ${variants.length})…`;
+        const r = await fetch(`${GEM}/models/${model}:predictLongRunning`, { method: "POST", headers: H, signal: sg,
+          body: JSON.stringify({ instances: [v.inst], parameters: { aspectRatio: "16:9", resolution: res, durationSeconds: 8 } }) });
+        const d = await r.json().catch(() => ({}));
+        if (r.ok) { op = d; used = v.label; break; }
+        lastMsg = (d.error && d.error.message) || `Error ${r.status}`;
+        if (r.status !== 400 || i === variants.length - 1) { if (r.status !== 400) throw { message: lastMsg }; }
+      }
+      if (!op) throw { message: lastMsg, refsFailed: refs.length > 0 };
       while (!op.done) {
         await sleep(10000, sg);
         const pr = await fetch(`${GEM}/${op.name}`, { headers: H, signal: sg });
@@ -1200,9 +1257,10 @@ Requisitos:
       try { const vr = await fetch(uri, { headers: { "x-goog-api-key": cfg.geminiKey }, signal: sg }); if (vr.ok) { veoBlob = URL.createObjectURL(await vr.blob()); src = veoBlob; } } catch (e) { if (e && e.name === "AbortError") throw { code: "cancelled" }; }
       out.innerHTML = `<video controls autoplay loop playsinline src="${esc(src)}"></video>
         <div class="meta"><a class="ghost lnk" href="${esc(src)}" download="escenario-de-futuro.mp4" target="_blank" rel="noopener">⬇ Descargar video</a></div>
-        <p class="help" style="margin-top:10px">Tiene audio y una marca invisible SynthID. Google conserva el archivo unos 2 días; descárgalo para guardarlo.</p>`;
+        <p class="help" style="margin-top:10px">Generado con: ${esc(used)}. Tiene audio y una marca invisible SynthID. Google conserva el archivo unos 2 días; descárgalo para guardarlo.</p>`;
     } catch (e) {
-      out.innerHTML = (e && e.code === "cancelled") ? `<p class="help">Se canceló la generación del video.</p>` : `<div class="error">${esc(String((e && e.message) || e))}</div><p class="help" style="margin-top:10px">Revisa tu clave de Gemini y que tu cuenta tenga facturación activa. También puedes copiar el prompt y usarlo en Google Flow o AI Studio.</p>`;
+      out.innerHTML = (e && e.code === "cancelled") ? `<p class="help">Se canceló la generación del video.</p>` : `<div class="error">${esc(String((e && e.message) || e))}</div><p class="help" style="margin-top:10px">${e && e.refsFailed ? "Veo no aceptó las imágenes de referencia en ninguno de los formatos probados. Puedes generar el video solo con el texto." : "Revisa tu clave de Gemini y que tu cuenta tenga facturación activa. También puedes copiar el prompt y usarlo en Google Flow o AI Studio."}</p>${e && e.refsFailed ? `<div class="meta"><button class="ghost" id="veoNoRef">🎬 Generar sin imágenes de referencia</button></div>` : ""}`;
+      const nr = $("#veoNoRef"); if (nr) nr.onclick = () => runVeo(prompt, { noRefs: true });
     } finally { clearInterval(tick); btn.disabled = false; stop.hidden = true; veoCtl = null; }
   }
 
@@ -1503,10 +1561,10 @@ REGLAS DE FIDELIDAD
 8. caption: una frase en español tomada de la narración o muy cercana, de máximo 110 caracteres.
 
 PROMPTS DE IMAGEN
-Escribe 3 prompts, uno por escena, listos para pegar en Midjourney, DALL·E o Gemini. Cada uno va en dos idiomas: "prompt" en español natural y claro (lo leerá el público de una feria del libro, todo hispanohablante) y "prompt_en" en inglés (la misma descripción, para el generador de imágenes). Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo artístico claro y el mismo en los 3 prompts. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
+Escribe 3 prompts, uno por escena, listos para pegar en Midjourney, DALL·E o Gemini. Cada uno va en dos idiomas: "prompt" en español natural y claro (lo leerá el público de una feria del libro, todo hispanohablante) y "prompt_en" en inglés (la misma descripción, para el generador de imágenes). Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo fotográfico hiperrealista (fotografía cinematográfica de alta definición, con texturas, piel, materiales y luz realistas), el mismo en los 3 prompts. Mantén los mismos personajes (edad, rasgos y ropa) y el mismo lugar en las 3 imágenes, porque se usarán como imágenes de referencia para crear el video. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
 
 PROMPT DE VIDEO
-Escribe 1 prompt para Google Veo y Runway, en dos idiomas: "prompt" en español natural y claro (lo leerá el público) y "prompt_en" en inglés (la misma descripción, para el generador de video): un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo visual de los prompts de imagen. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
+Escribe 1 prompt para Google Veo y Runway, en dos idiomas: "prompt" en español natural y claro (lo leerá el público) y "prompt_en" en inglés (la misma descripción, para el generador de video): un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo hiperrealista y los mismos personajes y lugar de las imágenes de referencia. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
 
 El JSON debe ser válido: dentro de los textos no uses comillas dobles (usa « » o comillas simples), no pongas saltos de línea dentro de los textos y no dejes comas al final de una lista.
 
@@ -1598,16 +1656,21 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
         <button class="ghost" id="playS">⏸ Pausar</button>
         <button class="ghost" id="fsS">⛶ Pantalla completa</button>
       </div>
+      ${prompts.length ? `<h3 class="ph">Imágenes de referencia · Nano Banana</h3>
+      <p class="help">Imágenes hiperrealistas creadas con Gemini a partir de los prompts de abajo. Las marcadas se usarán como referencia cuando generes el video con Veo.</p>
+      <div class="imgs" id="imgs">${prompts.map((p, k) => `<figure class="imgcard" data-k="${k}"><div class="imgframe" id="imgf${k}"></div><figcaption><b>${k + 1}.</b> ${esc(p.title)}</figcaption><div class="imgbtns"><label class="useref"><input type="checkbox" class="useChk" data-k="${k}" checked> Usar como referencia</label><button class="ghost regI" data-k="${k}">↻ Regenerar</button><a class="ghost lnk dlI" data-k="${k}" download="imagen-${k + 1}.png" hidden>⬇ Descargar</a></div></figure>`).join("")}</div>
+      <div class="meta"><button class="ghost" id="btnImgs">🖼 Generar las 3 imágenes</button><span class="imgcost" id="imgCost"></span></div>` : ""}
       ${prompts.length ? `<h3 class="ph">Prompts para generar imágenes</h3>
       <p class="help">Pégalos en tu generador de imágenes favorito (Midjourney, DALL·E, Gemini…). Los tres comparten el mismo estilo. Aquí se ven en español; con «Ver en inglés» tienes la versión que suelen entender mejor los generadores.</p>
       <div class="prompts">${prompts.map((p, k) => `<article class="pcard" data-k="${k}"><div class="ph2"><span>${k + 1}</span><h4>${esc(p.title)}</h4><em class="lang">ES</em></div><p class="ptxt">${esc(p.prompt)}</p><div class="pbtns"><button class="ghost cpP">⧉ Copiar</button>${p.en ? `<button class="ghost tgl">Ver en inglés</button>` : ""}</div></article>`).join("")}</div>` : ""}
       ${video ? `<h3 class="ph">Prompt para video</h3>
-      <p class="help">Pensado para Google Veo y Runway: un plano continuo de unos 8 segundos. Runway ignora la última frase («Audio:»). Para más coherencia, genera antes la imagen 1 y úsala como imagen inicial del video. Se ve en español para el público; «Ver en inglés» muestra la versión para el generador.</p>
-      <article class="pcard vcard" id="vcard"><div class="ph2"><span>▶</span><h4>${esc(video.title)}</h4><em class="lang">ES</em></div><p class="ptxt">${esc(video.prompt)}</p><div class="pbtns"><button class="ghost cpP" id="cpVideo">⧉ Copiar prompt de video</button>${video.en ? `<button class="ghost tgl">Ver en inglés</button>` : ""}</div></article>
+      <p class="help">Un plano continuo de unos 8 segundos, pensado para Google Veo. Puedes editarlo: lo que ves en el cuadro es exactamente lo que se envía a Veo. «Ver en inglés» muestra la versión para el generador, y «Traducir» pasa tu edición al otro idioma.</p>
+      <article class="pcard vcard" id="vcard"><div class="ph2"><span>▶</span><h4>${esc(video.title)}</h4><em class="lang">ES</em></div><textarea class="vtxt" id="vtxt" rows="7" spellcheck="true" aria-label="Prompt de video, editable"></textarea><p class="vnote" id="vnote"></p><div class="pbtns"><button class="ghost cpP" id="cpVideo">⧉ Copiar prompt de video</button>${video.en ? `<button class="ghost tgl">Ver en inglés</button>` : ""}<button class="ghost" id="vTrans">⇄ Traducir mi versión</button><button class="ghost" id="vReset">↺ Restaurar original</button></div></article>
       <div class="veo" id="veoBox"><h4>Generar el video aquí con Veo</h4>
-        <p class="help">Usa tu clave de Gemini (⚙ Ajustes). Genera un clip de 8 segundos con audio, en formato horizontal 16:9.</p>
-        <div class="veo-row"><label>Modelo<select id="veoModel"></select></label><label>Resolución<select id="veoRes"><option value="720p">720p</option><option value="1080p">1080p</option></select></label><label>Idioma del prompt<select id="veoLang"><option value="en">Inglés (recomendado)</option><option value="es">Español</option></select></label></div>
+        <p class="help">Usa Veo 3.1 con tu clave de Gemini (⚙ Ajustes). Genera un clip de 8 segundos con audio, en formato horizontal 16:9, usando como referencia las imágenes marcadas.</p>
+        <div class="veo-row"><label>Modelo<select id="veoModel"></select></label><label>Resolución<select id="veoRes"><option value="720p">720p</option><option value="1080p">1080p</option></select></label></div>
         <p class="cost" id="veoCost"></p>
+        <p class="cost" id="veoRefs"></p>
         <div class="meta" style="margin-top:0"><button class="ghost" id="btnVeo">🎬 Generar video con Veo</button><button class="ghost" id="btnVeoStop" hidden>■ Cancelar</button></div>
         <div id="veoOut"></div></div>` : ""}
       <div class="meta"><button class="ghost" id="cpAllP"${prompts.length || video ? "" : " hidden"}>⧉ Copiar todos los prompts</button><button class="ghost" id="regenViz">↻ Otra interpretación visual</button></div>`;
@@ -1625,12 +1688,105 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       if (tgl) tgl.onclick = () => { en = !en; txt.textContent = en ? item.en : item.prompt; lang.textContent = en ? "EN" : "ES"; tgl.textContent = en ? "Ver en español" : "Ver en inglés"; };
     };
     document.querySelectorAll(".pcard[data-k]").forEach(c => wireCard(c, prompts[+c.dataset.k], "Prompt copiado"));
-    if (video) wireCard($("#vcard"), video, "Prompt de video copiado");
+    if (video) wireVideo(video);
+    if (prompts.length) initImages(prompts);
     $("#cpAllP").onclick = async () => toast((await copy(prompts.map((p, k) => `IMAGEN ${k + 1}: ${p.title}\nEspañol: ${p.prompt}` + (p.en ? `\nEnglish: ${p.en}` : "")).concat(video ? [`VIDEO: ${video.title}\nEspañol: ${video.prompt}` + (video.en ? `\nEnglish: ${video.en}` : "")] : []).join("\n\n"))) ? "Prompts copiados" : "No se pudo copiar");
     $("#regenViz").onclick = visualize;
     if (video) initVeo(video);
   }
-  function clearViz() { if (veoCtl) veoCtl.abort(); stopViz(); viz.hidden = true; viz.innerHTML = ""; }
+
+  /* ---- Prompt de video editable ---- */
+  let vText = { es: "", en: "" }, getVideoPrompt = () => "";
+  function wireVideo(video) {
+    const ta = $("#vtxt"), lang = $("#vcard .lang"), tgl = $("#vcard .tgl"), note = $("#vnote");
+    const orig = { es: video.prompt, en: video.en || "" };
+    vText = { ...orig }; let cur = "es";
+    const show = () => {
+      ta.value = vText[cur]; lang.textContent = cur.toUpperCase();
+      if (tgl) tgl.textContent = cur === "es" ? "Ver en inglés" : "Ver en español";
+      $("#vTrans").textContent = cur === "es" ? "⇄ Traducir al inglés" : "⇄ Traducir al español";
+      note.textContent = `Se enviará a Veo exactamente este texto (${cur === "es" ? "español" : "inglés"}).` + (cur === "es" ? " Para mejores resultados con Veo suele convenir el inglés." : "");
+    };
+    ta.addEventListener("input", () => { vText[cur] = ta.value; });
+    if (tgl) tgl.onclick = () => { cur = cur === "es" ? "en" : "es"; show(); };
+    $("#cpVideo").onclick = async () => toast((await copy(ta.value)) ? "Prompt de video copiado" : "No se pudo copiar");
+    $("#vReset").onclick = () => { vText = { ...orig }; show(); toast("Prompt original restaurado"); };
+    $("#vTrans").onclick = async () => {
+      const to = cur === "es" ? "en" : "es", btn = $("#vTrans"), src = ta.value.trim();
+      if (!src) return;
+      btn.disabled = true; const old = btn.textContent; btn.textContent = "Traduciendo…";
+      try {
+        const r = await callClaudeAny(`Traduce al ${to === "en" ? "inglés" : "español"} el siguiente prompt de video, conservando su estructura, el tono cinematográfico y la última frase que empieza con "Audio:". Responde únicamente con la traducción.\n\n${src}`, {});
+        vText[to] = r.text.trim(); cur = to; show(); toast("Traducción lista. Revísala antes de generar.");
+      } catch (e) { toast((e && e.message) || "No se pudo traducir"); btn.textContent = old; }
+      finally { btn.disabled = false; }
+    };
+    getVideoPrompt = () => ta.value.trim();
+    show();
+  }
+
+  /* ---- Imágenes con Nano Banana (Gemini) ---- */
+  let vizImgs = [], vizPrompts = [], imgCtl = null;
+  const IMG_USD = { "gemini-3-pro-image-preview": .134, "gemini-2.5-flash-image": .04 };
+  function imgCostText() { const u = (IMG_USD[cfg.imgModel] || .134) * 3; return `Costo aproximado: ≈ US$ ${u.toFixed(2)} por las 3 imágenes (cifra aproximada; confirma en la página de precios de Google).`; }
+  function paintImg(k) {
+    const st = vizImgs[k], fr = $(`#imgf${k}`); if (!fr) return;
+    fr.classList.toggle("ok", st.status === "ok");
+    if (st.status === "ok") fr.innerHTML = `<img src="${st.url}" alt="Imagen de referencia ${k + 1}">`;
+    else if (st.status === "loading") fr.innerHTML = `<div class="loading" style="padding:0"><div class="spin"></div><span>Nano Banana está creando la imagen…</span></div>`;
+    else if (st.status === "error") fr.innerHTML = `<div class="error" style="width:100%">${esc(st.error || "No se pudo generar la imagen.")}</div>`;
+    else fr.textContent = cfg.geminiKey ? "Pulsa «Generar las 3 imágenes»." : "Agrega tu clave de Gemini en ⚙ Ajustes para generar imágenes.";
+    const dl = document.querySelector(`.dlI[data-k="${k}"]`); if (dl) { if (st.status === "ok") { dl.href = st.url; dl.hidden = false; } else dl.hidden = true; }
+    refreshRefs();
+  }
+  function readyRefs() { return vizImgs.filter(x => x.status === "ok" && x.use).slice(0, 3); }
+  function refreshRefs() {
+    const el = $("#veoRefs"); if (!el) return;
+    const n = readyRefs().length;
+    el.textContent = n ? `Referencias para el video: ${n} imagen${n > 1 ? "es" : ""} de Nano Banana.` : "Sin imágenes de referencia: el video se generará solo con el texto del prompt.";
+  }
+  async function genImage(k) {
+    if (!cfg.geminiKey) { openCfg(); toast("Agrega tu clave de Gemini para generar imágenes"); return; }
+    const st = vizImgs[k], p = vizPrompts[k], model = cfg.imgModel, sg = imgCtl && imgCtl.signal;
+    st.status = "loading"; st.error = ""; paintImg(k);
+    const H = { "x-goog-api-key": cfg.geminiKey, "Content-Type": "application/json" };
+    const text = "Generate a photorealistic, hyperrealistic image in 16:9 widescreen format. " + (p.en || p.prompt);
+    const body = (withCfg) => JSON.stringify({ contents: [{ parts: [{ text }] }], generationConfig: { responseModalities: ["TEXT", "IMAGE"], ...(withCfg ? { imageConfig: { aspectRatio: "16:9" } } : {}) } });
+    try {
+      let r = await fetch(`${GEM}/models/${model}:generateContent`, { method: "POST", headers: H, signal: sg, body: body(true) });
+      if (r.status === 400) r = await fetch(`${GEM}/models/${model}:generateContent`, { method: "POST", headers: H, signal: sg, body: body(false) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw { message: (d.error && d.error.message) || `Error ${r.status}` };
+      const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
+      const part = parts.find(x => x.inlineData || x.inline_data), id = part && (part.inlineData || part.inline_data);
+      if (!id || !id.data) {
+        const why = (d.promptFeedback && d.promptFeedback.blockReason) || (d.candidates && d.candidates[0] && d.candidates[0].finishReason) || "";
+        const said = parts.filter(x => x.text).map(x => x.text).join(" ").slice(0, 200);
+        throw { message: "Gemini no devolvió una imagen." + (why ? ` Motivo: ${why}.` : "") + (said ? ` Respuesta: ${said}` : "") };
+      }
+      st.b64 = id.data; st.mime = id.mimeType || id.mime_type || "image/png"; st.url = `data:${st.mime};base64,${st.b64}`; st.status = "ok";
+    } catch (e) {
+      if (e && (e.name === "AbortError" || e.code === "cancelled")) { st.status = "idle"; }
+      else { st.status = "error"; st.error = (e && e.message) ? e.message : "No se pudo conectar con Gemini. Usa «Probar conexión» en ⚙ Ajustes."; }
+    }
+    paintImg(k);
+  }
+  async function genAllImages() {
+    if (imgCtl) imgCtl.abort(); imgCtl = new AbortController();
+    const btn = $("#btnImgs"); if (btn) btn.disabled = true;
+    await Promise.all(vizPrompts.map((_, k) => genImage(k)));
+    if (btn) btn.disabled = false;
+  }
+  function initImages(prompts) {
+    vizPrompts = prompts; vizImgs = prompts.map(() => ({ status: "idle", use: true })); imgCtl = new AbortController();
+    $("#imgCost").textContent = imgCostText();
+    vizImgs.forEach((_, k) => paintImg(k));
+    $("#btnImgs").onclick = genAllImages;
+    document.querySelectorAll(".regI").forEach(b => b.onclick = () => { if (!imgCtl || imgCtl.signal.aborted) imgCtl = new AbortController(); genImage(+b.dataset.k); });
+    document.querySelectorAll(".useChk").forEach(c => c.onchange = () => { vizImgs[+c.dataset.k].use = c.checked; refreshRefs(); });
+    if (cfg.autoImages && cfg.geminiKey) genAllImages();
+  }
+  function clearViz() { if (veoCtl) veoCtl.abort(); if (typeof imgCtl !== "undefined" && imgCtl) imgCtl.abort(); stopViz(); viz.hidden = true; viz.innerHTML = ""; }
 
   $("#btnGenerate").addEventListener("click", generate);
 
