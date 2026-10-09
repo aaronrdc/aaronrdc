@@ -1,0 +1,5 @@
+
+# Copias con claves incrustadas: nunca se suben al repositorio
+*-con-clave.html
+.env
+.env.*
