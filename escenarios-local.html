@@ -785,7 +785,9 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
   <label for="cfgGem">Clave de Gemini (Veo)</label>
   <input id="cfgGem" type="password" placeholder="AIza…" autocomplete="off">
   <p class="small">La clave de Gemini se obtiene en Google AI Studio (aistudio.google.com/apikey). Veo requiere facturación activa y cada video cuesta dinero.</p>
+  <div id="cfgTestOut" class="small" aria-live="polite"></div>
   <div class="row">
+    <button class="ghost" id="cfgTest">Probar conexión</button>
     <button class="ghost" id="cfgClear">Borrar claves</button>
     <button class="ghost" id="cfgCancel">Cancelar</button>
     <button class="ghost" id="cfgSave">Guardar</button>
@@ -1081,6 +1083,28 @@ Requisitos:
     saveCfg(cfg); cfgDlg.close(); toast("Ajustes guardados");
   });
   cfgDlg.addEventListener("click", (e) => { if (e.target === cfgDlg) cfgDlg.close(); });
+  $("#cfgTest").addEventListener("click", async () => {
+    const out = $("#cfgTestOut"), ak = $("#cfgAnth").value.trim(), gk = $("#cfgGem").value.trim(), lines = [];
+    out.textContent = "Probando…";
+    const netMsg = (host, e) => `✗ No se pudo llegar a ${host} (${(e && e.message) || e}). El navegador no tiene salida a internet hacia ese sitio: abre el archivo con doble clic en Chrome o Safari (sin vista previa) y revisa VPN, bloqueadores de anuncios o antivirus.`;
+    if (!ak) lines.push("• Anthropic: falta la clave.");
+    else {
+      try {
+        const r = await fetch("https://api.anthropic.com/v1/models?limit=1", { headers: { "x-api-key": ak, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" } });
+        if (r.ok) lines.push("✓ Anthropic: conexión y clave correctas.");
+        else { const d = await r.json().catch(() => ({})); lines.push(`✗ Anthropic respondió ${r.status}: ${(d.error && d.error.message) || "error"}`); }
+      } catch (e) { lines.push(netMsg("api.anthropic.com", e)); }
+    }
+    if (!gk) lines.push("• Gemini: falta la clave (solo se necesita para generar video).");
+    else {
+      try {
+        const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1", { headers: { "x-goog-api-key": gk } });
+        if (r.ok) lines.push("✓ Gemini: conexión y clave correctas.");
+        else { const d = await r.json().catch(() => ({})); lines.push(`✗ Gemini respondió ${r.status}: ${(d.error && d.error.message) || "error"}`); }
+      } catch (e) { lines.push(netMsg("generativelanguage.googleapis.com", e)); }
+    }
+    out.innerHTML = lines.map(l => `<div>${esc(l)}</div>`).join("");
+  });
 
   /* Claude: usa la clave de Anthropic (con respuesta en vivo) */
   async function callClaude(prompt, { signal, onText } = {}) {
@@ -1092,7 +1116,7 @@ Requisitos:
         headers: { "content-type": "application/json", "x-api-key": cfg.anthropicKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
         body: JSON.stringify({ model: cfg.claudeModel, max_tokens: 8000, stream: true, messages: [{ role: "user", content: prompt }] }),
       });
-    } catch (e) { if (e && e.name === "AbortError") throw { code: "cancelled" }; throw { message: "No se pudo conectar con Anthropic. Revisa tu conexión." }; }
+    } catch (e) { if (e && e.name === "AbortError") throw { code: "cancelled" }; throw { code: "network", message: "El navegador no pudo comunicarse con Anthropic" + (e && e.message ? " (" + e.message + ")" : "") + ". Si abriste el archivo desde una vista previa o dentro de otra aplicación, ábrelo con doble clic en Chrome o Safari. Revisa también tu conexión, una VPN o los bloqueadores de anuncios. En ⚙ Ajustes puedes pulsar «Probar conexión»." }; }
     if (!r.ok) { const d = await r.json().catch(() => ({})); throw { code: r.status === 429 ? "rate_limited" : "api_error", message: (d.error && d.error.message) || `Error ${r.status}` }; }
     const reader = r.body.getReader(), dec = new TextDecoder(); let buf = "", text = "";
     try {
