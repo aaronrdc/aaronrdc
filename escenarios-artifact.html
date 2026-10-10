@@ -1665,81 +1665,121 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     };
     rvRefresh();
   }
-  async function rvGenerate() {
-    const model = $("#rvModel").value, cfgM = RV_MODELS[model], out = $("#rvOut"), btn = $("#btnRv"), stopB = $("#btnRvStop");
-    const texts = [0, 1, 2].map(k => ($(`#shot${k}`).value || "").trim());
-    if (texts.some(t => !t)) { toast("Falta el texto de alguna toma"); return; }
-    rvRunning = true; rvStop = false; btn.disabled = true; stopB.hidden = false;
-    const lines = [0, 1, 2].map(k => ({ label: `Toma ${k + 1}`, state: "en espera", url: "" }));
-    let stitch = { state: "en espera", url: "" }, spent = "";
-    const paint = (err) => {
-      out.innerHTML = `<div class="rvlist">${lines.map(l => `<div class="rvline"><b>${esc(l.label)}</b> · ${esc(l.state)}${l.url ? ` · <a class="lnk2" href="${esc(l.url)}" target="_blank" rel="noopener">↗ Abrir toma</a>` : ""}</div>`).join("")}<div class="rvline"><b>Video final</b> · ${esc(stitch.state)}${stitch.url ? ` · <a class="ghost lnk" href="${esc(stitch.url)}" target="_blank" rel="noopener">↗ Abrir video final</a>` : ""}</div></div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}${err ? `<div class="error" style="margin-top:10px">${esc(err)}</div>` : ""}`;
-    };
-    const poll = async (id, label, onProgress) => {
-      const t0 = Date.now();
-      for (;;) {
-        if (rvStop) throw { code: "cancelled" };
-        await new Promise(r => setTimeout(r, 8000));
-        const r = await rwMcp.callTool(RW, "get_task", { id }, { cache: false });
-        const d = r.payload && typeof r.payload === "object" ? r.payload : {};
-        const url = typeof d.url === "string" && d.url ? d.url : null;
-        if (url && !/task_pending/.test(String(d.kind || ""))) return { url, d };
-        const st = String(d.status || "").toUpperCase();
-        if (["FAILED", "CANCELED", "CANCELLED", "ERROR"].includes(st) || /fail|error/i.test(String(d.kind || ""))) throw { message: d.failure || d.error || d.message || `${label}: Runway no pudo completar la tarea (${st}).` };
-        if (typeof d.progressPercent === "number") onProgress(Math.round(d.progressPercent));
-        if (Date.now() - t0 > 14 * 60 * 1000) throw { message: `${label}: Runway tardó demasiado. Revisa tu galería de Runway.` };
+  /* Estado de la última generación: se conserva para poder reintentar solo la toma que falle. */
+  const RV_RATIOS = ["1280:720", "16:9", null];
+  let rv = null;
+  function rvReset(model, texts) {
+    rv = { model, texts, ids: [null, null, null], work: null, credits: [],
+      clips: [0, 1, 2].map(k => ({ state: "en espera", url: "", err: "" })), stitch: { state: "en espera", url: "", err: "" } };
+  }
+  function rvPaint(extra) {
+    const out = $("#rvOut"); if (!out || !rv) return;
+    const spent = rv.credits.length ? `Créditos restantes en Runway: ${rv.credits[rv.credits.length - 1]}` + (rwCreditsLast != null ? ` · gasto aproximado de las tomas enviadas: ${rwCreditsLast - rv.credits[rv.credits.length - 1]} créditos` : "") : "";
+    const busy = rvRunning;
+    out.innerHTML = `<div class="rvlist">${rv.clips.map((c, k) => `<div class="rvline"><b>Toma ${k + 1}</b> · ${esc(c.state)}${c.url ? ` · <a class="lnk2" href="${esc(c.url)}" target="_blank" rel="noopener">↗ Abrir toma</a>` : ""}${c.err ? `<div class="error" style="margin:6px 0">${esc(c.err)}</div><button class="ghost rvretry" data-k="${k}"${busy ? " disabled" : ""}>↻ Reintentar solo la toma ${k + 1}</button>` : ""}</div>`).join("")}<div class="rvline"><b>Video final</b> · ${esc(rv.stitch.state)}${rv.stitch.url ? ` · <a class="ghost lnk" href="${esc(rv.stitch.url)}" target="_blank" rel="noopener">↗ Abrir video final</a>` : ""}${rv.stitch.err ? `<div class="error" style="margin:6px 0">${esc(rv.stitch.err)}</div><button class="ghost rvretryS"${busy ? " disabled" : ""}>↻ Reintentar la unión</button>` : ""}</div></div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}${extra ? `<p class="imgcost">${esc(extra)}</p>` : ""}`;
+    out.querySelectorAll(".rvretry").forEach(b => b.onclick = () => rvRetry(+b.dataset.k));
+    const rs = out.querySelector(".rvretryS"); if (rs) rs.onclick = () => rvRetryStitch();
+  }
+  async function rvPoll(id, label, onProgress) {
+    const t0 = Date.now();
+    for (;;) {
+      if (rvStop) throw { code: "cancelled" };
+      await new Promise(r => setTimeout(r, 8000));
+      const r = await rwMcp.callTool(RW, "get_task", { id }, { cache: false });
+      const d = r.payload && typeof r.payload === "object" ? r.payload : {};
+      const url = typeof d.url === "string" && d.url ? d.url : null;
+      if (url && !/task_pending/.test(String(d.kind || ""))) return { url, d };
+      const st = String(d.status || "").toUpperCase();
+      if (["FAILED", "CANCELED", "CANCELLED", "ERROR"].includes(st) || /fail|error/i.test(String(d.kind || ""))) {
+        const why = d.failure || d.error || d.message || d.reason || "";
+        throw { message: `${label}: Runway marcó la tarea como fallida${st ? " (" + st + ")" : ""}.${why ? " Motivo: " + (typeof why === "string" ? why : JSON.stringify(why)) : ""}` };
       }
-    };
+      if (typeof d.progressPercent === "number") onProgress(Math.round(d.progressPercent));
+      if (Date.now() - t0 > 14 * 60 * 1000) throw { message: `${label}: Runway tardó demasiado. Revisa tu galería de Runway.` };
+    }
+  }
+  async function rvSubmitShot(k) {
+    const cfgM = RV_MODELS[rv.model], c = rv.clips[k];
+    c.state = "enviando…"; c.err = ""; c.url = ""; rvPaint();
+    const combos = rv.work ? [rv.work] : cfgM.durs.flatMap(d => RV_RATIOS.map(r => ({ d, r })));
+    const badD = new Set(), badR = new Set();
+    for (let i = 0; i < combos.length; i++) {
+      const { d, r } = combos[i];
+      if (badD.has(d) || badR.has(r)) continue;
+      const input = { promptText: rv.texts[k], model: rv.model, startFrame: { taskId: rwImgs[k].taskId }, duration: d.ds[k], rationale: "Toma " + (k + 1) + " de 3 de un video cinematográfico horizontal 720p que cuenta una historia de futuro con 3 imágenes." };
+      if (r) input.ratio = r;
+      try {
+        const g = await rwMcp.callTool(RW, "generate_video", input, { cache: false });
+        const id = rwTaskId(g); if (!id) throw { message: "Runway no devolvió el número de tarea." };
+        rv.ids[k] = id; if (!rv.work) rv.work = { d, r };
+        if (g.payload && typeof g.payload.creditsRemaining === "number") rv.credits.push(g.payload.creditsRemaining);
+        c.state = "en cola…"; rvPaint(); return;
+      } catch (e) {
+        const msg = (e && e.message) || "";
+        if (!(e && e.code === "tool_error" && /ratio|duration|aspect|resolution|invalid|unsupported|not supported/i.test(msg)) || i === combos.length - 1) throw e;
+        const isR = /(^|[^a-z])ratio([^a-z]|$)|aspect/i.test(msg), isD = /duration/i.test(msg);
+        if (isD && !isR) badD.add(d); else if (isR && !isD) badR.add(r);
+      }
+    }
+  }
+  async function rvPollShot(k) {
+    const c = rv.clips[k];
+    try { const r = await rvPoll(rv.ids[k], `Toma ${k + 1}`, p => { c.state = `generando… ${p}%`; rvPaint(); }); c.url = r.url; c.state = "lista"; c.err = ""; }
+    catch (e) { c.state = e && e.code === "cancelled" ? "cancelada" : "falló"; c.err = e && e.code === "cancelled" ? "Se canceló la espera. La toma puede seguir en Runway y gastar créditos." : rwErr(e) + (rv.ids[k] ? ` (tarea ${String(rv.ids[k]).slice(0, 8)})` : ""); }
+    rvPaint();
+  }
+  async function rvStitch() {
+    const st = rv.stitch, secs = rv.work.d.ds, trans = rv.work.d.tr;
+    st.state = "uniendo las 3 tomas…"; st.err = ""; st.url = ""; rvPaint();
     try {
-      // 1) enviar las 3 tomas (una por imagen), probando formatos y duraciones si Runway rechaza alguno
-      const ratios = ["1280:720", "16:9", null], ids = [], credits = [];
-      let work = null;
-      for (let k = 0; k < 3; k++) {
-        lines[k].state = "enviando…"; paint();
-        const combos = work ? [work] : cfgM.durs.flatMap(d => ratios.map(r => ({ d, r })));
-        let ok = false, lastErr = null; const badD = new Set(), badR = new Set();
-        for (let i = 0; i < combos.length && !ok; i++) {
-          const { d, r } = combos[i];
-          if (badD.has(d) || badR.has(r)) continue;
-          const input = { promptText: texts[k], model, startFrame: { taskId: rwImgs[k].taskId }, duration: d.ds[k], rationale: "Toma " + (k + 1) + " de 3 de un video cinematográfico horizontal 720p que cuenta una historia de futuro con 3 imágenes." };
-          if (r) input.ratio = r;
-          try {
-            const g = await rwMcp.callTool(RW, "generate_video", input, { cache: false });
-            const id = rwTaskId(g); if (!id) throw { message: "Runway no devolvió el número de tarea." };
-            ids[k] = id; work = { d, r }; ok = true;
-            if (g.payload && typeof g.payload.creditsRemaining === "number") credits.push(g.payload.creditsRemaining);
-          } catch (e) {
-            lastErr = e; const msg = (e && e.message) || "";
-            if (!(e && e.code === "tool_error" && /ratio|duration|aspect|resolution|invalid|unsupported|not supported/i.test(msg)) || i === combos.length - 1) throw e;
-            const isR = /(^|[^a-z])ratio([^a-z]|$)|aspect/i.test(msg), isD = /duration/i.test(msg);
-            if (isD && !isR) badD.add(d); else if (isR && !isD) badR.add(r);
-          }
-        }
-        lines[k].state = "en cola…"; paint();
-      }
-      if (credits.length) { spent = `Créditos restantes en Runway: ${credits[credits.length - 1]}` + (rwCreditsLast != null ? ` · gasto aproximado de las 3 tomas: ${rwCreditsLast - credits[credits.length - 1]} créditos` : ""); paint(); }
-      // 2) esperar las 3 tomas
-      const done = [];
-      await Promise.all([0, 1, 2].map(async k => {
-        const r = await poll(ids[k], `Toma ${k + 1}`, p => { lines[k].state = `generando… ${p}%`; paint(); });
-        done[k] = r; lines[k].state = "lista"; lines[k].url = r.url; paint();
-      }));
-      // 3) unir en un solo video (transición suave corta)
-      stitch.state = "uniendo las 3 tomas…"; paint();
-      const secs = work.d.ds, trans = work.d.tr;
-      const tryStitch = async (clips) => rwMcp.callTool(RW, "stitch_videos", Object.assign({ clips, transition: trans, rationale: "Unir las 3 tomas en un solo video cinematográfico." }, trans === "crossfade" ? { crossfadeSeconds: RV_XFADE } : {}), { cache: false });
+      const tryStitch = (clips) => rwMcp.callTool(RW, "stitch_videos", Object.assign({ clips, transition: trans, rationale: "Unir las 3 tomas en un solo video cinematográfico." }, trans === "crossfade" ? { crossfadeSeconds: RV_XFADE } : {}), { cache: false });
       let sg;
-      try { sg = await tryStitch(ids.map(id => ({ taskId: id }))); }
-      catch (e) { if (e && e.code === "tool_error") sg = await tryStitch(done.map((d, k) => ({ url: d.url, durationSeconds: secs[k] }))); else throw e; }
+      try { sg = await tryStitch(rv.ids.map(id => ({ taskId: id }))); }
+      catch (e) { if (e && e.code === "tool_error") sg = await tryStitch(rv.clips.map((c, k) => ({ url: c.url, durationSeconds: secs[k] }))); else throw e; }
       const sp = sg.payload && typeof sg.payload === "object" ? sg.payload : {};
       let finalUrl = typeof sp.url === "string" && sp.url && !/task_pending/.test(String(sp.kind || "")) ? sp.url : null;
       if (!finalUrl) {
-        const sid = rwTaskId(sg); if (!sid) throw { message: "Runway no devolvió el número de tarea de la unión. Las 3 tomas sí están listas; ábrelas con los enlaces." };
-        finalUrl = (await poll(sid, "Unión", p => { stitch.state = `uniendo… ${p}%`; paint(); })).url;
+        const sid = rwTaskId(sg); if (!sid) throw { message: "Runway no devolvió el número de tarea de la unión." };
+        finalUrl = (await rvPoll(sid, "Unión", p => { st.state = `uniendo… ${p}%`; rvPaint(); })).url;
       }
-      stitch.state = `listo (≈ ${rvTotal(work.d)} s)`; stitch.url = finalUrl; paint();
-    } catch (e) { paint(e && e.code === "cancelled" ? "Se canceló la generación. Las tomas ya enviadas pueden seguir en Runway y gastar créditos." : rwErr(e)); }
-    finally { rvRunning = false; stopB.hidden = true; rvRefresh(); }
+      st.state = `listo (≈ ${rvTotal(rv.work.d)} s)`; st.url = finalUrl;
+    } catch (e) { st.state = "falló"; st.err = e && e.code === "cancelled" ? "Se canceló la unión." : rwErr(e) + " Las tomas sí están listas: puedes abrirlas con sus enlaces o reintentar la unión."; }
+    rvPaint();
+  }
+  async function rvFinish() {
+    if (rv.clips.every(c => c.url)) await rvStitch();
+    else rvPaint("Algunas tomas no se completaron. Las que sí terminaron se conservan: reintenta solo las que fallaron y la página las unirá.");
+  }
+  function rvBusy(on) {
+    rvRunning = on; const b = $("#btnRv"), sb = $("#btnRvStop");
+    if (b && on) b.disabled = true; if (sb) sb.hidden = !on;
+    if (!on) { rvPaint(); rvRefresh(); }
+  }
+  async function rvGenerate() {
+    const model = $("#rvModel").value;
+    const texts = [0, 1, 2].map(k => ($(`#shot${k}`).value || "").trim());
+    if (texts.some(t => !t)) { toast("Falta el texto de alguna toma"); return; }
+    rvStop = false; rvReset(model, texts); rvBusy(true); $("#btnRv").disabled = true; rvPaint();
+    try {
+      for (let k = 0; k < 3; k++) {            // se envían una por una; si una falla al enviarse, las demás siguen
+        try { await rvSubmitShot(k); } catch (e) { rv.clips[k].state = "falló"; rv.clips[k].err = rwErr(e); rvPaint(); }
+      }
+      await Promise.all([0, 1, 2].map(k => rv.ids[k] && !rv.clips[k].err ? rvPollShot(k) : null));
+      await rvFinish();
+    } finally { rvBusy(false); }
+  }
+  async function rvRetry(k) {
+    if (rvRunning || !rv) return;
+    rvStop = false; rv.texts[k] = ($(`#shot${k}`).value || "").trim() || rv.texts[k]; rvBusy(true); $("#btnRv").disabled = true;
+    try {
+      try { await rvSubmitShot(k); await rvPollShot(k); } catch (e) { rv.clips[k].state = "falló"; rv.clips[k].err = rwErr(e); rvPaint(); }
+      await rvFinish();
+    } finally { rvBusy(false); }
+  }
+  async function rvRetryStitch() {
+    if (rvRunning || !rv || !rv.clips.every(c => c.url)) return;
+    rvStop = false; rvBusy(true); $("#btnRv").disabled = true;
+    try { await rvStitch(); } finally { rvBusy(false); }
   }
   function clearViz() { rwStop = true; rvStop = true; stopViz(); viz.hidden = true; viz.innerHTML = ""; }
 
