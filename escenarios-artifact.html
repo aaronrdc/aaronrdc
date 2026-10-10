@@ -347,6 +347,18 @@
   .imgcard figcaption { font-size: .9rem; }
   .imgcost { font-size: .85rem; color: var(--muted); }
   .rwinfo { color: var(--muted); font-size: .8rem; }
+
+  /* ---------- Video con Runway ---------- */
+  .shots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 12px; }
+  @media (max-width: 900px) { .shots { grid-template-columns: minmax(0, 1fr); } }
+  .shot { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 14px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); background: color-mix(in srgb, var(--ink) 4%, transparent); }
+  .shot-h { display: flex; gap: 8px; align-items: center; }
+  .shot-h span { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: .8rem; font-weight: 700; background: color-mix(in srgb, var(--ink) 12%, transparent); flex: none; }
+  .shot-es { margin: 0; font-size: .9rem; line-height: 1.5; color: var(--muted); }
+  .vtxt { width: 100%; min-height: 110px; resize: vertical; background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink); border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); border-radius: 12px; padding: 10px 12px; font: inherit; font-size: .9rem; line-height: 1.45; }
+  .rvlist { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .rvline { font-size: .92rem; }
+  .lnk2 { color: inherit; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <style id="css-light" media="not all">
@@ -720,6 +732,18 @@
   .imgcard figcaption { font-size: .9rem; }
   .imgcost { font-size: .85rem; color: var(--muted); }
   .rwinfo { color: var(--muted); font-size: .8rem; }
+
+  /* ---------- Video con Runway ---------- */
+  .shots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 12px; }
+  @media (max-width: 900px) { .shots { grid-template-columns: minmax(0, 1fr); } }
+  .shot { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 14px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); background: color-mix(in srgb, var(--ink) 4%, transparent); }
+  .shot-h { display: flex; gap: 8px; align-items: center; }
+  .shot-h span { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: .8rem; font-weight: 700; background: color-mix(in srgb, var(--ink) 12%, transparent); flex: none; }
+  .shot-es { margin: 0; font-size: .9rem; line-height: 1.5; color: var(--muted); }
+  .vtxt { width: 100%; min-height: 110px; resize: vertical; background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink); border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); border-radius: 12px; padding: 10px 12px; font: inherit; font-size: .9rem; line-height: 1.45; }
+  .rvlist { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .rvline { font-size: .92rem; }
+  .lnk2 { color: inherit; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <script>
@@ -1346,10 +1370,13 @@ Escribe 3 prompts, uno por escena, listos para pegar en Midjourney, DALL·E o Ge
 PROMPT DE VIDEO
 Escribe 1 prompt para Google Veo y Runway, en dos idiomas: "prompt" en español natural y claro (lo leerá el público) y "prompt_en" en inglés (la misma descripción, para el generador de video): un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo hiperrealista y los mismos personajes y lugar de las imágenes de referencia. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
 
+PLAN DE VIDEO EN 3 TOMAS
+Además escribe "video_shots": exactamente 3 tomas, una por cada imagen y en el mismo orden, que juntas cuentan la historia como un cortometraje cinematográfico de unos 16 segundos: toma 1 plantea el contexto y el lugar, toma 2 muestra el conflicto o el momento de tensión, toma 3 es el clímax y el cierre con la consecuencia de ese futuro. Cada toma dura de 5 a 6 segundos y describe, a partir de lo que ya muestra su imagen, el movimiento de cámara (por ejemplo slow push-in, dolly lateral, travelling, tilt, plano subjetivo) y la acción de los personajes o elementos. Mantén los mismos personajes, ropa, lugar y hora del día entre tomas para que haya continuidad, y respeta fielmente la narración. Estilo cinematográfico hiperrealista, sin texto en pantalla ni logotipos. Cada toma lleva "prompt" en español natural y "prompt_en" en inglés (la misma descripción, de 40 a 70 palabras).
+
 El JSON debe ser válido: dentro de los textos no uses comillas dobles (usa « » o comillas simples), no pongas saltos de línea dentro de los textos y no dejes comas al final de una lista.
 
 RESPONDE SOLO CON ESTE JSON, sin texto adicional:
-{"scenes":[{"title":"...","caption":"...","time":"dusk","weather":"fog","palette":{"top":"#000000","bottom":"#000000","glow":"#000000","ink":"#000000"},"sky":[{"type":"moon","x":70,"y":22,"s":1}],"layers":[{"type":"skyline","depth":"far","density":0.8}],"actors":[{"type":"elder","x":30,"depth":"near","s":1,"anim":"walk"}],"effects":[]}],"prompts":[{"title":"...","prompt":"...","prompt_en":"..."}],"video":{"title":"...","prompt":"...","prompt_en":"..."}}`;
+{"scenes":[{"title":"...","caption":"...","time":"dusk","weather":"fog","palette":{"top":"#000000","bottom":"#000000","glow":"#000000","ink":"#000000"},"sky":[{"type":"moon","x":70,"y":22,"s":1}],"layers":[{"type":"skyline","depth":"far","density":0.8}],"actors":[{"type":"elder","x":30,"depth":"near","s":1,"anim":"walk"}],"effects":[]}],"prompts":[{"title":"...","prompt":"...","prompt_en":"..."}],"video":{"title":"...","prompt":"...","prompt_en":"..."},"video_shots":[{"title":"...","prompt":"...","prompt_en":"..."}]}`;
   }
   const RETRY_NOTE = "\n\nIMPORTANTE: tu respuesta anterior no era un JSON válido. Responde de nuevo SOLO con el JSON, bien formado: sin comillas dobles dentro de los textos (usa « » o comillas simples), sin saltos de línea dentro de los textos y sin comas finales.";
   function parseJSON(t) {
@@ -1400,7 +1427,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       }
       const scenes = arr(data.scenes).slice(0, 3).map(normScene).map((sc, i) => ({ ...sc, i }));
       if (!scenes.length) throw { message: "Claude no devolvió ninguna escena. Inténtalo de nuevo." };
-      renderVisual(scenes, normPrompts(data.prompts), normPrompts([data.video])[0] || null);
+      renderVisual(scenes, normPrompts(data.prompts), normPrompts([data.video])[0] || null, normPrompts(arr(data.video_shots)));
     } catch (e) {
       if (e && e.code === "cancelled") { vizMessage(`<p class="help">Se detuvo la generación de la escena.</p><div class="meta"><button class="ghost" id="retryViz">↻ Intentar de nuevo</button></div>`); $("#retryViz").onclick = visualize; return; }
       const m = { not_granted: "No diste permiso para que la página consulte a Claude.", rate_limited: "Se alcanzó el límite de uso por ahora. Espera un momento e inténtalo de nuevo.", invalid_json: "La respuesta de Claude no tenía el formato esperado. Inténtalo de nuevo." }[e && e.code];
@@ -1423,7 +1450,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     const b = $("#playS"); if (b) b.textContent = on ? "⏸ Pausar" : "▶ Reanudar";
   }
   let vizScenes = [];
-  function renderVisual(scenes, prompts, video) {
+  function renderVisual(scenes, prompts, video, shots) {
     vizScenes = scenes; vizCount = scenes.length; vizIdx = 0;
     viz.hidden = false;
     viz.innerHTML = `<h2>Escena visual</h2>
@@ -1449,6 +1476,13 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       ${video ? `<h3 class="ph">Prompt para video</h3>
       <p class="help">Pensado para Google Veo y Runway: un plano continuo de unos 8 segundos. Runway ignora la última frase («Audio:»). Para más coherencia, genera antes la imagen 1 y úsala como imagen inicial del video. Se ve en español para el público; «Ver en inglés» muestra la versión para el generador.</p>
       <article class="pcard vcard" id="vcard"><div class="ph2"><span>▶</span><h4>${esc(video.title)}</h4><em class="lang">ES</em></div><p class="ptxt">${esc(video.prompt)}</p><div class="pbtns"><button class="ghost cpP" id="cpVideo">⧉ Copiar prompt de video</button>${video.en ? `<button class="ghost tgl">Ver en inglés</button>` : ""}</div></article>` : ""}
+      ${shots && shots.length ? `<h3 class="ph">Video con Runway · 3 tomas (≈ 16 s)</h3>
+      <p class="help">Un video cinematográfico horizontal en 720p que cuenta la historia con las 3 imágenes: cada imagen se anima en una toma y las 3 se unen en un solo video. Puedes editar el texto en inglés de cada toma antes de generar.</p>
+      <div class="shots" id="shots">${shots.map((p, k) => `<div class="shot"><div class="shot-h"><span>${k + 1}</span><b>${esc(p.title)}</b></div><p class="shot-es">${esc(p.prompt)}</p><textarea class="vtxt" id="shot${k}" rows="4" spellcheck="true" aria-label="Prompt en inglés de la toma ${k + 1}, editable"></textarea></div>`).join("")}</div>
+      <div class="rwbar"><label>Modelo de video <select id="rvModel"><option value="gen-4.5" selected>Gen-4.5 · calidad máxima</option><option value="gen-4-turbo">Gen-4 Turbo · económico</option></select></label><span class="imgcost" id="rvCost"></span></div>
+      <div class="meta"><button class="ghost" id="btnRv" disabled>🎬 Generar video con Runway</button><button class="ghost" id="btnRvStop" hidden>■ Cancelar</button></div>
+      <p class="imgcost" id="rvNote"></p>
+      <div id="rvOut"></div>` : ""}
       <div class="meta"><button class="ghost" id="cpAllP"${prompts.length || video ? "" : " hidden"}>⧉ Copiar todos los prompts</button><button class="ghost" id="regenViz">↻ Otra interpretación visual</button></div>`;
     showScene(0); setPlaying(true);
     $("#prevS").onclick = () => { showScene(vizIdx - 1); setPlaying(vizPlaying); };
@@ -1468,10 +1502,11 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     $("#cpAllP").onclick = async () => toast((await copy(prompts.map((p, k) => `IMAGEN ${k + 1}: ${p.title}\nEspañol: ${p.prompt}` + (p.en ? `\nEnglish: ${p.en}` : "")).concat(video ? [`VIDEO: ${video.title}\nEspañol: ${video.prompt}` + (video.en ? `\nEnglish: ${video.en}` : "")] : []).join("\n\n"))) ? "Prompts copiados" : "No se pudo copiar");
     $("#regenViz").onclick = visualize;
     if (prompts.length) initRunway(prompts);
+    if (shots && shots.length) initRunwayVideo(shots);
   }
   /* ---- Imágenes con el conector de Runway ML ---- */
   const RW = "Runway ML";
-  let rwMcp = null, rwImgs = [], rwPrompts = [], rwStop = false;
+  let rwMcp = null, rwImgs = [], rwPrompts = [], rwStop = false, rwCreditsLast = null;
   const RW_CREDITS = {};
   const rwErr = (e) => {
     const c = e && e.code, m = (e && e.message) || "";
@@ -1506,6 +1541,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     } else if (st.status === "error") {
       fr.innerHTML = `<div class="error" style="width:100%">${esc(st.error || "No se pudo generar la imagen.")}</div>`;
     } else fr.textContent = rwMcp ? "Pulsa «Generar las 3 imágenes con Runway»." : "No disponible: esta función necesita el conector Runway ML.";
+    if (typeof rvRefresh === "function") rvRefresh();
   }
   /* Parámetros por modelo: se prueban en orden; si Runway rechaza el formato o el tamaño, se pasa al siguiente. */
   const RW_MODELS = {
@@ -1543,8 +1579,9 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
         last = e;
         const msg = (e && e.message) || "";
         if (e && e.code === "tool_error" && i < combos.length - 1 && /ratio|size|resolution|aspect|unsupported|invalid|not supported/i.test(msg)) {
-          if (/size|resolution/i.test(msg) && !/ratio|aspect/i.test(msg)) badSz.add(sz);
-          else if (/ratio|aspect/i.test(msg) && !/size|resolution/i.test(msg)) badR.add(r);
+          const isR = /(^|[^a-z])ratio([^a-z]|$)|aspect/i.test(msg), isS = /size|resolution/i.test(msg);
+          if (isS && !isR) badSz.add(sz);
+          else if (isR && !isS) badR.add(r);
           continue;
         }
         throw e;
@@ -1570,13 +1607,14 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     const credits = [];
     const ids = [];
     for (let k = 0; k < rwImgs.length; k++) {           // se envían una por una para poder medir el costo
-      try { const r = await rwSubmit(k, model); ids[k] = r.id; if (r.credits != null) credits.push(r.credits); }
+      try { const r = await rwSubmit(k, model); ids[k] = r.id; rwImgs[k].taskId = r.id; if (r.credits != null) credits.push(r.credits); }
       catch (e) { rwImgs[k].status = e && e.code === "cancelled" ? "idle" : "error"; rwImgs[k].error = rwErr(e); rwPaint(k); }
     }
     if (credits.length >= 2) {
       const per = Math.round((credits[0] - credits[credits.length - 1]) / (credits.length - 1));
       if (per > 0) { rwCosts[model] = per; try { localStorage.setItem("rwCosts", JSON.stringify(rwCosts)); } catch {} }
     }
+    if (credits.length) rwCreditsLast = credits[credits.length - 1];
     if (credits.length) { const c = $("#rwCredits"); if (c) c.textContent = `Créditos restantes en Runway: ${credits[credits.length - 1]}`; }
     $("#rwCost").textContent = rwCostText(model);
     await Promise.all(rwImgs.map(async (st, k) => {
@@ -1595,7 +1633,115 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     if (!rwMcp) { btn.disabled = true; return; }
     btn.onclick = async () => { btn.disabled = true; rwStop = false; rwImgs.forEach((_, k) => { rwImgs[k] = { status: "idle" }; }); await rwRunAll($("#rwModel").value); btn.disabled = false; };
   }
-  function clearViz() { rwStop = true; stopViz(); viz.hidden = true; viz.innerHTML = ""; }
+
+  /* ---- Video con Runway: 1 toma por imagen + unión en un solo video ---- */
+  const RV_MODELS = {
+    "gen-4.5": { durs: [{ ds: [6, 5, 6], tr: "crossfade" }, { ds: [5, 5, 5], tr: "cut" }], perSec: 12, label: "Gen-4.5" },
+    "gen-4-turbo": { durs: [{ ds: [5, 5, 5], tr: "cut" }], perSec: 5, label: "Gen-4 Turbo" },
+  };
+  const RV_XFADE = 0.5;
+  let rvRunning = false, rvArmUntil = 0, rvStop = false;
+  const rvTotal = (d) => d.ds.reduce((a, b) => a + b, 0) - (d.tr === "crossfade" ? RV_XFADE * (d.ds.length - 1) : 0);
+  function rvCostText() {
+    const m = RV_MODELS[$("#rvModel").value], d = m.durs[0], secs = d.ds.reduce((a, b) => a + b, 0);
+    return `Duración final ≈ ${rvTotal(d)} s en 720p horizontal. Costo estimado ≈ ${m.perSec * secs} créditos (${m.perSec} por segundo de cada toma; cifra sin confirmar). Después de generar verás el costo medido.`;
+  }
+  function rvRefresh() {
+    const b = $("#btnRv"), n = $("#rvNote"); if (!b) return;
+    const ready = rwImgs.length === 3 && rwImgs.every(x => x.status === "ok" && x.taskId);
+    b.disabled = !rwMcp || !ready || rvRunning;
+    if (n && !rvRunning) n.textContent = !rwMcp ? "Esta función necesita el conector Runway ML." : (ready ? "Las 3 imágenes están listas. Revisa los textos y pulsa el botón." : "Primero genera las 3 imágenes con Runway (se usan como primer fotograma de cada toma).");
+  }
+  function initRunwayVideo(shots) {
+    rvStop = false; rvRunning = false;
+    shots.forEach((p, k) => { const t = $(`#shot${k}`); if (t) t.value = p.en || p.prompt; });
+    $("#rvModel").onchange = () => { $("#rvCost").textContent = rvCostText(); };
+    $("#rvCost").textContent = rvCostText();
+    $("#btnRvStop").onclick = () => { rvStop = true; };
+    $("#btnRv").onclick = () => {
+      const b = $("#btnRv");
+      if (Date.now() > rvArmUntil) { rvArmUntil = Date.now() + 6000; b.textContent = "¿Seguro? Gasta créditos de Runway. Clic otra vez"; setTimeout(() => { if (Date.now() >= rvArmUntil) b.textContent = "🎬 Generar video con Runway"; }, 6100); return; }
+      rvArmUntil = 0; b.textContent = "🎬 Generar video con Runway"; rvGenerate();
+    };
+    rvRefresh();
+  }
+  async function rvGenerate() {
+    const model = $("#rvModel").value, cfgM = RV_MODELS[model], out = $("#rvOut"), btn = $("#btnRv"), stopB = $("#btnRvStop");
+    const texts = [0, 1, 2].map(k => ($(`#shot${k}`).value || "").trim());
+    if (texts.some(t => !t)) { toast("Falta el texto de alguna toma"); return; }
+    rvRunning = true; rvStop = false; btn.disabled = true; stopB.hidden = false;
+    const lines = [0, 1, 2].map(k => ({ label: `Toma ${k + 1}`, state: "en espera", url: "" }));
+    let stitch = { state: "en espera", url: "" }, spent = "";
+    const paint = (err) => {
+      out.innerHTML = `<div class="rvlist">${lines.map(l => `<div class="rvline"><b>${esc(l.label)}</b> · ${esc(l.state)}${l.url ? ` · <a class="lnk2" href="${esc(l.url)}" target="_blank" rel="noopener">↗ Abrir toma</a>` : ""}</div>`).join("")}<div class="rvline"><b>Video final</b> · ${esc(stitch.state)}${stitch.url ? ` · <a class="ghost lnk" href="${esc(stitch.url)}" target="_blank" rel="noopener">↗ Abrir video final</a>` : ""}</div></div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}${err ? `<div class="error" style="margin-top:10px">${esc(err)}</div>` : ""}`;
+    };
+    const poll = async (id, label, onProgress) => {
+      const t0 = Date.now();
+      for (;;) {
+        if (rvStop) throw { code: "cancelled" };
+        await new Promise(r => setTimeout(r, 8000));
+        const r = await rwMcp.callTool(RW, "get_task", { id }, { cache: false });
+        const d = r.payload && typeof r.payload === "object" ? r.payload : {};
+        const url = typeof d.url === "string" && d.url ? d.url : null;
+        if (url && !/task_pending/.test(String(d.kind || ""))) return { url, d };
+        const st = String(d.status || "").toUpperCase();
+        if (["FAILED", "CANCELED", "CANCELLED", "ERROR"].includes(st) || /fail|error/i.test(String(d.kind || ""))) throw { message: d.failure || d.error || d.message || `${label}: Runway no pudo completar la tarea (${st}).` };
+        if (typeof d.progressPercent === "number") onProgress(Math.round(d.progressPercent));
+        if (Date.now() - t0 > 14 * 60 * 1000) throw { message: `${label}: Runway tardó demasiado. Revisa tu galería de Runway.` };
+      }
+    };
+    try {
+      // 1) enviar las 3 tomas (una por imagen), probando formatos y duraciones si Runway rechaza alguno
+      const ratios = ["1280:720", "16:9", null], ids = [], credits = [];
+      let work = null;
+      for (let k = 0; k < 3; k++) {
+        lines[k].state = "enviando…"; paint();
+        const combos = work ? [work] : cfgM.durs.flatMap(d => ratios.map(r => ({ d, r })));
+        let ok = false, lastErr = null; const badD = new Set(), badR = new Set();
+        for (let i = 0; i < combos.length && !ok; i++) {
+          const { d, r } = combos[i];
+          if (badD.has(d) || badR.has(r)) continue;
+          const input = { promptText: texts[k], model, startFrame: { taskId: rwImgs[k].taskId }, duration: d.ds[k], rationale: "Toma " + (k + 1) + " de 3 de un video cinematográfico horizontal 720p que cuenta una historia de futuro con 3 imágenes." };
+          if (r) input.ratio = r;
+          try {
+            const g = await rwMcp.callTool(RW, "generate_video", input, { cache: false });
+            const id = rwTaskId(g); if (!id) throw { message: "Runway no devolvió el número de tarea." };
+            ids[k] = id; work = { d, r }; ok = true;
+            if (g.payload && typeof g.payload.creditsRemaining === "number") credits.push(g.payload.creditsRemaining);
+          } catch (e) {
+            lastErr = e; const msg = (e && e.message) || "";
+            if (!(e && e.code === "tool_error" && /ratio|duration|aspect|resolution|invalid|unsupported|not supported/i.test(msg)) || i === combos.length - 1) throw e;
+            const isR = /(^|[^a-z])ratio([^a-z]|$)|aspect/i.test(msg), isD = /duration/i.test(msg);
+            if (isD && !isR) badD.add(d); else if (isR && !isD) badR.add(r);
+          }
+        }
+        lines[k].state = "en cola…"; paint();
+      }
+      if (credits.length) { spent = `Créditos restantes en Runway: ${credits[credits.length - 1]}` + (rwCreditsLast != null ? ` · gasto aproximado de las 3 tomas: ${rwCreditsLast - credits[credits.length - 1]} créditos` : ""); paint(); }
+      // 2) esperar las 3 tomas
+      const done = [];
+      await Promise.all([0, 1, 2].map(async k => {
+        const r = await poll(ids[k], `Toma ${k + 1}`, p => { lines[k].state = `generando… ${p}%`; paint(); });
+        done[k] = r; lines[k].state = "lista"; lines[k].url = r.url; paint();
+      }));
+      // 3) unir en un solo video (transición suave corta)
+      stitch.state = "uniendo las 3 tomas…"; paint();
+      const secs = work.d.ds, trans = work.d.tr;
+      const tryStitch = async (clips) => rwMcp.callTool(RW, "stitch_videos", Object.assign({ clips, transition: trans, rationale: "Unir las 3 tomas en un solo video cinematográfico." }, trans === "crossfade" ? { crossfadeSeconds: RV_XFADE } : {}), { cache: false });
+      let sg;
+      try { sg = await tryStitch(ids.map(id => ({ taskId: id }))); }
+      catch (e) { if (e && e.code === "tool_error") sg = await tryStitch(done.map((d, k) => ({ url: d.url, durationSeconds: secs[k] }))); else throw e; }
+      const sp = sg.payload && typeof sg.payload === "object" ? sg.payload : {};
+      let finalUrl = typeof sp.url === "string" && sp.url && !/task_pending/.test(String(sp.kind || "")) ? sp.url : null;
+      if (!finalUrl) {
+        const sid = rwTaskId(sg); if (!sid) throw { message: "Runway no devolvió el número de tarea de la unión. Las 3 tomas sí están listas; ábrelas con los enlaces." };
+        finalUrl = (await poll(sid, "Unión", p => { stitch.state = `uniendo… ${p}%`; paint(); })).url;
+      }
+      stitch.state = `listo (≈ ${rvTotal(work.d)} s)`; stitch.url = finalUrl; paint();
+    } catch (e) { paint(e && e.code === "cancelled" ? "Se canceló la generación. Las tomas ya enviadas pueden seguir en Runway y gastar créditos." : rwErr(e)); }
+    finally { rvRunning = false; stopB.hidden = true; rvRefresh(); }
+  }
+  function clearViz() { rwStop = true; rvStop = true; stopViz(); viz.hidden = true; viz.innerHTML = ""; }
 
   $("#btnGenerate").addEventListener("click", generate);
 
