@@ -346,6 +346,7 @@
   .imgframe.link .rwopen { position: static; }
   .imgcard figcaption { font-size: .9rem; }
   .imgcost { font-size: .85rem; color: var(--muted); }
+  .rwinfo { color: var(--muted); font-size: .8rem; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <style id="css-light" media="not all">
@@ -718,6 +719,7 @@
   .imgframe.link .rwopen { position: static; }
   .imgcard figcaption { font-size: .9rem; }
   .imgcost { font-size: .85rem; color: var(--muted); }
+  .rwinfo { color: var(--muted); font-size: .8rem; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <script>
@@ -1438,8 +1440,8 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       </div>
       ${prompts.length ? `<h3 class="ph">Imágenes con Runway</h3>
       <p class="help">Imágenes hiperrealistas creadas con tu cuenta de Runway a partir de los prompts de abajo. Se generan con el conector de Runway ML y usan tus créditos.</p>
-      <div class="rwbar"><label>Modelo <select id="rwModel"><option value="nano-banana-pro">Nano Banana Pro</option><option value="gpt-image-2">GPT Image 2</option></select></label><span class="imgcost" id="rwCost"></span></div>
-      <div class="imgs" id="rwImgs">${prompts.map((p, k) => `<figure class="imgcard" data-k="${k}"><div class="imgframe" id="rwf${k}"></div><figcaption><b>${k + 1}.</b> ${esc(p.title)}</figcaption></figure>`).join("")}</div>
+      <div class="rwbar"><label>Modelo <select id="rwModel"><option value="gen-4-image-turbo">Gen-4 Image Turbo</option><option value="seedream-5">Seedream 5.0-lite (1K)</option><option value="nano-banana-pro" selected>Nano Banana Pro (1K)</option><option value="gpt-image-2">GPT Image 2 (calidad media)</option></select></label><span class="imgcost" id="rwCost"></span><span class="imgcost" id="rwCredits"></span></div>
+      <div class="imgs" id="rwImgs">${prompts.map((p, k) => `<figure class="imgcard" data-k="${k}"><div class="imgframe" id="rwf${k}"></div><figcaption><b>${k + 1}.</b> ${esc(p.title)}<span class="rwinfo" id="rwi${k}"></span></figcaption></figure>`).join("")}</div>
       <div class="meta"><button class="ghost" id="btnRw">🖼 Generar las 3 imágenes con Runway</button></div>` : ""}
       ${prompts.length ? `<h3 class="ph">Prompts para generar imágenes</h3>
       <p class="help">Pégalos en tu generador de imágenes favorito (Midjourney, DALL·E, Gemini…). Los tres comparten el mismo estilo. Aquí se ven en español; con «Ver en inglés» tienes la versión que suelen entender mejor los generadores.</p>
@@ -1470,7 +1472,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
   /* ---- Imágenes con el conector de Runway ML ---- */
   const RW = "Runway ML";
   let rwMcp = null, rwImgs = [], rwPrompts = [], rwStop = false;
-  const RW_CREDITS = { "nano-banana-pro": 20, "gpt-image-2": null };
+  const RW_CREDITS = {};
   const rwErr = (e) => {
     const c = e && e.code, m = (e && e.message) || "";
     const map = {
@@ -1492,6 +1494,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
   }
   function rwPaint(k) {
     const st = rwImgs[k], fr = $(`#rwf${k}`); if (!fr) return;
+    const inf = $(`#rwi${k}`); if (inf) inf.textContent = st.info ? " · " + st.info : "";
     fr.classList.toggle("ok", st.status === "ok");
     if (st.status === "ok") {
       fr.innerHTML = `<img alt="Imagen ${k + 1} de Runway" src="${esc(st.url)}"><a class="ghost lnk rwopen" href="${esc(st.url)}" target="_blank" rel="noopener">↗ Abrir imagen</a>`;
@@ -1504,40 +1507,92 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       fr.innerHTML = `<div class="error" style="width:100%">${esc(st.error || "No se pudo generar la imagen.")}</div>`;
     } else fr.textContent = rwMcp ? "Pulsa «Generar las 3 imágenes con Runway»." : "No disponible: esta función necesita el conector Runway ML.";
   }
-  async function rwGen(k) {
-    const st = rwImgs[k], p = rwPrompts[k], model = $("#rwModel").value;
-    st.status = "loading"; st.pct = null; st.error = ""; rwPaint(k);
-    try {
-      const text = "Photorealistic, hyperrealistic cinematic photograph, 16:9 widescreen. " + (p.en || p.prompt);
-      const g = await rwMcp.callTool(RW, "generate_image", { promptText: text, model, ratio: "16:9", imageSize: "1K", count: 1, rationale: "Imagen de referencia hiperrealista para una escena de futuro, pedida desde la página del generador de escenarios." }, { cache: false });
-      const gp = g.payload;
-      const id = (gp && typeof gp === "object" && (gp.taskId || rwFind(gp, ["taskId", "id"]))) || ((JSON.stringify(g.content || gp) || "").match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/) || [])[0];
-      if (!id) throw { message: "Runway no devolvió el número de tarea. Intenta de nuevo." };
-      if (gp && typeof gp.creditsRemaining === "number") { const c = $("#rwCost"); if (c) c.textContent = `Créditos restantes en Runway: ${gp.creditsRemaining}`; }
-      const t0 = Date.now();
-      for (;;) {
-        if (rwStop) throw { code: "cancelled" };
-        await new Promise(r => setTimeout(r, 5000));
-        const r = await rwMcp.callTool(RW, "get_task", { id }, { cache: false });
-        const d = r.payload && typeof r.payload === "object" ? r.payload : {};
-        if (d.kind === "image" && d.url) { st.url = d.url; st.status = "ok"; break; }
-        const status = String(d.status || "").toUpperCase();
-        if (["FAILED", "CANCELED", "CANCELLED", "ERROR"].includes(status) || /fail|error/i.test(String(d.kind || ""))) throw { message: d.failure || d.error || d.message || "Runway no pudo generar la imagen (" + status + ")." };
-        if (typeof d.progressPercent === "number") { st.pct = Math.round(d.progressPercent); rwPaint(k); }
-        if (Date.now() - t0 > 6 * 60 * 1000) throw { message: "Runway tardó demasiado. Revisa la imagen en tu cuenta de Runway." };
+  /* Parámetros por modelo: se prueban en orden; si Runway rechaza el formato o el tamaño, se pasa al siguiente. */
+  const RW_MODELS = {
+    "gen-4-image-turbo": { ratios: ["1280:720", "16:9", null], sizes: [null] },
+    "seedream-5": { ratios: ["16:9", null], sizes: ["1K", null] },
+    "nano-banana-pro": { ratios: ["16:9", null], sizes: ["1K"] },
+    "gpt-image-2": { ratios: ["16:9", "3:2", null], sizes: [null] },
+  };
+  let rwCosts = {};
+  try { rwCosts = JSON.parse(localStorage.getItem("rwCosts") || "{}"); } catch {}
+  const rwCostText = (m) => rwCosts[m] ? `Costo medido: ≈ ${rwCosts[m]} créditos por imagen (≈ ${rwCosts[m] * 3} por las 3).` : "Costo por medir: después de generar verás cuántos créditos gastó este modelo.";
+  const rwTaskId = (g) => {
+    const gp = g && g.payload;
+    return (gp && typeof gp === "object" && (gp.taskId || rwFind(gp, ["taskId", "id"]))) || ((JSON.stringify((g && g.content) || gp) || "").match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/) || [])[0];
+  };
+  async function rwSubmit(k, model) {
+    const st = rwImgs[k], p = rwPrompts[k], cfgM = RW_MODELS[model] || { ratios: ["16:9", null], sizes: [null] };
+    st.status = "loading"; st.pct = null; st.error = ""; st.info = ""; rwPaint(k);
+    const text = "Photorealistic, hyperrealistic cinematic photograph, 16:9 widescreen. " + (p.en || p.prompt);
+    const combos = []; cfgM.sizes.forEach(sz => cfgM.ratios.forEach(r => combos.push({ r, sz })));
+    let last = null; const badSz = new Set(), badR = new Set();
+    for (let i = 0; i < combos.length; i++) {
+      const { r, sz } = combos[i];
+      if (badSz.has(sz) || badR.has(r)) continue;
+      const input = { promptText: text, model, count: 1, rationale: "Imagen de referencia hiperrealista para una escena de futuro, pedida desde la página del generador de escenarios." };
+      if (r) input.ratio = r; if (sz) input.imageSize = sz;
+      try {
+        const g = await rwMcp.callTool(RW, "generate_image", input, { cache: false });
+        const id = rwTaskId(g);
+        if (!id) throw { message: "Runway no devolvió el número de tarea. Intenta de nuevo." };
+        st.info = `${r ? r : "formato predeterminado"} · ${sz ? sz : "tamaño predeterminado"}`;
+        return { id, credits: g.payload && typeof g.payload.creditsRemaining === "number" ? g.payload.creditsRemaining : null };
+      } catch (e) {
+        last = e;
+        const msg = (e && e.message) || "";
+        if (e && e.code === "tool_error" && i < combos.length - 1 && /ratio|size|resolution|aspect|unsupported|invalid|not supported/i.test(msg)) {
+          if (/size|resolution/i.test(msg) && !/ratio|aspect/i.test(msg)) badSz.add(sz);
+          else if (/ratio|aspect/i.test(msg) && !/size|resolution/i.test(msg)) badR.add(r);
+          continue;
+        }
+        throw e;
       }
-    } catch (e) { st.status = e && e.code === "cancelled" ? "idle" : "error"; st.error = rwErr(e); }
-    rwPaint(k);
+    }
+    throw last;
+  }
+  async function rwPoll(k, id) {
+    const st = rwImgs[k], t0 = Date.now();
+    for (;;) {
+      if (rwStop) throw { code: "cancelled" };
+      await new Promise(r => setTimeout(r, 5000));
+      const r = await rwMcp.callTool(RW, "get_task", { id }, { cache: false });
+      const d = r.payload && typeof r.payload === "object" ? r.payload : {};
+      if (d.kind === "image" && d.url) { st.url = d.url; st.status = "ok"; return; }
+      const status = String(d.status || "").toUpperCase();
+      if (["FAILED", "CANCELED", "CANCELLED", "ERROR"].includes(status) || /fail|error/i.test(String(d.kind || ""))) throw { message: d.failure || d.error || d.message || "Runway no pudo generar la imagen (" + status + ")." };
+      if (typeof d.progressPercent === "number") { st.pct = Math.round(d.progressPercent); rwPaint(k); }
+      if (Date.now() - t0 > 6 * 60 * 1000) throw { message: "Runway tardó demasiado. Revisa la imagen en tu cuenta de Runway." };
+    }
+  }
+  async function rwRunAll(model) {
+    const credits = [];
+    const ids = [];
+    for (let k = 0; k < rwImgs.length; k++) {           // se envían una por una para poder medir el costo
+      try { const r = await rwSubmit(k, model); ids[k] = r.id; if (r.credits != null) credits.push(r.credits); }
+      catch (e) { rwImgs[k].status = e && e.code === "cancelled" ? "idle" : "error"; rwImgs[k].error = rwErr(e); rwPaint(k); }
+    }
+    if (credits.length >= 2) {
+      const per = Math.round((credits[0] - credits[credits.length - 1]) / (credits.length - 1));
+      if (per > 0) { rwCosts[model] = per; try { localStorage.setItem("rwCosts", JSON.stringify(rwCosts)); } catch {} }
+    }
+    if (credits.length) { const c = $("#rwCredits"); if (c) c.textContent = `Créditos restantes en Runway: ${credits[credits.length - 1]}`; }
+    $("#rwCost").textContent = rwCostText(model);
+    await Promise.all(rwImgs.map(async (st, k) => {
+      if (!ids[k]) return;
+      try { await rwPoll(k, ids[k]); } catch (e) { st.status = e && e.code === "cancelled" ? "idle" : "error"; st.error = rwErr(e); }
+      rwPaint(k);
+    }));
   }
   async function initRunway(prompts) {
     rwPrompts = prompts; rwStop = false; rwImgs = prompts.map(() => ({ status: "idle" }));
     const btn = $("#btnRw"), cost = $("#rwCost");
-    const upd = () => { const c = RW_CREDITS[$("#rwModel").value]; cost.textContent = c ? `Costo medido en una prueba: ≈ ${c} créditos por imagen (≈ ${c * 3} por las 3).` : "Costo en créditos por confirmar para este modelo."; };
+    const upd = () => { cost.textContent = rwCostText($("#rwModel").value); };
     $("#rwModel").onchange = upd; upd();
     try { rwMcp = await window.claude?.use("mcp"); } catch { rwMcp = null; }
     rwImgs.forEach((_, k) => rwPaint(k));
     if (!rwMcp) { btn.disabled = true; return; }
-    btn.onclick = async () => { btn.disabled = true; rwStop = false; await Promise.all(rwImgs.map((_, k) => rwGen(k))); btn.disabled = false; };
+    btn.onclick = async () => { btn.disabled = true; rwStop = false; rwImgs.forEach((_, k) => { rwImgs[k] = { status: "idle" }; }); await rwRunAll($("#rwModel").value); btn.disabled = false; };
   }
   function clearViz() { rwStop = true; stopViz(); viz.hidden = true; viz.innerHTML = ""; }
 
