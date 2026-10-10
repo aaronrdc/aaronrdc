@@ -359,6 +359,15 @@
   .rvlist { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
   .rvline { font-size: .92rem; }
   .lnk2 { color: inherit; }
+
+  /* ---------- Video multi-shot ---------- */
+  .msgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 10px 0 14px; }
+  @media (max-width: 900px) { .msgrid { grid-template-columns: minmax(0, 1fr); } }
+  .msinfo { padding: 14px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); background: color-mix(in srgb, var(--ink) 4%, transparent); min-width: 0; }
+  .msinfo b { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .msinfo p { margin: 6px 0 0; line-height: 1.5; font-size: .95rem; }
+  .chip2 { display: inline-block; padding: 3px 10px; border-radius: 999px; margin: 2px 2px 2px 0; font-size: .82rem; border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); }
+  #mshot { margin-top: 26px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <style id="css-light" media="not all">
@@ -744,6 +753,15 @@
   .rvlist { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
   .rvline { font-size: .92rem; }
   .lnk2 { color: inherit; }
+
+  /* ---------- Video multi-shot ---------- */
+  .msgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 10px 0 14px; }
+  @media (max-width: 900px) { .msgrid { grid-template-columns: minmax(0, 1fr); } }
+  .msinfo { padding: 14px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); background: color-mix(in srgb, var(--ink) 4%, transparent); min-width: 0; }
+  .msinfo b { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .msinfo p { margin: 6px 0 0; line-height: 1.5; font-size: .95rem; }
+  .chip2 { display: inline-block; padding: 3px 10px; border-radius: 999px; margin: 2px 2px 2px 0; font-size: .82rem; border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); }
+  #mshot { margin-top: 26px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <script>
@@ -786,6 +804,7 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
 
   <section class="panel" id="story" aria-live="polite"></section>
   <section class="panel" id="visual" hidden></section>
+  <section class="panel" id="mshot" hidden></section>
 </div>
 
 <div class="fab-wrap">
@@ -1031,12 +1050,14 @@ Requisitos:
         <button class="ghost" id="cpStory">⧉ Copiar narrativa</button>
         <button class="ghost" id="regen">↻ Generar otra versión</button>
         <button class="ghost viz" id="btnViz">🎞 Visualizar escena</button>
+        <button class="ghost viz" id="btnMs">🎬 Video multi-shot (15 s)</button>
       </div>` : "");
     if (final) {
       $("#cpStory").onclick = async () => toast((await copy(title + "\n\n" + parts.join("\n\n"))) ? "Narrativa copiada" : "No se pudo copiar");
       $("#regen").onclick = generate;
       lastStory = { title, body: parts.join("\n\n") };
       $("#btnViz").onclick = visualize;
+      $("#btnMs").onclick = openMs;
     }
   }
   function showError(msg) {
@@ -1781,7 +1802,151 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     rvStop = false; rvBusy(true); $("#btnRv").disabled = true;
     try { await rvStitch(); } finally { rvBusy(false); }
   }
-  function clearViz() { rwStop = true; rvStop = true; stopViz(); viz.hidden = true; viz.innerHTML = ""; }
+
+  /* ============ Video Multi-Shot de Runway: guion hecho por Claude a partir de la historia ============ */
+  let msStop = false, msRunning = false, msData = null, msArm = 0;
+  async function msGetMcp() {
+    if (rwMcp) return rwMcp;
+    try { rwMcp = await window.claude?.use("mcp"); } catch { rwMcp = null; }
+    return rwMcp;
+  }
+  function buildMsPrompt() {
+    const sel = selection(), notes = ($("#notes").value || "").trim();
+    return `Eres director de cine y analista de prospectiva en un centro de estudios del futuro. A partir de la narración, vas a imaginar cómo se vive en ese futuro y a escribir el guion de un video corto de 15 segundos con 3 tomas, para el generador de video multi-shot de Runway.
+
+NARRACIÓN
+Título: ${lastStory.title}
+${lastStory.body}
+
+CARTAS ELEGIDAS: ${sel.map(x => x.cat + ": " + x.text).join(" | ")}
+IDEAS DE LA PERSONA PARTICIPANTE: ${notes || "(sin comentarios)"}
+
+QUÉ DEBES HACER
+1. "vida": en 2 o 3 frases sencillas en español, explica cómo se vive en ese futuro (rutinas, lugares, objetos, reglas, qué cambió). Usa solo lo que dice o sugiere la narración.
+2. "situacion": en 1 o 2 frases, la situación específica de la historia que mostrará el video.
+3. "emociones": de 3 a 5 emociones de los personajes o elementos importantes, cada una como {"quien","emocion"}.
+4. "shots": exactamente 3 tomas de unos 5 segundos que juntas forman un cortometraje de 15 segundos con inicio, desarrollo y cierre:
+   - Toma 1: el contexto de la vida cotidiana en ese futuro (lugar, año ${sel[1].text}, objetos, rutina).
+   - Toma 2: la situación específica de la historia.
+   - Toma 3: la emoción y el momento de mayor intensidad, con gestos y rostros visibles.
+   Cada toma lleva "title", "prompt" en español natural y "prompt_en" en inglés (la misma descripción, de 40 a 70 palabras) con movimiento de cámara, acción, luz y las emociones visibles. Describe a los personajes igual en las 3 tomas (edad, rasgos, ropa) y mantén el mismo lugar. Estilo cinematográfico hiperrealista. Sin texto en pantalla ni logotipos. Evita nombres de personas reales, marcas y violencia explícita, para que los filtros de contenido no lo rechacen.
+5. "story" y "story_en": un solo texto (de 70 a 110 palabras, en español y en inglés) que resuma el video completo en sus 3 momentos, para el modo automático.
+
+El JSON debe ser válido: dentro de los textos no uses comillas dobles (usa « » o comillas simples), no pongas saltos de línea dentro de los textos y no dejes comas al final de una lista.
+
+RESPONDE SOLO CON ESTE JSON, sin texto adicional:
+{"title":"...","vida":"...","situacion":"...","emociones":[{"quien":"...","emocion":"..."}],"shots":[{"title":"...","prompt":"...","prompt_en":"..."}],"story":"...","story_en":"..."}`;
+  }
+  function msShell(inner) { const m = $("#mshot"); m.hidden = false; m.innerHTML = `<h2>Video multi-shot · 15 s · 720p</h2>${inner}`; }
+  function openMs() {
+    if (!lastStory || generating) return;
+    msStop = false; msData = null;
+    msShell(`<p class="help">Claude lee la historia, resume cómo se vive en ese futuro y escribe el guion de un video de 3 tomas conectadas: el contexto de la vida, una situación concreta y la emoción del momento. Después Runway lo genera en un solo video horizontal de 15 segundos en 720p.</p>
+      <div class="meta"><button class="ghost" id="btnMsA">✦ Analizar la historia y crear el guion</button></div><div id="msBody"></div>`);
+    $("#btnMsA").onclick = msAnalyze;
+    $("#mshot").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  async function msAnalyze() {
+    const btn = $("#btnMsA"), body = $("#msBody");
+    btn.disabled = true;
+    body.innerHTML = `<div class="loading"><div class="spin"></div><span id="msWait">Claude está leyendo la historia y escribiendo el guion… puede tardar hasta un minuto.</span></div>`;
+    try {
+      const sample = await window.claude?.use("sample");
+      if (!sample) throw { message: "Esta función solo está disponible al abrir la página como Artifact en claude.ai, con la sesión iniciada." };
+      const ask = (extra) => sample(buildMsPrompt() + (extra || ""), { cache: false });
+      let data; const r = await ask();
+      try { data = parseJSON(r.text); }
+      catch (e1) { const w = $("#msWait"); if (w) w.textContent = "Ajustando el formato… segundo intento"; data = parseJSON((await ask(RETRY_NOTE)).text); }
+      const shots = arr(data.shots).filter(x => x && (x.prompt_en || x.prompt)).slice(0, 3);
+      if (shots.length < 3) throw { message: "Claude no devolvió las 3 tomas. Inténtalo de nuevo." };
+      msData = { title: String(data.title || lastStory.title).slice(0, 90), vida: String(data.vida || ""), situacion: String(data.situacion || ""),
+        emociones: arr(data.emociones).filter(x => x && x.emocion).slice(0, 5).map(x => ({ quien: String(x.quien || "").slice(0, 60), emocion: String(x.emocion).slice(0, 40) })),
+        shots: shots.map((x, k) => ({ title: String(x.title || "Toma " + (k + 1)).slice(0, 60), es: String(x.prompt || "").slice(0, 900), en: String(x.prompt_en || x.prompt || "").slice(0, 900) })),
+        story: String(data.story || ""), storyEn: String(data.story_en || data.story || "") };
+      msRender();
+    } catch (e) {
+      const m = { not_granted: "No diste permiso para que la página consulte a Claude.", rate_limited: "Se alcanzó el límite de uso. Espera un momento e inténtalo de nuevo.", invalid_json: "La respuesta de Claude no tenía el formato esperado. Inténtalo de nuevo." }[e && e.code];
+      body.innerHTML = `<div class="error">${esc(m || String((e && e.message) || e))}</div>`;
+    } finally { btn.disabled = false; btn.textContent = "↻ Analizar de nuevo"; }
+  }
+  function msRender() {
+    const d = msData, body = $("#msBody");
+    const img1 = rwImgs[0] && rwImgs[0].status === "ok" && rwImgs[0].url;
+    body.innerHTML = `<h3 class="ph">${esc(d.title)}</h3>
+      <div class="msgrid">
+        <div class="msinfo"><b>Cómo se vive en ese futuro</b><p>${esc(d.vida)}</p></div>
+        <div class="msinfo"><b>Situación que muestra el video</b><p>${esc(d.situacion)}</p></div>
+        <div class="msinfo"><b>Emociones</b><p>${d.emociones.map(x => `<span class="chip2">${esc(x.quien ? x.quien + ": " : "")}${esc(x.emocion)}</span>`).join(" ") || "—"}</p></div>
+      </div>
+      <div class="rwbar"><label><input type="radio" name="msMode" value="custom" checked> Por tomas (3 textos, recomendado)</label><label><input type="radio" name="msMode" value="auto"> Automático (un solo texto)</label></div>
+      <div id="msCustom"><div class="shots">${d.shots.map((x, k) => `<div class="shot"><div class="shot-h"><span>${k + 1}</span><b>${esc(x.title)}</b></div><p class="shot-es">${esc(x.es)}</p><textarea class="vtxt" id="msShot${k}" rows="5" spellcheck="true" aria-label="Prompt en inglés de la toma ${k + 1}, editable"></textarea></div>`).join("")}</div></div>
+      <div id="msAuto" hidden><p class="shot-es">${esc(d.story)}</p><textarea class="vtxt" id="msStory" rows="6" spellcheck="true" aria-label="Historia completa en inglés, editable"></textarea></div>
+      <div class="rwbar"><label><input type="checkbox" id="msSound" checked> Con sonido</label><label><input type="checkbox" id="msAnchor"${img1 ? "" : " disabled"}> Usar la imagen 1 de Runway como primer cuadro${img1 ? "" : " (primero genera las imágenes)"}</label></div>
+      <p class="imgcost" id="msCost">Duración 15 segundos, horizontal 16:9, 720p. El costo en créditos se mide al enviar y se muestra después.</p>
+      <div class="meta"><button class="ghost" id="btnMsG">🎬 Generar video multi-shot</button><button class="ghost" id="btnMsStop" hidden>■ Dejar de esperar</button></div>
+      <div id="msOut"></div>`;
+    d.shots.forEach((x, k) => { $(`#msShot${k}`).value = x.en; });
+    $("#msStory").value = d.storyEn;
+    document.querySelectorAll('input[name="msMode"]').forEach(r => r.onchange = () => { const a = r.value === "auto" && r.checked; $("#msCustom").hidden = a; $("#msAuto").hidden = !a; });
+    $("#btnMsStop").onclick = () => { msStop = true; };
+    $("#btnMsG").onclick = () => {
+      const b = $("#btnMsG");
+      if (Date.now() > msArm) { msArm = Date.now() + 6000; b.textContent = "¿Seguro? Gasta créditos de Runway. Clic otra vez"; setTimeout(() => { if (Date.now() >= msArm) b.textContent = "🎬 Generar video multi-shot"; }, 6100); return; }
+      msArm = 0; b.textContent = "🎬 Generar video multi-shot"; msGenerate();
+    };
+  }
+  async function msPoll(id, onProgress) {
+    const t0 = Date.now();
+    for (;;) {
+      if (msStop) throw { code: "cancelled" };
+      await new Promise(r => setTimeout(r, 10000));
+      const r = await rwMcp.callTool(RW, "get_task", { id }, { cache: false });
+      const p = r.payload, d = p && typeof p === "object" ? p : {};
+      const txt = typeof p === "string" ? p : JSON.stringify(p != null ? p : (r.content || ""));
+      let url = typeof d.url === "string" && d.url && !/task_pending/.test(String(d.kind || "")) ? d.url : null;
+      const st = (String(d.status || "") || ((txt.match(/\b(FAILED|CANCELED|CANCELLED|SUCCEEDED|RUNNING|PENDING|QUEUED|THROTTLED)\b/i) || [])[1] || "")).toUpperCase();
+      if (!url && st === "SUCCEEDED") { const m = txt.match(/https:\/\/[^\s"'\\)\]>]+\.mp4[^\s"'\\)\]>]*/g); if (m) url = m[m.length - 1]; }
+      if (url) return { url };
+      if (["FAILED", "CANCELED", "CANCELLED", "ERROR"].includes(st)) throw { message: "Runway marcó el video como fallido (" + st + "). " + (d.failure || d.error || d.message || txt.replace(/\s+/g, " ").slice(0, 220)) };
+      if (st === "SUCCEEDED") throw { message: "Runway terminó el video, pero la página no encontró el enlace. Ábrelo en tu galería de Runway. Respuesta: " + txt.replace(/\s+/g, " ").slice(0, 200) };
+      const pct = typeof d.progressPercent === "number" ? Math.round(d.progressPercent) : (txt.match(/(\d{1,3})\s*%/) || [])[1];
+      onProgress(pct != null ? +pct : null, Math.round((Date.now() - t0) / 1000));
+      if (Date.now() - t0 > 25 * 60 * 1000) throw { message: "Runway tardó demasiado. Revisa tu galería de Runway." };
+    }
+  }
+  const msCredits = async () => { try { const w = await rwMcp.callTool(RW, "whoami", {}, { cache: false }); const t = w.payload && w.payload.credits && w.payload.credits.total; return typeof t === "number" ? t : null; } catch { return null; } };
+  async function msGenerate() {
+    if (msRunning) return;
+    const mcp = await msGetMcp(); const out = $("#msOut");
+    if (!mcp) { out.innerHTML = `<div class="error">Esta función necesita el conector Runway ML conectado en claude.ai.</div>`; return; }
+    const mode = (document.querySelector('input[name="msMode"]:checked') || {}).value || "custom";
+    const input = { duration: 15, aspectRatio: "16:9", resolution: "720p", sound: $("#msSound").checked, rationale: "Video multi-shot de 15 segundos y 720p que muestra cómo se vive en un futuro imaginado y una situación de su historia, pedido desde el generador de escenarios de futuro." };
+    if (mode === "auto") {
+      const t = ($("#msStory").value || "").trim(); if (!t) { toast("Falta el texto de la historia"); return; }
+      input.mode = "auto"; input.storyPrompt = t;
+    } else {
+      const ts = [0, 1, 2].map(k => ($(`#msShot${k}`).value || "").trim()); if (ts.some(t => !t)) { toast("Falta el texto de alguna toma"); return; }
+      input.mode = "custom"; input.shots = ts.map(prompt => ({ prompt }));
+    }
+    if ($("#msAnchor").checked && rwImgs[0] && rwImgs[0].url) input.firstSceneImage = { url: rwImgs[0].url };
+    msRunning = true; msStop = false; $("#btnMsG").disabled = true; $("#btnMsStop").hidden = false;
+    const status = (t, extra) => { out.innerHTML = `<div class="loading"><div class="spin"></div><span>${esc(t)}</span></div>${extra ? `<p class="imgcost">${esc(extra)}</p>` : ""}`; };
+    let spent = "";
+    try {
+      status("Enviando el guion a Runway…");
+      const before = await msCredits();
+      const g = await mcp.callTool(RW, "generate_multishot_video", input, { cache: false });
+      const id = rwTaskId(g); if (!id) throw { message: "Runway no devolvió el número de tarea. Respuesta: " + JSON.stringify(g.payload != null ? g.payload : g.content).slice(0, 200) };
+      const left = g.payload && typeof g.payload.creditsRemaining === "number" ? g.payload.creditsRemaining : await msCredits();
+      if (before != null && left != null) spent = `Créditos restantes: ${left} · costo medido del video: ≈ ${before - left} créditos`; else if (left != null) spent = `Créditos restantes: ${left}`;
+      status("Runway está generando el video multi-shot… suele tardar de 5 a 10 minutos.", spent);
+      const r = await msPoll(id, (pct, secs) => status(`Generando el video multi-shot… ${pct != null ? pct + "% · " : ""}${Math.floor(secs / 60)} min ${secs % 60} s`, spent));
+      out.innerHTML = `<div class="rvline"><b>Video multi-shot</b> · listo · <a class="ghost lnk" href="${esc(r.url)}" target="_blank" rel="noopener">↗ Abrir video</a></div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}<p class="imgcost">El enlace es temporal (vence en unos días). Descarga el video desde esa pestaña para conservarlo.</p>`;
+    } catch (e) {
+      out.innerHTML = `<div class="error">${esc(e && e.code === "cancelled" ? "Dejaste de esperar. El video puede seguir generándose en Runway y gastar créditos." : rwErr(e))}</div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}`;
+    } finally { msRunning = false; $("#btnMsG").disabled = false; $("#btnMsStop").hidden = true; }
+  }
+  function clearViz() { rwStop = true; rvStop = true; msStop = true; stopViz(); viz.hidden = true; viz.innerHTML = ""; const m = $("#mshot"); if (m) { m.hidden = true; m.innerHTML = ""; } }
 
   $("#btnGenerate").addEventListener("click", generate);
 
