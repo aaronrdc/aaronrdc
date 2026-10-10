@@ -1440,7 +1440,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       </div>
       ${prompts.length ? `<h3 class="ph">Imágenes con Runway</h3>
       <p class="help">Imágenes hiperrealistas creadas con tu cuenta de Runway a partir de los prompts de abajo. Se generan con el conector de Runway ML y usan tus créditos.</p>
-      <div class="rwbar"><label>Modelo <select id="rwModel"><option value="gen-4-image-turbo">Gen-4 Image Turbo</option><option value="seedream-5">Seedream 5.0-lite (1K)</option><option value="nano-banana-pro" selected>Nano Banana Pro (1K)</option><option value="gpt-image-2">GPT Image 2 (calidad media)</option></select></label><span class="imgcost" id="rwCost"></span><span class="imgcost" id="rwCredits"></span></div>
+      <div class="rwbar"><label>Modelo <select id="rwModel"><option value="seedream-5">Seedream 5.0 Lite · ≈ 4 créditos</option><option value="nano-banana-2" selected>Nano Banana 2 (1K) · ≈ 7 créditos</option><option value="gen-4">Gen-4 Image (720p) · ≈ 5 a 8 créditos</option><option value="gpt-image-2">GPT Image 2 · costo por confirmar</option></select></label><span class="imgcost" id="rwCost"></span><span class="imgcost" id="rwCredits"></span></div>
       <div class="imgs" id="rwImgs">${prompts.map((p, k) => `<figure class="imgcard" data-k="${k}"><div class="imgframe" id="rwf${k}"></div><figcaption><b>${k + 1}.</b> ${esc(p.title)}<span class="rwinfo" id="rwi${k}"></span></figcaption></figure>`).join("")}</div>
       <div class="meta"><button class="ghost" id="btnRw">🖼 Generar las 3 imágenes con Runway</button></div>` : ""}
       ${prompts.length ? `<h3 class="ph">Prompts para generar imágenes</h3>
@@ -1509,14 +1509,15 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
   }
   /* Parámetros por modelo: se prueban en orden; si Runway rechaza el formato o el tamaño, se pasa al siguiente. */
   const RW_MODELS = {
-    "gen-4-image-turbo": { ratios: ["1280:720", "16:9", null], sizes: [null] },
-    "seedream-5": { ratios: ["16:9", null], sizes: ["1K", null] },
-    "nano-banana-pro": { ratios: ["16:9", null], sizes: ["1K"] },
-    "gpt-image-2": { ratios: ["16:9", "3:2", null], sizes: [null] },
+    "seedream-5": { ratios: ["16:9", null], sizes: [null], est: "≈ 4" },
+    "nano-banana-2": { ratios: ["16:9", null], sizes: ["1K"], est: "≈ 7" },
+    "gen-4": { ratios: ["1280:720", "16:9", null], sizes: [null], est: "≈ 5 a 8" },
+    "gpt-image-2": { ratios: ["16:9", "3:2", null], sizes: [null], est: null },
   };
   let rwCosts = {};
   try { rwCosts = JSON.parse(localStorage.getItem("rwCosts") || "{}"); } catch {}
-  const rwCostText = (m) => rwCosts[m] ? `Costo medido: ≈ ${rwCosts[m]} créditos por imagen (≈ ${rwCosts[m] * 3} por las 3).` : "Costo por medir: después de generar verás cuántos créditos gastó este modelo.";
+  const rwCostText = (m) => rwCosts[m] ? `Costo medido en tu cuenta: ≈ ${rwCosts[m]} créditos por imagen (≈ ${rwCosts[m] * 3} por las 3).`
+    : (RW_MODELS[m] && RW_MODELS[m].est ? `Costo estimado: ${RW_MODELS[m].est} créditos por imagen, según tablas públicas sin confirmar en tu cuenta. Después de generar verás el costo real.` : "Costo por confirmar: después de generar verás cuántos créditos gastó este modelo.");
   const rwTaskId = (g) => {
     const gp = g && g.payload;
     return (gp && typeof gp === "object" && (gp.taskId || rwFind(gp, ["taskId", "id"]))) || ((JSON.stringify((g && g.content) || gp) || "").match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/) || [])[0];
