@@ -331,6 +331,21 @@
 
   .pcard .pbtns { display: flex; flex-wrap: wrap; gap: 8px; }
   .pcard .lang { margin-left: auto; font-style: normal; font-size: .68rem; letter-spacing: .14em; font-weight: 700; color: var(--muted); border: 1px solid color-mix(in srgb, var(--muted) 50%, transparent); border-radius: 999px; padding: 2px 8px; }
+
+  /* ---------- Imágenes de Runway ---------- */
+  .rwbar { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .rwbar label { display: flex; gap: 8px; align-items: center; font-size: .85rem; color: var(--muted); }
+  .rwbar select { background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink); border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); border-radius: 10px; padding: 8px 10px; font: inherit; }
+  .imgs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  @media (max-width: 900px) { .imgs { grid-template-columns: minmax(0, 1fr); } }
+  .imgcard { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .imgframe { position: relative; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; display: grid; place-items: center; text-align: center; padding: 12px; font-size: .88rem; color: var(--muted); background: color-mix(in srgb, var(--ink) 7%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); }
+  .imgframe.ok { padding: 0; }
+  .imgframe img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .imgframe .rwopen { position: absolute; right: 8px; bottom: 8px; }
+  .imgframe.link .rwopen { position: static; }
+  .imgcard figcaption { font-size: .9rem; }
+  .imgcost { font-size: .85rem; color: var(--muted); }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <style id="css-light" media="not all">
@@ -688,6 +703,21 @@
 
   .pcard .pbtns { display: flex; flex-wrap: wrap; gap: 8px; }
   .pcard .lang { margin-left: auto; font-style: normal; font-size: .68rem; letter-spacing: .14em; font-weight: 700; color: var(--muted); border: 1px solid color-mix(in srgb, var(--muted) 50%, transparent); border-radius: 999px; padding: 2px 8px; }
+
+  /* ---------- Imágenes de Runway ---------- */
+  .rwbar { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .rwbar label { display: flex; gap: 8px; align-items: center; font-size: .85rem; color: var(--muted); }
+  .rwbar select { background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink); border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); border-radius: 10px; padding: 8px 10px; font: inherit; }
+  .imgs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  @media (max-width: 900px) { .imgs { grid-template-columns: minmax(0, 1fr); } }
+  .imgcard { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .imgframe { position: relative; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; display: grid; place-items: center; text-align: center; padding: 12px; font-size: .88rem; color: var(--muted); background: color-mix(in srgb, var(--ink) 7%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); }
+  .imgframe.ok { padding: 0; }
+  .imgframe img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .imgframe .rwopen { position: absolute; right: 8px; bottom: 8px; }
+  .imgframe.link .rwopen { position: static; }
+  .imgcard figcaption { font-size: .9rem; }
+  .imgcost { font-size: .85rem; color: var(--muted); }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <script>
@@ -1309,10 +1339,10 @@ REGLAS DE FIDELIDAD
 8. caption: una frase en español tomada de la narración o muy cercana, de máximo 110 caracteres.
 
 PROMPTS DE IMAGEN
-Escribe 3 prompts, uno por escena, listos para pegar en Midjourney, DALL·E o Gemini. Cada uno va en dos idiomas: "prompt" en español natural y claro (lo leerá el público de una feria del libro, todo hispanohablante) y "prompt_en" en inglés (la misma descripción, para el generador de imágenes). Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo artístico claro y el mismo en los 3 prompts. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
+Escribe 3 prompts, uno por escena, listos para pegar en Midjourney, DALL·E o Gemini. Cada uno va en dos idiomas: "prompt" en español natural y claro (lo leerá el público de una feria del libro, todo hispanohablante) y "prompt_en" en inglés (la misma descripción, para el generador de imágenes). Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo fotográfico hiperrealista (fotografía cinematográfica de alta definición, con texturas, piel, materiales y luz realistas), el mismo en los 3 prompts. Mantén los mismos personajes (edad, rasgos y ropa) y el mismo lugar en las 3 imágenes, porque se usarán como imágenes de referencia para crear el video. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
 
 PROMPT DE VIDEO
-Escribe 1 prompt para Google Veo y Runway, en dos idiomas: "prompt" en español natural y claro (lo leerá el público) y "prompt_en" en inglés (la misma descripción, para el generador de video): un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo visual de los prompts de imagen. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
+Escribe 1 prompt para Google Veo y Runway, en dos idiomas: "prompt" en español natural y claro (lo leerá el público) y "prompt_en" en inglés (la misma descripción, para el generador de video): un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo hiperrealista y los mismos personajes y lugar de las imágenes de referencia. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
 
 El JSON debe ser válido: dentro de los textos no uses comillas dobles (usa « » o comillas simples), no pongas saltos de línea dentro de los textos y no dejes comas al final de una lista.
 
@@ -1406,6 +1436,11 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
         <button class="ghost" id="playS">⏸ Pausar</button>
         <button class="ghost" id="fsS">⛶ Pantalla completa</button>
       </div>
+      ${prompts.length ? `<h3 class="ph">Imágenes con Runway</h3>
+      <p class="help">Imágenes hiperrealistas creadas con tu cuenta de Runway a partir de los prompts de abajo. Se generan con el conector de Runway ML y usan tus créditos.</p>
+      <div class="rwbar"><label>Modelo <select id="rwModel"><option value="nano-banana-pro">Nano Banana Pro</option><option value="gpt-image-2">GPT Image 2</option></select></label><span class="imgcost" id="rwCost"></span></div>
+      <div class="imgs" id="rwImgs">${prompts.map((p, k) => `<figure class="imgcard" data-k="${k}"><div class="imgframe" id="rwf${k}"></div><figcaption><b>${k + 1}.</b> ${esc(p.title)}</figcaption></figure>`).join("")}</div>
+      <div class="meta"><button class="ghost" id="btnRw">🖼 Generar las 3 imágenes con Runway</button></div>` : ""}
       ${prompts.length ? `<h3 class="ph">Prompts para generar imágenes</h3>
       <p class="help">Pégalos en tu generador de imágenes favorito (Midjourney, DALL·E, Gemini…). Los tres comparten el mismo estilo. Aquí se ven en español; con «Ver en inglés» tienes la versión que suelen entender mejor los generadores.</p>
       <div class="prompts">${prompts.map((p, k) => `<article class="pcard" data-k="${k}"><div class="ph2"><span>${k + 1}</span><h4>${esc(p.title)}</h4><em class="lang">ES</em></div><p class="ptxt">${esc(p.prompt)}</p><div class="pbtns"><button class="ghost cpP">⧉ Copiar</button>${p.en ? `<button class="ghost tgl">Ver en inglés</button>` : ""}</div></article>`).join("")}</div>` : ""}
@@ -1430,8 +1465,81 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     if (video) wireCard($("#vcard"), video, "Prompt de video copiado");
     $("#cpAllP").onclick = async () => toast((await copy(prompts.map((p, k) => `IMAGEN ${k + 1}: ${p.title}\nEspañol: ${p.prompt}` + (p.en ? `\nEnglish: ${p.en}` : "")).concat(video ? [`VIDEO: ${video.title}\nEspañol: ${video.prompt}` + (video.en ? `\nEnglish: ${video.en}` : "")] : []).join("\n\n"))) ? "Prompts copiados" : "No se pudo copiar");
     $("#regenViz").onclick = visualize;
+    if (prompts.length) initRunway(prompts);
   }
-  function clearViz() { stopViz(); viz.hidden = true; viz.innerHTML = ""; }
+  /* ---- Imágenes con el conector de Runway ML ---- */
+  const RW = "Runway ML";
+  let rwMcp = null, rwImgs = [], rwPrompts = [], rwStop = false;
+  const RW_CREDITS = { "nano-banana-pro": 20, "gpt-image-2": null };
+  const rwErr = (e) => {
+    const c = e && e.code, m = (e && e.message) || "";
+    const map = {
+      server_not_connected: "No tienes conectado Runway ML. Agrégalo en claude.ai, en Ajustes → Conectores, y recarga la página.",
+      needs_reauth: "La conexión con Runway ML venció. Reconéctala en claude.ai, en Ajustes → Conectores.",
+      selection_required: "Tienes más de un conector llamado Runway ML. Elige uno cuando la página te lo pida.",
+      not_in_manifest: "No diste permiso para usar Runway ML en esta página. Recarga y acepta el permiso.",
+      blocked_by_policy: "Tu organización bloquea esta herramienta de Runway ML.",
+      approval_required: "Runway ML necesita tu aprobación. Pulsa el botón de nuevo y acepta.",
+      cancelled: "Se canceló la generación.",
+    };
+    return map[c] || (m ? m : "No se pudo completar la generación con Runway.");
+  };
+  function rwFind(o, keys) {
+    if (!o || typeof o !== "object") return null;
+    for (const k of keys) if (typeof o[k] === "string" && o[k]) return o[k];
+    for (const v of Object.values(o)) { const r = rwFind(v, keys); if (r) return r; }
+    return null;
+  }
+  function rwPaint(k) {
+    const st = rwImgs[k], fr = $(`#rwf${k}`); if (!fr) return;
+    fr.classList.toggle("ok", st.status === "ok");
+    if (st.status === "ok") {
+      fr.innerHTML = `<img alt="Imagen ${k + 1} de Runway" src="${esc(st.url)}"><a class="ghost lnk rwopen" href="${esc(st.url)}" target="_blank" rel="noopener">↗ Abrir imagen</a>`;
+      const im = fr.querySelector("img");
+      im.onerror = () => { im.remove(); fr.classList.remove("ok"); fr.classList.add("link"); };
+    } else if (st.status === "loading") {
+      fr.classList.remove("link");
+      fr.innerHTML = `<div class="loading" style="padding:0"><div class="spin"></div><span>${st.pct != null ? "Runway está creando la imagen… " + st.pct + "%" : "Enviando a Runway…"}</span></div>`;
+    } else if (st.status === "error") {
+      fr.innerHTML = `<div class="error" style="width:100%">${esc(st.error || "No se pudo generar la imagen.")}</div>`;
+    } else fr.textContent = rwMcp ? "Pulsa «Generar las 3 imágenes con Runway»." : "No disponible: esta función necesita el conector Runway ML.";
+  }
+  async function rwGen(k) {
+    const st = rwImgs[k], p = rwPrompts[k], model = $("#rwModel").value;
+    st.status = "loading"; st.pct = null; st.error = ""; rwPaint(k);
+    try {
+      const text = "Photorealistic, hyperrealistic cinematic photograph, 16:9 widescreen. " + (p.en || p.prompt);
+      const g = await rwMcp.callTool(RW, "generate_image", { promptText: text, model, ratio: "16:9", imageSize: "1K", count: 1, rationale: "Imagen de referencia hiperrealista para una escena de futuro, pedida desde la página del generador de escenarios." }, { cache: false });
+      const gp = g.payload;
+      const id = (gp && typeof gp === "object" && (gp.taskId || rwFind(gp, ["taskId", "id"]))) || ((JSON.stringify(g.content || gp) || "").match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/) || [])[0];
+      if (!id) throw { message: "Runway no devolvió el número de tarea. Intenta de nuevo." };
+      if (gp && typeof gp.creditsRemaining === "number") { const c = $("#rwCost"); if (c) c.textContent = `Créditos restantes en Runway: ${gp.creditsRemaining}`; }
+      const t0 = Date.now();
+      for (;;) {
+        if (rwStop) throw { code: "cancelled" };
+        await new Promise(r => setTimeout(r, 5000));
+        const r = await rwMcp.callTool(RW, "get_task", { id }, { cache: false });
+        const d = r.payload && typeof r.payload === "object" ? r.payload : {};
+        if (d.kind === "image" && d.url) { st.url = d.url; st.status = "ok"; break; }
+        const status = String(d.status || "").toUpperCase();
+        if (["FAILED", "CANCELED", "CANCELLED", "ERROR"].includes(status) || /fail|error/i.test(String(d.kind || ""))) throw { message: d.failure || d.error || d.message || "Runway no pudo generar la imagen (" + status + ")." };
+        if (typeof d.progressPercent === "number") { st.pct = Math.round(d.progressPercent); rwPaint(k); }
+        if (Date.now() - t0 > 6 * 60 * 1000) throw { message: "Runway tardó demasiado. Revisa la imagen en tu cuenta de Runway." };
+      }
+    } catch (e) { st.status = e && e.code === "cancelled" ? "idle" : "error"; st.error = rwErr(e); }
+    rwPaint(k);
+  }
+  async function initRunway(prompts) {
+    rwPrompts = prompts; rwStop = false; rwImgs = prompts.map(() => ({ status: "idle" }));
+    const btn = $("#btnRw"), cost = $("#rwCost");
+    const upd = () => { const c = RW_CREDITS[$("#rwModel").value]; cost.textContent = c ? `Costo medido en una prueba: ≈ ${c} créditos por imagen (≈ ${c * 3} por las 3).` : "Costo en créditos por confirmar para este modelo."; };
+    $("#rwModel").onchange = upd; upd();
+    try { rwMcp = await window.claude?.use("mcp"); } catch { rwMcp = null; }
+    rwImgs.forEach((_, k) => rwPaint(k));
+    if (!rwMcp) { btn.disabled = true; return; }
+    btn.onclick = async () => { btn.disabled = true; rwStop = false; await Promise.all(rwImgs.map((_, k) => rwGen(k))); btn.disabled = false; };
+  }
+  function clearViz() { rwStop = true; stopViz(); viz.hidden = true; viz.innerHTML = ""; }
 
   $("#btnGenerate").addEventListener("click", generate);
 
