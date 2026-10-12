@@ -2,8 +2,9 @@
 
 Dinámica de cartas para el Centro de Estudios del Futuro. Se eligen 5 cartas
 (tipo de historia, horizonte, temática, evento y a quién o dónde le sucede), se
-agregan ideas y Claude escribe una narrativa sencilla con la estructura
-implícita de las 4C (contexto, conflicto, clímax y cierre). Después se puede
+agregan ideas y Claude escribe una síntesis sencilla en 4 párrafos
+(contexto, conflicto, solución y cierre, sin títulos) que resalta qué es
+diferente a la actualidad. En la versión local el texto sigue siendo más largo. Después se puede
 visualizar con escenas animadas y generar prompts de imagen y de video.
 
 ## Dos versiones
