@@ -821,8 +821,7 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
 
   <section class="panel" id="story" aria-live="polite"></section>
   <section class="panel" id="visual" hidden></section>
-  <section class="panel" id="mshot" hidden></section>
-  <section class="panel" id="trailer" hidden></section>
+    <section class="panel" id="trailer" hidden></section>
 </div>
 
 <div class="fab-wrap">
@@ -1006,7 +1005,7 @@ ${notes ? notes : "(No añadió comentarios; usa tu criterio dentro de los pará
 Premisa: imagina que en el año ${s[1].text}, en el ámbito de «${s[2].text}», ya es realidad que «${s[3].text}», y que esto afecta sobre todo a «${s[4].text}». Escribe una síntesis creativa e imaginativa de ese futuro: que quede clara la idea de cómo se vería y cómo se vive, y cómo se relacionan y viven ahí todos los elementos de las cartas y las ideas de la persona participante.
 
 Vas a escribir DOS versiones de la misma historia (mismos personajes, mismo mundo y mismos hechos), para públicos distintos. No pongas títulos ni nombres de sección dentro de los párrafos: la estructura queda implícita.
-- VERSIÓN BREVE: exactamente 2 párrafos (de 45 a 60 palabras cada uno). El primero resume el contexto y el conflicto; el segundo, el clímax o solución y el cierre.
+- VERSIÓN BREVE: exactamente 2 párrafos (de 90 a 110 palabras cada uno; 180 a 220 en total). El primero resume el contexto y el conflicto; el segundo, el clímax o solución y el cierre.
 - VERSIÓN EXTENDIDA: exactamente 4 párrafos, en este orden:
 1. Contexto: pinta el mundo de ese año con una imagen concreta y un personaje o grupo que sirva de hilo conductor; deja ver qué cambió para que esto fuera posible.
 2. Conflicto: la tensión que aparece cuando esto se vuelve real (un dilema, un efecto no previsto, una desigualdad, una dependencia o una resistencia ligada a lo elegido).
@@ -1014,7 +1013,7 @@ Vas a escribir DOS versiones de la misma historia (mismos personajes, mismo mund
 4. Cierre: la nueva normalidad que deja ese futuro y una consecuencia duradera o una pregunta abierta que invite a pensar.
 
 Requisitos:
-- Extensión: la versión breve, de 90 a 120 palabras; la extendida, de 250 a 300 palabras (cada párrafo de 3 a 4 oraciones).
+- Extensión: la versión breve, de 180 a 220 palabras; la extendida, de 300 a 400 palabras (cada párrafo de unas 75 a 100 palabras).
 - Lo diferente a la actualidad: en las dos versiones, dentro de los mismos párrafos y sin crear una sección aparte, haz notar con claridad qué es distinto de hoy. Usa contrastes naturales como «hoy… pero en ese futuro…» o «antes se… ahora ya no». Que cada párrafo de la versión extendida y los dos de la breve dejen ver al menos un cambio respecto al presente.
 - Sé creativo e imaginativo: incluye un detalle sorprendente de la vida diaria y escenas con imágenes concretas, evitando clichés de ciencia ficción.
 - Usa lo que aportó la persona participante (comentarios, ideas y preguntas de la consulta) como hechos o rasgos de ese mundo, integrados en la historia.
@@ -1077,8 +1076,7 @@ Requisitos:
       (final ? `<div class="meta">
         <button class="ghost" id="cpStory">⧉ Copiar narrativa</button>
         <button class="ghost" id="regen">↻ Generar otra versión</button>
-        <button class="ghost viz" id="btnViz">🎞 Visualizar escena</button>
-        <button class="ghost viz" id="btnMs">🎬 Video multi-shot (15 s)</button>
+        <button class="ghost viz" id="btnViz">🖼 Imágenes de la escena</button>
         <button class="ghost viz" id="btnTr">🎞 Tráiler cinematográfico (prueba)</button>
       </div>` : "");
     if (final) {
@@ -1094,7 +1092,6 @@ Requisitos:
       $("#regen").onclick = generate;
       lastStory = { title, body: (long.length ? long : short).join("\n\n") };   // los videos y escenas usan la versión más completa
       $("#btnViz").onclick = visualize;
-      $("#btnMs").onclick = openMs;
       $("#btnTr").onclick = openTr;
     }
   }
@@ -1127,277 +1124,19 @@ Requisitos:
       generating = false; $("#btnGenerate").textContent = "✦ Generar narrativa"; refresh();
     }
   }
-  /* ============ Escena visual: motor de siluetas animadas ============ */
-  const VW = 1600, VH = 900, HZ = 600, LAND = 655;
-  const BASEY = { far: 676, mid: 744, near: 826 };
-  const DSC = { far: .62, mid: 1, near: 1.4 };
-  const LD = { far: { base: 612, hmax: 270, t: .22 }, mid: { base: 646, hmax: 170, t: .42 }, near: { base: 670, hmax: 95, t: .58 } };
-  const TIMES = {
-    dawn:  { top: "#2b2f6b", bottom: "#f4a77a", glow: "#ffd9a0", ink: "#1a1633", win: .45 },
-    day:   { top: "#3f86d9", bottom: "#bfe3ff", glow: "#fff4cf", ink: "#1c2a44", win: .15 },
-    dusk:  { top: "#3b2a6d", bottom: "#ff7a59", glow: "#ffc27a", ink: "#1a1030", win: .85 },
-    night: { top: "#070b1f", bottom: "#1c2a5e", glow: "#8fb8ff", ink: "#04060f", win: 1 },
-  };
-  const SKY_T = ["sun", "moon", "stars", "planet_mars", "planet_ring", "earth", "clouds", "aurora", "comet", "nebula"];
-  const LAYER_T = ["skyline", "mountains", "dunes", "hills", "ocean", "forest", "factory"];
-  const ACTOR_T = ["person", "child", "children", "elder", "crowd", "robot", "mammoth", "dodo", "whale", "deer", "bird_flock", "drone",
-                   "printer3d", "floating_city", "dome_colony", "rover", "rocket", "house", "lighthouse", "wind_turbine", "tree", "boat", "book"];
-  const WEATHER = ["none", "rain", "snow", "dust", "fog", "fireflies"];
-  const ANIMS = ["none", "float", "walk", "sway", "pulse", "fly"];
-  const DEPTHS = ["far", "mid", "near"];
-  const FLYERS = { bird_flock: 1, drone: 1, rocket: 1 };
-  const hexRe = /^#[0-9a-f]{6}$/i;
-
-  const clampN = (v, a, b, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(b, Math.max(a, v)) : d; };
-  const f1 = (n) => Math.round(n * 10) / 10;
-  const mix = (a, b, t) => {
-    const p = (h) => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
-    const A = p(a), B = p(b);
-    return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, "0")).join("");
-  };
-  const mulberry = (seed) => { let t = seed >>> 0; return () => { t += 0x6D2B79F5; let r = Math.imul(t ^ t >>> 15, 1 | t); r ^= r + Math.imul(r ^ r >>> 7, 61 | r); return ((r ^ r >>> 14) >>> 0) / 4294967296; }; };
-  const strSeed = (s) => [...s].reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619), 2166136261) >>> 0;
   const arr = (v) => Array.isArray(v) ? v : [];
-
-  /* ---- Siluetas (origen: centro-base; color = currentColor; detalles luminosos = var(--glow)) ---- */
-  const G = "var(--glow)";
-  const A = {};
-  A.person = () => `<circle cy="-92" r="8"/><path d="M-12-83Q0-88 12-83L14-48H-14Z"/><path d="M-12-82L-19-52L-14-50L-8-70ZM12-82L19-52L14-50L8-70Z"/><path d="M-13-50H-1L-3 0H-10ZM1-50H13L10 0H3Z"/>`;
-  A.child = () => `<circle cy="-62" r="9"/><path d="M-8-53Q0-57 8-53L9-34H-9Z"/><path d="M-8-52L-14-34L-10-32L-5-44ZM8-52L14-34L10-32L5-44Z"/><path d="M-8-35H-1L-2 0H-7ZM1-35H8L7 0H2Z"/>`;
-  A.children = () => `<g transform="translate(-20 0)">${A.child()}</g><g transform="translate(20 0) scale(.92)">${A.child()}</g><path d="M-12-40Q0-30 12-40" fill="none" stroke="currentColor" stroke-width="3"/>`;
-  A.elder = () => `<circle cx="5" cy="-88" r="8"/><path d="M-9-80Q5-87 14-77L11-46H-9Z"/><path d="M-9-78L-16-52L-11-50L-5-66Z"/><path d="M13-76L21-58L25-60L17-72Z"/><path d="M-10-48H-1L-3 0H-9ZM1-48H11L9 0H3Z"/><path d="M23-62L27 0" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>`;
-  A.crowd = () => [[-70, A.person(), .92], [-38, A.child(), 1], [0, A.person(), 1.05], [38, A.elder(), .95], [68, A.child(), .9]].map(([x, s, k]) => `<g transform="translate(${x} 0) scale(${k})">${s}</g>`).join("");
-  A.robot = () => `<path d="M0-122V-112" stroke="currentColor" stroke-width="3"/><circle cy="-124" r="3.5"/><rect x="-11" y="-112" width="22" height="18" rx="5"/><rect x="-7" y="-106" width="14" height="4" rx="2" fill="${G}"/><rect x="-4" y="-94" width="8" height="5"/><rect x="-16" y="-89" width="32" height="42" rx="6"/><circle cy="-70" r="4" fill="${G}"/><rect x="-24" y="-88" width="8" height="34" rx="4"/><rect x="16" y="-88" width="8" height="34" rx="4"/><rect x="-12" y="-47" width="9" height="47" rx="3"/><rect x="3" y="-47" width="9" height="47" rx="3"/>`;
-  A.mammoth = () => `<path d="M-98-50C-100-118-48-142 6-138C58-134 98-112 102-72L102-46H-98Z"/><ellipse cx="-86" cy="-92" rx="34" ry="42"/><path d="M-104-84Q-132-62-124-30Q-121-12-106-12" fill="none" stroke="currentColor" stroke-width="15" stroke-linecap="round"/><path d="M-100-70Q-138-66-146-38Q-132-52-104-58Z" fill="#d8d0bc" fill-opacity=".85"/><rect x="-84" y="-52" width="22" height="52" rx="6"/><rect x="-54" y="-52" width="22" height="52" rx="6"/><rect x="50" y="-52" width="22" height="52" rx="6"/><rect x="78" y="-52" width="22" height="52" rx="6"/><path d="M-98-50L-90-34L-82-50L-74-30L-66-50L-58-28L-50-50L-42-30L-34-50L-26-32L-18-50L-10-30L-2-50L6-32L14-50L22-30L30-50L38-32L46-50L54-30L62-50L70-32L78-50L86-30L94-50Z"/><path d="M100-100Q116-90 112-60L104-70Z"/><circle cx="-96" cy="-98" r="2.5" fill="${G}"/>`;
-  A.dodo = () => `<ellipse cx="4" cy="-34" rx="27" ry="22" transform="rotate(-12 4 -34)"/><path d="M26-44Q46-62 40-30Q34-38 28-36Z"/><path d="M-26-52Q-18-40-8-36L2-52Z"/><circle cx="-22" cy="-58" r="11"/><path d="M-30-62Q-58-60-54-42Q-46-50-31-50Z"/><path d="M-6-14L-8-2M6-14L8-2M-13 0H-4M4 0H13" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="-25" cy="-60" r="1.8" fill="${G}"/>`;
-  A.whale = () => `<path d="M-200 4C-200-40-140-76-60-74C20-72 100-50 170-34L212-56C224-64 236-82 232-100C248-92 262-92 276-100C274-76 254-56 228-40C216-28 196-16 168-8C100 8-60 16-140 12C-180 10-200 8-200 4Z"/><path d="M-170-14Q-100-2-20-6" fill="none" stroke="${G}" stroke-opacity=".25" stroke-width="3"/><circle cx="-158" cy="-34" r="3" fill="${G}"/><g class="spout"><path d="M-110-76Q-114-110-126-124M-110-76Q-104-112-92-124" stroke="${G}" stroke-width="4" fill="none" stroke-linecap="round" opacity=".6"/></g>`;
-  A.deer = () => `<ellipse cx="4" cy="-64" rx="34" ry="15"/><path d="M-26-70Q-40-90-42-104" stroke="currentColor" stroke-width="9" fill="none" stroke-linecap="round"/><ellipse cx="-46" cy="-108" rx="11" ry="6" transform="rotate(-25 -46 -108)"/><path d="M-44-114L-52-140M-48-127L-62-131M-44-114L-34-138M-38-127L-26-132" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M-22-52L-24 0M-10-52L-8 0M22-52L24 0M32-54L36 0" stroke="currentColor" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M36-70L46-78L40-62Z"/>`;
-  A.bird_flock = () => [[0, 0], [-30, 14], [30, 14], [-60, 30], [60, 30], [-92, 46], [92, 46]].map(([x, y], i) =>
-    `<g transform="translate(${x} ${y})"><path class="flap" style="animation-delay:-${(i * .17).toFixed(2)}s" d="M-10 0Q-5-9 0 0Q5-9 10 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></g>`).join("");
-  A.drone = () => `<ellipse rx="16" ry="6"/><path d="M-14-2L-32-12M14-2L32-12" stroke="currentColor" stroke-width="3" fill="none"/><ellipse class="rot" cx="-32" cy="-14" rx="13" ry="2"/><ellipse class="rot" cx="32" cy="-14" rx="13" ry="2"/><circle cy="6" r="2.5" fill="${G}"/>`;
-  A.printer3d = () => `<rect x="-38" y="-14" width="76" height="14" rx="3"/><rect x="-38" y="-104" width="6" height="92"/><rect x="32" y="-104" width="6" height="92"/><rect x="-38" y="-104" width="76" height="8"/><rect x="-10" y="-96" width="20" height="10" rx="2"/><path d="M-4-86H4L0-74Z"/><ellipse cy="-16" rx="22" ry="3" fill="${G}" fill-opacity=".5"/><rect x="-14" y="-24" width="28" height="5" fill="${G}"/><rect x="-12" y="-29" width="24" height="5" fill="${G}"/><rect x="-9" y="-34" width="18" height="5" fill="${G}"/><rect x="-5" y="-39" width="10" height="5" fill="${G}"/><path d="M0-74V-42" stroke="${G}" stroke-width="1.5" opacity=".7"/>`;
-  A.floating_city = (rnd) => {
-    let t = "", w = "", x = -340;
-    while (x < 320) {
-      const tw = 22 + rnd() * 26, th = 44 + rnd() * 120;
-      t += `<path d="M${f1(x)} -14V${f1(-14 - th)}Q${f1(x + tw / 2)} ${f1(-28 - th)} ${f1(x + tw)} ${f1(-14 - th)}V-14Z"/>`;
-      for (let k = 0; k < 4; k++) if (rnd() < .8) w += `<rect class="win" x="${f1(x + 4 + rnd() * (tw - 10))}" y="${f1(-24 - rnd() * (th - 14))}" width="4" height="6" fill="${G}"/>`;
-      x += tw + 6 + rnd() * 14;
-    }
-    const dome = (cx, r) => `<path d="M${cx - r} -14A${r} ${r} 0 0 1 ${cx + r} -14Z" fill="${G}" fill-opacity=".22" stroke="currentColor" stroke-width="4"/>`;
-    const turb = (cx) => `<path d="M${cx} -14V-120" stroke="currentColor" stroke-width="4"/><g><animateTransform attributeName="transform" type="rotate" from="0 ${cx} -120" to="360 ${cx} -120" dur="7s" repeatCount="indefinite"/><path d="M${cx} -120V-170M${cx} -120L${cx - 43} -95M${cx} -120L${cx + 43} -95" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></g>`;
-    return `<path d="M-384 -2H384L344 38Q0 74-344 38Z"/><rect x="-372" y="-16" width="744" height="16" rx="4"/>${t}<path d="M-18-14L-11-250L0-304L11-250L18-14Z"/><ellipse cy="-176" rx="46" ry="6"/><ellipse cy="-120" rx="38" ry="5"/><circle cy="-306" r="3.5" fill="${G}"/>${dome(-210, 54)}${dome(236, 42)}${turb(-300)}${turb(330)}${w}<path class="wake" d="M-430 6H-320M326 6H436" stroke="${G}" stroke-opacity=".35" stroke-width="3"/>`;
-  };
-  A.dome_colony = () => {
-    const dome = (x, r) => `<path d="M${x - r} 0A${r} ${r} 0 0 1 ${x + r} 0Z" fill="${G}" fill-opacity=".2" stroke="currentColor" stroke-width="5"/><path d="M${x} 0V${-r}M${x - r * .62} 0Q${x - r * .55} ${-r * .75} ${x} ${-r}M${x + r * .62} 0Q${x + r * .55} ${-r * .75} ${x} ${-r}" stroke="currentColor" stroke-width="2" fill="none"/><rect x="${x - r * .35}" y="${-r * .32}" width="${r * .22}" height="${r * .32}"/><rect x="${x + r * .05}" y="${-r * .48}" width="${r * .2}" height="${r * .48}"/><circle cx="${x - r * .55}" cy="${-r * .12}" r="${r * .12}"/>`;
-    return `${dome(-170, 96)}${dome(0, 62)}${dome(130, 46)}<rect x="-80" y="-16" width="52" height="10" rx="3"/><rect x="40" y="-14" width="48" height="9" rx="3"/><path d="M230 0V-140" stroke="currentColor" stroke-width="4"/><circle class="blink" cx="230" cy="-143" r="4.5" fill="#ff5a5a"/><path d="M-12 0M270 0L300 -28H344L314 0Z"/><path d="M322 0L350 -26H394L366 0Z"/>`;
-  };
-  A.rover = () => `<rect x="-34" y="-34" width="68" height="16" rx="4"/><circle cx="-26" cy="-8" r="9"/><circle cx="0" cy="-8" r="9"/><circle cx="26" cy="-8" r="9"/><path d="M-30-18L-24-8M30-18L24-8" stroke="currentColor" stroke-width="3"/><path d="M20-34V-58" stroke="currentColor" stroke-width="3"/><rect x="11" y="-66" width="18" height="9" rx="2"/><path d="M-32-34L-42-50H-6L-8-34Z"/><circle cx="20" cy="-62" r="2.2" fill="${G}"/>`;
-  A.rocket = () => `<path d="M0-300Q32-250 32-170V-60H-32V-170Q-32-250 0-300Z"/><path d="M-32-130L-62-44V-22H-32ZM32-130L62-44V-22H32Z"/><rect x="-14" y="-60" width="28" height="12"/><circle cy="-204" r="12" fill="${G}"/><path class="flame" d="M-18-48Q0 30 18-48Z" fill="${G}"/>`;
-  A.house = () => `<rect x="-50" y="-70" width="100" height="70"/><path d="M-64-70L0-122L64-70Z"/><rect x="28" y="-120" width="12" height="32"/><rect class="win" x="-32" y="-54" width="22" height="22" fill="${G}"/><rect class="win" x="12" y="-54" width="22" height="22" fill="${G}"/><rect x="-6" y="-40" width="14" height="40" fill="${G}" fill-opacity=".25"/>`;
-  A.lighthouse = () => `<path d="M-28 0L-17-190H17L28 0Z"/><rect x="-26" y="-206" width="52" height="16"/><rect x="-15" y="-240" width="30" height="34" fill="${G}"/><path d="M-22-240H22L0-268Z"/><path class="beam" d="M0-224L560-300V-148Z" fill="${G}" opacity=".25"/>`;
-  A.wind_turbine = () => `<path d="M-6 0L-2-188H2L6 0Z"/><rect x="-7" y="-196" width="18" height="10" rx="3"/><g><animateTransform attributeName="transform" type="rotate" from="0 0 -190" to="360 0 -190" dur="9s" repeatCount="indefinite"/><path d="M0-190L-4-262L0-270L4-262Z"/><path transform="rotate(120 0 -190)" d="M0-190L-4-262L0-270L4-262Z"/><path transform="rotate(240 0 -190)" d="M0-190L-4-262L0-270L4-262Z"/></g><circle cy="-190" r="5"/>`;
-  A.tree = () => `<rect x="-4" y="-52" width="8" height="52"/><circle cy="-92" r="34"/><circle cx="-24" cy="-68" r="24"/><circle cx="24" cy="-68" r="24"/><circle cy="-124" r="22"/>`;
-  A.boat = () => `<path d="M-92-10H92L72 12H-72Z"/><rect x="-2" y="-134" width="4" height="124"/><path d="M8-128L72-26H8Z"/><path d="M-8-112L-56-26H-8Z"/>`;
-  A.book = () => `<path d="M-48-6Q-24-20 0-8Q24-20 48-6V-32Q24-44 0-34Q-24-44-48-32Z"/><path d="M0-8V-34" stroke="${G}" stroke-width="2" opacity=".6"/>`;
-
-  /* ---- Cuerpos celestes ---- */
-  const SKYD = {
-    sun: (s, P, n) => `<circle r="${200 * s}" fill="url(#halo${n})"/><circle r="${46 * s}" fill="${P.glow}"/>`,
-    moon: (s, P, n) => `<circle r="${150 * s}" fill="url(#halo${n})" opacity=".6"/><circle r="${40 * s}" fill="#eceadf"/><circle cx="${-12 * s}" cy="${-8 * s}" r="${9 * s}" fill="#000" opacity=".08"/><circle cx="${14 * s}" cy="${10 * s}" r="${12 * s}" fill="#000" opacity=".08"/><circle cx="${6 * s}" cy="${-18 * s}" r="${5 * s}" fill="#000" opacity=".08"/>`,
-    planet_mars: (s) => `<circle r="${70 * s}" fill="url(#mars)"/><ellipse cx="${-20 * s}" cy="${-14 * s}" rx="${14 * s}" ry="${8 * s}" fill="#000" opacity=".12"/><ellipse cx="${22 * s}" cy="${16 * s}" rx="${18 * s}" ry="${9 * s}" fill="#000" opacity=".12"/><path d="M${-26 * s} ${-62 * s}Q0 ${-76 * s} ${26 * s} ${-62 * s}Q0 ${-56 * s} ${-26 * s} ${-62 * s}Z" fill="#fff" opacity=".6"/>`,
-    planet_ring: (s) => `<g transform="rotate(-16)"><ellipse rx="${118 * s}" ry="${26 * s}" fill="none" stroke="#e8d2a0" stroke-width="${7 * s}" opacity=".8"/><circle r="${58 * s}" fill="url(#gas)"/><path d="M${-118 * s} 0A${118 * s} ${26 * s} 0 0 0 ${118 * s} 0" fill="none" stroke="#e8d2a0" stroke-width="${7 * s}"/></g>`,
-    earth: (s) => `<circle r="${44 * s}" fill="url(#earth)"/><path d="M${-26 * s} ${-12 * s}Q${-12 * s} ${-30 * s} ${4 * s} ${-18 * s}Q${10 * s} ${-4 * s} ${-6 * s} ${4 * s}Q${-22 * s} ${6 * s} ${-26 * s} ${-12 * s}ZM${12 * s} ${10 * s}Q${28 * s} ${6 * s} ${26 * s} ${22 * s}Q${16 * s} ${30 * s} ${10 * s}  ${22 * s}Z" fill="#59b36a"/><circle r="${44 * s}" fill="none" stroke="#bfe3ff" stroke-width="${2 * s}" opacity=".6"/>`,
-    comet: (s, P) => Array.from({ length: 8 }, (_, k) => `<path d="M${-k * 32 * s} ${-k * 11 * s}L${-(k + 1) * 32 * s} ${-(k + 1) * 11 * s}" stroke="${P.glow}" stroke-opacity="${(.85 - k * .1).toFixed(2)}" stroke-width="${f1((9 - k) * s)}" stroke-linecap="round"/>`).join("") + `<circle r="${9 * s}" fill="${P.glow}"/>`,
-  };
-
-  /* ---- Fondos procedurales ---- */
-  const waveD = (rnd, L, amp, fr, sharp) => {
-    const a = rnd() * 6, b = rnd() * 6; let p = `M-50 ${L.base}`;
-    for (let x = -50; x <= 1650; x += 40) {
-      const k = sharp ? 1 - Math.abs(Math.sin(x * fr + a)) : .55 + .3 * Math.sin(x * fr + a) + .15 * Math.sin(x * fr * 2.7 + b);
-      p += `L${x} ${f1(L.base - L.hmax * amp * (sharp ? .35 + .65 * k : k))}`;
-    }
-    return p + `L1650 ${L.base}Z`;
-  };
-  const LAY = {
-    skyline: (rnd, tone, d, den) => {
-      const L = LD[d]; let x = -40, p = "", ant = "", wins = "";
-      while (x < 1650) {
-        const w = 28 + rnd() * (d === "far" ? 36 : 56), h = L.hmax * (.2 + .8 * Math.pow(rnd(), 1.5)) * (.5 + .5 * den);
-        p += `M${f1(x)} ${L.base}V${f1(L.base - h)}H${f1(x + w)}V${L.base}Z`;
-        if (rnd() < .3) p += `M${f1(x + w * .22)} ${f1(L.base - h)}V${f1(L.base - h - 12 - rnd() * 20)}H${f1(x + w * .72)}V${f1(L.base - h)}Z`;
-        if (rnd() < .35) ant += `<path d="M${f1(x + w / 2)} ${f1(L.base - h)}V${f1(L.base - h - 26 - rnd() * 46)}" stroke="${tone}" stroke-width="2"/>`;
-        if (d !== "far") {
-          const cols = Math.max(1, Math.floor(w / 12)), rows = Math.floor(h / 18);
-          for (let c = 0; c < cols; c++) for (let r = 0; r < rows; r++) if (rnd() < .15) wins += `<rect x="${f1(x + 5 + c * 12)}" y="${f1(L.base - h + 8 + r * 18)}" width="5" height="7"/>`;
-        }
-        x += w + rnd() * 12 * (1.2 - den);
-      }
-      return `<path d="${p}" fill="${tone}"/>${ant}<g class="win" fill="${G}">${wins}</g>`;
-    },
-    mountains: (rnd, tone, d) => {
-      const L = LD[d]; let p = `M-50 ${L.base}`, x = -50;
-      while (x < 1650) { p += `L${f1(x)} ${f1(L.base - L.hmax * (.3 + .7 * rnd()))}`; x += 70 + rnd() * 110; p += `L${f1(x - 30)} ${f1(L.base - L.hmax * .12 * rnd())}`; }
-      return `<path d="${p}L1650 ${L.base}Z" fill="${tone}"/>`;
-    },
-    hills: (rnd, tone, d) => `<path d="${waveD(rnd, LD[d], .6, .0032, false)}" fill="${tone}"/>`,
-    dunes: (rnd, tone, d) => {
-      const L = LD[d]; let rocks = "";
-      if (d !== "far") for (let i = 0; i < 7; i++) { const x = rnd() * 1600, s = 8 + rnd() * 16; rocks += `<path d="M${f1(x - s)} ${L.base}L${f1(x - s * .5)} ${f1(L.base - s)}L${f1(x + s * .6)} ${f1(L.base - s * .8)}L${f1(x + s)} ${L.base}Z" fill="${tone}"/>`; }
-      return `<path d="${waveD(rnd, L, .75, .0042, true)}" fill="${tone}"/>${rocks}`;
-    },
-    ocean: (rnd, tone, d, den, P) => {
-      let s = "";
-      for (let i = 0; i < 46; i++) { const y = HZ + 6 + Math.pow(rnd(), 1.4) * 280, w = 30 + (y - HZ) * .35 * (.4 + rnd()); s += `<rect x="${f1(rnd() * 1700 - 50)}" y="${f1(y)}" width="${f1(w)}" height="${f1(1.5 + (y - HZ) / 90)}" rx="1.5"/>`; }
-      return `<g class="shim" fill="${P.glow}" opacity=".28">${s}</g>`;
-    },
-    forest: (rnd, tone, d, den) => {
-      const L = LD[d]; let x = -30, s = "";
-      while (x < 1650) {
-        const h = (30 + rnd() * L.hmax * .42) * (d === "near" ? 1.2 : 1), w = h * .26;
-        if (rnd() < .72) s += `<path d="M${f1(x - w * 1.2)} ${f1(L.base - h * .1)}L${f1(x)} ${f1(L.base - h * .72)}L${f1(x + w * 1.2)} ${f1(L.base - h * .1)}ZM${f1(x - w * .8)} ${f1(L.base - h * .46)}L${f1(x)} ${f1(L.base - h)}L${f1(x + w * .8)} ${f1(L.base - h * .46)}ZM${f1(x - 2)} ${L.base}V${f1(L.base - h * .14)}H${f1(x + 2)}V${L.base}Z"/>`;
-        else s += `<circle cx="${f1(x)}" cy="${f1(L.base - h * .62)}" r="${f1(h * .3)}"/><rect x="${f1(x - 2)}" y="${f1(L.base - h * .4)}" width="4" height="${f1(h * .4)}"/>`;
-        x += (9 + rnd() * 18) / (.5 + den * .8);
-      }
-      return `<g fill="${tone}">${s}</g>`;
-    },
-    factory: (rnd, tone, d, den, P) => {
-      const L = LD[d], base = L.base; let x = -20, s = "", smoke = "", k = 0;
-      while (x < 1620) {
-        const w = 110 + rnd() * 110, h = 46 + rnd() * L.hmax * .3, teeth = Math.max(2, Math.round(w / 42));
-        let p = `M${f1(x)} ${base}V${f1(base - h)}`;
-        for (let i = 0; i < teeth; i++) { const tx = x + i * w / teeth; p += `L${f1(tx)} ${f1(base - h - 22)}L${f1(tx + w / teeth)} ${f1(base - h)}`; }
-        s += `<path d="${p}V${base}Z" fill="${tone}"/>`;
-        if (d !== "far") s += `<rect class="win" x="${f1(x + 8)}" y="${f1(base - h + 12)}" width="${f1(w - 16)}" height="4" fill="${G}"/>`;
-        if (rnd() < .62) {
-          const cx = x + w * (.2 + .6 * rnd()), ch = 60 + rnd() * L.hmax * .5;
-          s += `<rect x="${f1(cx - 8)}" y="${f1(base - h - ch)}" width="16" height="${f1(ch)}" fill="${tone}"/><rect x="${f1(cx - 11)}" y="${f1(base - h - ch)}" width="22" height="6" fill="${tone}"/>`;
-          for (let j = 0; j < 3; j++) smoke += `<circle class="smoke" cx="${f1(cx)}" cy="${f1(base - h - ch - 6)}" r="${12 + j * 3}" style="animation-delay:-${(k * 1.3 + j * 2.1).toFixed(1)}s"/>`;
-          k++;
-        }
-        x += w + 8 + rnd() * 30;
-      }
-      for (let i = 0; i < 2; i++) { const cx = 300 + i * 760 + rnd() * 160; s += `<path d="M${f1(cx)} ${base}L${f1(cx + 8)} ${base - L.hmax * .62}M${f1(cx + 62)} ${base}L${f1(cx + 54)} ${base - L.hmax * .62}M${f1(cx - 24)} ${f1(base - L.hmax * .62)}H${f1(cx + 130)}M${f1(cx + 100)} ${f1(base - L.hmax * .62)}V${f1(base - L.hmax * .42)}" stroke="${tone}" stroke-width="5" fill="none"/><rect x="${f1(cx + 92)}" y="${f1(base - L.hmax * .42)}" width="16" height="12" fill="${tone}"/>`; }
-      if (d !== "far") {
-        for (let i = 0; i < 3; i++) {
-          const ax = 140 + i * 520 + rnd() * 120, dur = (3 + rnd() * 2).toFixed(1);
-          s += `<g transform="translate(${f1(ax)} ${base})" fill="${tone}"><rect x="-18" y="-14" width="36" height="14" rx="3"/><g><animateTransform attributeName="transform" type="rotate" values="-28;18;-28" dur="${dur}s" repeatCount="indefinite"/><path d="M-6 -10L-4-70L4-70L6-10Z"/><g transform="translate(0 -70)"><g><animateTransform attributeName="transform" type="rotate" values="30;-40;30" dur="${(dur * .8).toFixed(1)}s" repeatCount="indefinite"/><path d="M-4 0L-3-48L3-48L4 0Z"/><path d="M-9-48L-3-58H3L9-48Z"/><circle cy="-52" r="2" fill="${G}"/></g></g></g></g>`;
-        }
-        s += `<rect x="-20" y="${base - 12}" width="1680" height="7" fill="${tone}"/><g fill="${mix(tone, P.glow, .35)}"><animateTransform attributeName="transform" type="translate" from="0 0" to="140 0" dur="5s" repeatCount="indefinite"/>${Array.from({ length: 13 }, (_, i) => `<rect x="${-20 + i * 140}" y="${base - 24}" width="26" height="12"/>`).join("")}</g>`;
-      }
-      return s + `<g fill="${mix(tone, "#ffffff", .22)}">${smoke}</g>`;
-    },
-  };
-
-  /* ---- Clima ---- */
-  const WX = {
-    rain: (rnd, P) => `<g stroke="${P.glow}" stroke-opacity=".4" stroke-width="1.6">${Array.from({ length: 80 }, () => { const x = f1(rnd() * 1700), l = 14 + rnd() * 18; return `<path class="rain" style="animation-duration:${(.7 + rnd() * .6).toFixed(2)}s;animation-delay:-${(rnd() * 1.4).toFixed(2)}s" d="M${x} 0l-3 ${f1(l)}"/>`; }).join("")}</g>`,
-    snow: (rnd) => `<g fill="#fff" fill-opacity=".8">${Array.from({ length: 80 }, () => `<circle class="snow" style="animation-duration:${(7 + rnd() * 8).toFixed(1)}s;animation-delay:-${(rnd() * 14).toFixed(1)}s" cx="${f1(rnd() * 1650)}" cy="0" r="${f1(1.5 + rnd() * 2.5)}"/>`).join("")}</g>`,
-    dust: (rnd, P) => `<rect width="${VW}" height="${VH}" fill="${P.glow}" opacity=".08"/><g fill="${P.glow}" fill-opacity=".45">${Array.from({ length: 46 }, () => `<rect class="dust" style="animation-duration:${(9 + rnd() * 10).toFixed(1)}s;animation-delay:-${(rnd() * 18).toFixed(1)}s" x="0" y="${f1(HZ - 80 + rnd() * 330)}" width="${f1(10 + rnd() * 30)}" height="2" rx="1"/>`).join("")}</g>`,
-    fog: (rnd, P, n) => `<g filter="url(#blur${n})" fill="${mix(P.bottom, "#ffffff", .5)}" opacity=".32">${[0, 1, 2].map(i => `<ellipse class="fog" style="animation-duration:${18 + i * 7}s" cx="${400 + i * 400}" cy="${HZ + 20 + i * 70}" rx="520" ry="46"/>`).join("")}</g>`,
-    fireflies: (rnd, P) => `<g fill="${P.glow}">${Array.from({ length: 30 }, () => `<circle class="ff" style="animation-duration:${(5 + rnd() * 5).toFixed(1)}s;animation-delay:-${(rnd() * 8).toFixed(1)}s" cx="${f1(rnd() * 1600)}" cy="${f1(HZ - 40 + rnd() * 280)}" r="${f1(1.8 + rnd() * 2.2)}"/>`).join("")}</g>`,
-  };
-
-  /* ---- Normalización de lo que devuelve Claude ---- */
-  function normScene(o, i) {
-    o = o && typeof o === "object" ? o : {};
-    const time = TIMES[o.time] ? o.time : "dusk", base = TIMES[time], pal = { win: base.win };
-    ["top", "bottom", "glow", "ink"].forEach(k => { pal[k] = hexRe.test(o.palette && o.palette[k]) ? o.palette[k] : base[k]; });
-    const sky = arr(o.sky).filter(e => e && SKY_T.includes(e.type)).slice(0, 4).map(e => ({ type: e.type, x: clampN(e.x, 0, 100, 50), y: clampN(e.y, 0, 100, 25), s: clampN(e.s, .3, 3, 1) }));
-    const layers = arr(o.layers).filter(e => e && LAYER_T.includes(e.type)).slice(0, 5).map(e => ({ type: e.type, depth: DEPTHS.includes(e.depth) ? e.depth : "mid", density: clampN(e.density, .3, 1, .7) }));
-    if (!layers.length) layers.push({ type: "hills", depth: "far", density: .7 });
-    const actors = arr(o.actors).filter(e => e && ACTOR_T.includes(e.type)).slice(0, 7).map(e => ({
-      type: e.type, x: clampN(e.x, 0, 100, 50), y: e.y == null ? null : clampN(e.y, 0, 100, 50), s: clampN(e.s, .4, 2.5, 1),
-      depth: DEPTHS.includes(e.depth) ? e.depth : "mid", anim: ANIMS.includes(e.anim) ? e.anim : (FLYERS[e.type] ? "fly" : "none"),
-    }));
-    const effects = arr(o.effects).filter(e => e && e.type === "link").slice(0, 2).map(e => ({ type: "link", x1: clampN(e.x1, 0, 100, 40), x2: clampN(e.x2, 0, 100, 60), y: clampN(e.y, 0, 100, 62) }));
-    return {
-      i, time, pal, sky, layers, actors, effects,
-      weather: WEATHER.includes(o.weather) ? o.weather : "none",
-      title: String(o.title || "").slice(0, 70), caption: String(o.caption || "").slice(0, 170),
-    };
-  }
   function normPrompts(a) {
     return arr(a).filter(p => p && typeof p.prompt === "string" && p.prompt.trim()).slice(0, 3)
       .map((p, i) => ({ title: String(p.title || "Escena " + (i + 1)).slice(0, 80), prompt: p.prompt.trim().slice(0, 1600), en: typeof p.prompt_en === "string" ? p.prompt_en.trim().slice(0, 1600) : "" }));
   }
 
-  /* ---- Ensamble de una escena ---- */
-  function sceneSvg(sc) {
-    const n = sc.i, P = sc.pal, rndB = mulberry(strSeed(sc.time) + n * 7919);
-    const tone = (t) => mix(P.bottom, P.ink, t);
-    const haveOcean = sc.layers.some(l => l.type === "ocean");
-    let s = `<g class="scene${n === 0 ? " on" : ""}" id="sc${n}" style="--glow:${P.glow};--wo:${P.win}">`;
-    s += `<defs>
-      <linearGradient id="sk${n}" x1="0" y1="0" x2="0" y2="${HZ + 50}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${P.top}"/><stop offset=".72" stop-color="${P.bottom}"/><stop offset="1" stop-color="${mix(P.bottom, P.glow, .5)}"/></linearGradient>
-      <radialGradient id="halo${n}"><stop offset="0" stop-color="${P.glow}" stop-opacity=".7"/><stop offset="1" stop-color="${P.glow}" stop-opacity="0"/></radialGradient>
-      <radialGradient id="hz${n}" cx=".5" cy="1" r=".75"><stop offset="0" stop-color="${P.glow}" stop-opacity=".55"/><stop offset="1" stop-color="${P.glow}" stop-opacity="0"/></radialGradient>
-      <linearGradient id="gr${n}" x1="0" y1="${LAND}" x2="0" y2="${VH}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${mix(tone(.5), P.glow, .1)}"/><stop offset="1" stop-color="${tone(.66)}"/></linearGradient>
-      <linearGradient id="wt${n}" x1="0" y1="${HZ}" x2="0" y2="${VH}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${mix(P.bottom, P.glow, .35)}"/><stop offset=".25" stop-color="${mix(P.bottom, P.ink, .35)}"/><stop offset="1" stop-color="${mix(P.bottom, P.ink, .72)}"/></linearGradient>
-      <radialGradient id="vg${n}" cx=".5" cy=".5" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></radialGradient>
-      <filter id="blur${n}" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="28"/></filter>
-      <filter id="blurS${n}" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
-      <radialGradient id="mars"><stop offset="0" stop-color="#f0956a"/><stop offset="1" stop-color="#8a3a22"/></radialGradient>
-      <radialGradient id="gas"><stop offset="0" stop-color="#f2c98a"/><stop offset="1" stop-color="#b7773f"/></radialGradient>
-      <radialGradient id="earth" cx=".38" cy=".35"><stop offset="0" stop-color="#7cc3ff"/><stop offset="1" stop-color="#1c4f9c"/></radialGradient>
-    </defs>`;
-    s += `<rect width="${VW}" height="${HZ + 60}" fill="url(#sk${n})"/>`;
-    if (sc.time === "night" || sc.sky.some(e => e.type === "stars")) {
-      s += `<g fill="#fff">${Array.from({ length: 130 }, () => `<circle class="tw" style="animation-duration:${(2 + rndB() * 4).toFixed(1)}s;animation-delay:-${(rndB() * 6).toFixed(1)}s" cx="${f1(rndB() * VW)}" cy="${f1(rndB() * 520)}" r="${f1(.6 + rndB() * 1.5)}"/>`).join("")}</g>`;
-    }
-    sc.sky.forEach((e, k) => {
-      const x = f1(e.x / 100 * VW), y = f1(e.y / 100 * (HZ - 40));
-      if (e.type === "clouds") {
-        const c = mix(P.bottom, "#ffffff", sc.time === "night" ? .25 : .75);
-        s += `<g transform="translate(${x} ${y})"><g class="cloud" style="animation-duration:${60 + k * 17}s"><g transform="scale(${e.s})" fill="${c}" opacity="${sc.time === "night" ? .35 : .85}"><ellipse rx="90" ry="22"/><ellipse cx="-50" cy="6" rx="55" ry="18"/><ellipse cx="60" cy="8" rx="60" ry="18"/><ellipse cx="10" cy="-14" rx="48" ry="20"/></g></g></g>`;
-      } else if (e.type === "aurora") {
-        s += `<g transform="translate(0 ${f1(y - 100)})"><g filter="url(#blurS${n})" opacity=".55" class="auro">${["#5cf2b0", "#6fa8ff", "#b46cff"].map((c, j) => `<path d="M-50 ${130 + j * 36}Q300 ${40 + j * 30} 640 ${120 + j * 30}T1300 ${100 + j * 36}T1700 ${130 + j * 30}V${200 + j * 36}Q1300 ${170 + j * 30} 640 ${200 + j * 30}T-50 ${210 + j * 36}Z" fill="${c}" opacity=".5"/>`).join("")}</g></g>`;
-      } else if (e.type === "nebula") {
-        s += `<g filter="url(#blur${n})" opacity=".4" transform="translate(${x} ${y})"><circle r="${150 * e.s}" fill="#b46cff"/><circle cx="${120 * e.s}" cy="${30 * e.s}" r="${120 * e.s}" fill="#6fa8ff"/><circle cx="${-100 * e.s}" cy="${50 * e.s}" r="${100 * e.s}" fill="#ff6fae"/></g>`;
-      } else if (SKYD[e.type]) {
-        s += `<g transform="translate(${x} ${y})"><g class="${e.type === "sun" || e.type === "moon" ? "pulseS" : ""}">${SKYD[e.type](e.s, P, n)}</g></g>`;
-      }
-    });
-    s += `<rect y="${HZ - 220}" width="${VW}" height="${220 + 55}" fill="url(#hz${n})"/>`;
-    ["far", "mid", "near"].forEach((d) => {
-      sc.layers.filter(l => l.depth === d && l.type !== "ocean").forEach((l, k) => {
-        const rnd = mulberry(strSeed(l.type) + n * 131 + k * 17);
-        s += `<g class="lay ${d}">${LAY[l.type](rnd, tone(LD[d].t), d, l.density, P)}</g>`;
-      });
-    });
-    if (haveOcean) {
-      const rnd = mulberry(n * 977 + 5);
-      s += `<rect y="${HZ}" width="${VW}" height="${VH - HZ}" fill="url(#wt${n})"/><rect y="${HZ - 1}" width="${VW}" height="3" fill="${P.glow}" opacity=".5"/>${LAY.ocean(rnd, "", "far", .7, P)}`;
-    } else {
-      s += `<rect y="${LAND}" width="${VW}" height="${VH - LAND}" fill="url(#gr${n})"/>`;
-    }
-    if (sc.weather === "fog") s += `<g class="wx">${WX.fog(mulberry(n * 31 + 9), P, n)}</g>`;
-    const actorTone = { far: tone(.84), mid: tone(.93), near: tone(1) };
-    const sorted = sc.actors.map((a, k) => ({ ...a, k })).sort((a, b) => (DEPTHS.indexOf(a.depth) - DEPTHS.indexOf(b.depth)) || (a.y || 0) - (b.y || 0));
-    sorted.forEach((a) => {
-      const rnd = mulberry(strSeed(a.type) + n * 53 + a.k * 11);
-      const x = f1(a.x / 100 * VW), y = f1(a.y != null ? a.y / 100 * VH : BASEY[a.depth]), sc2 = f1(DSC[a.depth] * a.s * 100) / 100;
-      const an = a.anim !== "none" ? `a-${a.anim}` : "";
-      s += `<g transform="translate(${x} ${y}) scale(${sc2})" style="color:${actorTone[a.depth]}" fill="currentColor"><g class="an ${an}" style="animation-delay:-${(rnd() * 5).toFixed(1)}s">${A[a.type](rnd)}</g></g>`;
-    });
-    sc.effects.forEach((e) => {
-      const x1 = f1(e.x1 / 100 * VW), x2 = f1(e.x2 / 100 * VW), y = f1(e.y / 100 * VH), mx = f1((x1 + x2) / 2);
-      s += `<g fill="none" stroke="${P.glow}"><path d="M${x1} ${y}Q${mx} ${f1(y - 90)} ${x2} ${y}" stroke-width="3" stroke-dasharray="6 10" opacity=".85"><animate attributeName="stroke-dashoffset" from="0" to="-64" dur="2s" repeatCount="indefinite"/></path>${[x1, x2].map((cx, j) => `<circle cx="${cx}" cy="${y}" r="10" stroke-width="2"><animate attributeName="r" values="10;70" dur="2.4s" begin="${j * .8}s" repeatCount="indefinite"/><animate attributeName="opacity" values=".8;0" dur="2.4s" begin="${j * .8}s" repeatCount="indefinite"/></circle>`).join("")}</g>`;
-    });
-    if (sc.weather !== "none" && sc.weather !== "fog") s += `<g class="wx">${WX[sc.weather](mulberry(n * 31 + 9), P, n)}</g>`;
-    s += `<rect width="${VW}" height="${VH}" fill="url(#vg${n})"/></g>`;
-    return s;
-  }
-
   /* ---- Panel visual: petición a Claude, escenas, prompts ---- */
   const viz = $("#visual");
-  let lastStory = null, vizCtl = null, vizTimer = null, vizIdx = 0, vizCount = 0, vizPlaying = true;
-  const reduceMotion = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let lastStory = null, vizCtl = null;
 
   function buildVizPrompt() {
     const s = selection();
-    return `Eres director de arte y animador de ilustración vectorial. Convierte la narración en 3 escenas visuales que una página dibujará con un catálogo FIJO de siluetas, y en 3 prompts para un generador de imágenes, más 1 prompt para un generador de video.
+    return `Eres director de arte de cine. Convierte la narración en 3 prompts para un generador de imágenes y en 1 prompt para un generador de video.
 
 NARRACIÓN
 Título: ${lastStory.title}
@@ -1405,37 +1144,16 @@ ${lastStory.body}
 
 PARÁMETROS ELEGIDOS: ${s.map(x => x.cat + ": " + x.text).join(" | ")}
 
-CATÁLOGO (usa SOLO estos nombres exactos)
-- sky (cuerpos celestes): sun, moon, stars, planet_mars, planet_ring, earth, clouds, aurora, comet, nebula
-- layers (fondos): skyline (ciudad de rascacielos), mountains, dunes (desierto o superficie de Marte), hills, ocean (mar), forest, factory (fábrica automatizada con chimeneas, grúas, brazos robóticos y banda transportadora)
-- actors: person, child, children (dos niños), elder (persona mayor con bastón), crowd (grupo de personas), robot, mammoth, dodo, whale, deer, bird_flock, drone, printer3d (impresora 3D de alimentos), floating_city (ciudad flotante sobre el mar), dome_colony (domos habitables), rover, rocket, house, lighthouse, wind_turbine, tree, boat, book
-- effects: {"type":"link","x1":30,"x2":60,"y":60} = ondas entre dos puntos, para comunicación sin palabras
-- weather: none, rain, snow, dust, fog, fireflies
-- time: dawn, day, dusk, night
-
-REGLAS DE FIDELIDAD
-1. Antes de elegir, detecta en la narración: lugar, momento del día, clima, personajes, criaturas, objetos y tecnología. Cada uno que exista en el catálogo debe aparecer en la escena donde la narración lo menciona.
-2. No añadas nada que la narración no sugiera. Si algo no existe en el catálogo, elige lo más cercano.
-3. Haz 3 escenas en el orden de la narración (inicio, desarrollo, cierre). Cada una es un momento distinto y puede cambiar la hora, el clima y el encuadre.
-4. Máximo por escena: 4 sky, 4 layers, 6 actors, 2 effects.
-5. depth puede ser far, mid o near. Pon el lugar al fondo (far) y a los protagonistas al frente (mid o near). x e y van de 0 a 100 (x de izquierda a derecha, y de arriba abajo). En actors, y es opcional: úsalo solo para lo que vuela (bird_flock, drone, rocket). s es el tamaño relativo (0.5 a 2, normal 1). anim de actors: none, float, walk, sway, pulse o fly. density de layers: 0.3 a 1.
-6. Si usas el layer ocean, no uses otros layers salvo far. floating_city, boat y whale van sobre el mar (depth far o mid). dome_colony, rover y rocket van sobre dunes.
-7. palette: 4 colores #rrggbb coherentes con la hora y la atmósfera: top (cielo alto), bottom (cielo en el horizonte), glow (luz principal: sol, ventanas, luces), ink (siluetas, el más oscuro). Debe haber buen contraste entre bottom e ink.
-8. caption: una frase en español tomada de la narración o muy cercana, de máximo 110 caracteres.
-
 PROMPTS DE IMAGEN
-Escribe 3 prompts, uno por escena, listos para pegar en Midjourney, DALL·E o Gemini. Cada uno va en dos idiomas: "prompt" en español natural y claro (lo leerá el público de una feria del libro, todo hispanohablante) y "prompt_en" en inglés (la misma descripción, para el generador de imágenes). Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo fotográfico hiperrealista (fotografía cinematográfica de alta definición, con texturas, piel, materiales y luz realistas), el mismo en los 3 prompts. Mantén los mismos personajes (edad, rasgos y ropa) y el mismo lugar en las 3 imágenes, porque se usarán como imágenes de referencia para crear el video. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
+Escribe 3 prompts, uno por escena, en el orden de la narración (inicio, desarrollo, cierre), listos para pegar en Midjourney, DALL·E o Gemini. Cada uno va en dos idiomas: "prompt" en español natural y claro (lo leerá el público de una feria del libro, todo hispanohablante) y "prompt_en" en inglés (la misma descripción, para el generador de imágenes). Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo fotográfico hiperrealista (fotografía cinematográfica de alta definición, con texturas, piel, materiales y luz realistas), el mismo en los 3 prompts. Respeta fielmente lo que dice la narración (lugar, momento del día, personajes, objetos y tecnología) y no añadas nada que no sugiera. Mantén los mismos personajes (edad, rasgos y ropa) y el mismo lugar en las 3 imágenes. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
 
 PROMPT DE VIDEO
-Escribe 1 prompt para Google Veo y Runway, en dos idiomas: "prompt" en español natural y claro (lo leerá el público) y "prompt_en" en inglés (la misma descripción, para el generador de video): un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo hiperrealista y los mismos personajes y lugar de las imágenes de referencia. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
-
-PLAN DE VIDEO EN 3 TOMAS
-Además escribe "video_shots": exactamente 3 tomas, una por cada imagen y en el mismo orden, que juntas cuentan la historia como un cortometraje cinematográfico de unos 16 segundos: toma 1 plantea el contexto y el lugar, toma 2 muestra el conflicto o el momento de tensión, toma 3 es el clímax y el cierre con la consecuencia de ese futuro. Cada toma dura de 5 a 6 segundos y describe, a partir de lo que ya muestra su imagen, el movimiento de cámara (por ejemplo slow push-in, dolly lateral, travelling, tilt, plano subjetivo) y la acción de los personajes o elementos. Mantén los mismos personajes, ropa, lugar y hora del día entre tomas para que haya continuidad, y respeta fielmente la narración. Estilo cinematográfico hiperrealista, sin texto en pantalla ni logotipos. Cada toma lleva "prompt" en español natural y "prompt_en" en inglés (la misma descripción, de 40 a 70 palabras).
+Escribe 1 prompt para Google Veo y Runway, en dos idiomas: "prompt" en español natural y claro (lo leerá el público) y "prompt_en" en inglés (la misma descripción, para el generador de video): un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo hiperrealista y los mismos personajes y lugar de las imágenes. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
 
 El JSON debe ser válido: dentro de los textos no uses comillas dobles (usa « » o comillas simples), no pongas saltos de línea dentro de los textos y no dejes comas al final de una lista.
 
 RESPONDE SOLO CON ESTE JSON, sin texto adicional:
-{"scenes":[{"title":"...","caption":"...","time":"dusk","weather":"fog","palette":{"top":"#000000","bottom":"#000000","glow":"#000000","ink":"#000000"},"sky":[{"type":"moon","x":70,"y":22,"s":1}],"layers":[{"type":"skyline","depth":"far","density":0.8}],"actors":[{"type":"elder","x":30,"depth":"near","s":1,"anim":"walk"}],"effects":[]}],"prompts":[{"title":"...","prompt":"...","prompt_en":"..."}],"video":{"title":"...","prompt":"...","prompt_en":"..."},"video_shots":[{"title":"...","prompt":"...","prompt_en":"..."}]}`;
+{"prompts":[{"title":"...","prompt":"...","prompt_en":"..."}],"video":{"title":"...","prompt":"...","prompt_en":"..."}}`;
   }
   const RETRY_NOTE = "\n\nIMPORTANTE: tu respuesta anterior no era un JSON válido. Responde de nuevo SOLO con el JSON, bien formado: sin comillas dobles dentro de los textos (usa « » o comillas simples), sin saltos de línea dentro de los textos y sin comas finales.";
   function parseJSON(t) {
@@ -1464,92 +1182,52 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     }
     return out.replace(/,\s*([}\]])/g, "$1");
   }
-  function stopViz() { clearInterval(vizTimer); vizTimer = null; if (vizCtl) { vizCtl.abort(); vizCtl = null; } }
-  function vizMessage(html) { viz.hidden = false; $("#visual").innerHTML = `<h2>Escena visual</h2>${html}`; }
+  function stopViz() { if (vizCtl) { vizCtl.abort(); vizCtl = null; } }
+  function vizMessage(html) { viz.hidden = false; $("#visual").innerHTML = `<h2>Imágenes de la escena</h2>${html}`; }
 
   async function visualize() {
     if (!lastStory || generating) return;
     stopViz();
-    vizMessage(`<div class="loading"><div class="spin"></div><span id="vizWait">Claude está imaginando las escenas… puede tardar hasta un minuto.</span></div><div class="meta"><button class="ghost" id="vizStop">■ Detener</button></div>`);
+    vizMessage(`<div class="loading"><div class="spin"></div><span id="vizWait">Claude está escribiendo los prompts de las imágenes… puede tardar un momento.</span></div><div class="meta"><button class="ghost" id="vizStop">■ Detener</button></div>`);
     viz.scrollIntoView({ behavior: "smooth", block: "start" });
     const ctl = new AbortController(); vizCtl = ctl;
     $("#vizStop").onclick = () => { ctl.abort(); };
     try {
       const sample = await window.claude?.use("sample");
       if (!sample) throw { message: "Esta función solo está disponible al abrir la página como Artifact en claude.ai, con la sesión iniciada." };
-      const r = await sample(buildVizPrompt(), { cache: false, signal: ctl.signal, onText: ({ text }) => { const w = $("#vizWait"); if (w) w.textContent = "Dibujando la escena… " + Math.min(99, Math.round(text.length / 60)) + "%"; } });
+      const r = await sample(buildVizPrompt(), { cache: false, signal: ctl.signal });
       let data;
       try { data = parseJSON(r.text); } catch (e1) {
         const w = $("#vizWait"); if (w) w.textContent = "Ajustando el formato… segundo intento";
         const r2 = await sample(buildVizPrompt() + RETRY_NOTE, { cache: false, signal: ctl.signal });
         data = parseJSON(r2.text);
       }
-      const scenes = arr(data.scenes).slice(0, 3).map(normScene).map((sc, i) => ({ ...sc, i }));
-      if (!scenes.length) throw { message: "Claude no devolvió ninguna escena. Inténtalo de nuevo." };
-      renderVisual(scenes, normPrompts(data.prompts), normPrompts([data.video])[0] || null, normPrompts(arr(data.video_shots)));
+      const prompts = normPrompts(data.prompts);
+      if (!prompts.length) throw { message: "Claude no devolvió los prompts. Inténtalo de nuevo." };
+      renderVisual(prompts, normPrompts([data.video])[0] || null);
     } catch (e) {
-      if (e && e.code === "cancelled") { vizMessage(`<p class="help">Se detuvo la generación de la escena.</p><div class="meta"><button class="ghost" id="retryViz">↻ Intentar de nuevo</button></div>`); $("#retryViz").onclick = visualize; return; }
+      if (e && e.code === "cancelled") { vizMessage(`<p class="help">Se detuvo la generación.</p><div class="meta"><button class="ghost" id="retryViz">↻ Intentar de nuevo</button></div>`); $("#retryViz").onclick = visualize; return; }
       const m = { not_granted: "No diste permiso para que la página consulte a Claude.", rate_limited: "Se alcanzó el límite de uso por ahora. Espera un momento e inténtalo de nuevo.", invalid_json: "La respuesta de Claude no tenía el formato esperado. Inténtalo de nuevo." }[e && e.code];
-      vizMessage(`<div class="error">${esc(m || String((e && e.message) || e))}</div><div class="meta"><button class="ghost" id="retryViz">↻ Intentar de nuevo</button>${claudeLink(buildVizPrompt(), "↗ Pedir las escenas en Claude")}</div><p class="help" style="margin-top:12px">En el chat de Claude recibirás el JSON de las escenas y los prompts de imagen y video.</p>`);
+      vizMessage(`<div class="error">${esc(m || String((e && e.message) || e))}</div><div class="meta"><button class="ghost" id="retryViz">↻ Intentar de nuevo</button></div>`);
       $("#retryViz").onclick = visualize;
     } finally { if (vizCtl === ctl) vizCtl = null; }
   }
 
-  function showScene(i) {
-    vizIdx = (i + vizCount) % vizCount;
-    document.querySelectorAll("#sv .scene").forEach((g, k) => g.classList.toggle("on", k === vizIdx));
-    document.querySelectorAll(".sdot").forEach((d, k) => d.classList.toggle("on", k === vizIdx));
-    const sc = vizScenes[vizIdx];
-    $("#capN").textContent = `Escena ${vizIdx + 1} de ${vizCount}` + (sc.title ? " · " + sc.title : "");
-    $("#capT").textContent = sc.caption;
-  }
-  function setPlaying(on) {
-    vizPlaying = on; clearInterval(vizTimer); vizTimer = null;
-    if (on && !reduceMotion()) vizTimer = setInterval(() => showScene(vizIdx + 1), 8500);
-    const b = $("#playS"); if (b) b.textContent = on ? "⏸ Pausar" : "▶ Reanudar";
-  }
-  let vizScenes = [];
-  function renderVisual(scenes, prompts, video, shots) {
-    vizScenes = scenes; vizCount = scenes.length; vizIdx = 0;
+  function renderVisual(prompts, video) {
     viz.hidden = false;
-    viz.innerHTML = `<h2>Escena visual</h2>
-      <div class="stage" id="stage">
-        <svg id="sv" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Escena animada de la narrativa">${scenes.map(sceneSvg).join("")}</svg>
-        <div class="cap"><div class="cap-n" id="capN"></div><p id="capT"></p></div>
-      </div>
-      <div class="ctrl">
-        <button class="ghost" id="prevS" aria-label="Escena anterior">◀</button>
-        <div class="sdots">${scenes.map((_, k) => `<button class="sdot${k === 0 ? " on" : ""}" data-k="${k}" aria-label="Ir a la escena ${k + 1}"></button>`).join("")}</div>
-        <button class="ghost" id="nextS" aria-label="Escena siguiente">▶</button>
-        <button class="ghost" id="playS">⏸ Pausar</button>
-        <button class="ghost" id="fsS">⛶ Pantalla completa</button>
-      </div>
-      ${prompts.length ? `<h3 class="ph">Imágenes con Runway</h3>
+    viz.innerHTML = `<h2>Imágenes de la escena</h2>
+      <h3 class="ph">Imágenes con Runway</h3>
       <p class="help">Imágenes hiperrealistas creadas con tu cuenta de Runway a partir de los prompts de abajo. Se generan con el conector de Runway ML y usan tus créditos.</p>
       <div class="rwbar"><label>Modelo <select id="rwModel"><option value="seedream-5">Seedream 5.0 Lite · ≈ 4 créditos</option><option value="nano-banana-2" selected>Nano Banana 2 (1K) · ≈ 7 créditos</option><option value="gen-4">Gen-4 Image (720p) · ≈ 5 a 8 créditos</option><option value="gpt-image-2">GPT Image 2 · costo por confirmar</option></select></label><span class="imgcost" id="rwCost"></span><span class="imgcost" id="rwCredits"></span></div>
       <div class="imgs" id="rwImgs">${prompts.map((p, k) => `<figure class="imgcard" data-k="${k}"><div class="imgframe" id="rwf${k}"></div><figcaption><b>${k + 1}.</b> ${esc(p.title)}<span class="rwinfo" id="rwi${k}"></span></figcaption></figure>`).join("")}</div>
-      <div class="meta"><button class="ghost" id="btnRw">🖼 Generar las 3 imágenes con Runway</button></div>` : ""}
-      ${prompts.length ? `<h3 class="ph">Prompts para generar imágenes</h3>
+      <div class="meta"><button class="ghost" id="btnRw">🖼 Generar las 3 imágenes con Runway</button></div>
+      <h3 class="ph">Prompts para generar imágenes</h3>
       <p class="help">Pégalos en tu generador de imágenes favorito (Midjourney, DALL·E, Gemini…). Los tres comparten el mismo estilo. Aquí se ven en español; con «Ver en inglés» tienes la versión que suelen entender mejor los generadores.</p>
-      <div class="prompts">${prompts.map((p, k) => `<article class="pcard" data-k="${k}"><div class="ph2"><span>${k + 1}</span><h4>${esc(p.title)}</h4><em class="lang">ES</em></div><p class="ptxt">${esc(p.prompt)}</p><div class="pbtns"><button class="ghost cpP">⧉ Copiar</button>${p.en ? `<button class="ghost tgl">Ver en inglés</button>` : ""}</div></article>`).join("")}</div>` : ""}
+      <div class="prompts">${prompts.map((p, k) => `<article class="pcard" data-k="${k}"><div class="ph2"><span>${k + 1}</span><h4>${esc(p.title)}</h4><em class="lang">ES</em></div><p class="ptxt">${esc(p.prompt)}</p><div class="pbtns"><button class="ghost cpP">⧉ Copiar</button>${p.en ? `<button class="ghost tgl">Ver en inglés</button>` : ""}</div></article>`).join("")}</div>
       ${video ? `<h3 class="ph">Prompt para video</h3>
       <p class="help">Pensado para Google Veo y Runway: un plano continuo de unos 8 segundos. Runway ignora la última frase («Audio:»). Para más coherencia, genera antes la imagen 1 y úsala como imagen inicial del video. Se ve en español para el público; «Ver en inglés» muestra la versión para el generador.</p>
       <article class="pcard vcard" id="vcard"><div class="ph2"><span>▶</span><h4>${esc(video.title)}</h4><em class="lang">ES</em></div><p class="ptxt">${esc(video.prompt)}</p><div class="pbtns"><button class="ghost cpP" id="cpVideo">⧉ Copiar prompt de video</button>${video.en ? `<button class="ghost tgl">Ver en inglés</button>` : ""}</div></article>` : ""}
-      ${shots && shots.length ? `<h3 class="ph">Video con Runway · 3 tomas (≈ 16 s)</h3>
-      <p class="help">Un video cinematográfico horizontal en 720p que cuenta la historia con las 3 imágenes: cada imagen se anima en una toma y las 3 se unen en un solo video. Puedes editar el texto en inglés de cada toma antes de generar.</p>
-      <div class="shots" id="shots">${shots.map((p, k) => `<div class="shot"><div class="shot-h"><span>${k + 1}</span><b>${esc(p.title)}</b></div><p class="shot-es">${esc(p.prompt)}</p><textarea class="vtxt" id="shot${k}" rows="4" spellcheck="true" aria-label="Prompt en inglés de la toma ${k + 1}, editable"></textarea></div>`).join("")}</div>
-      <div class="rwbar"><label>Modelo de video <select id="rvModel"><option value="gen-4.5" selected>Gen-4.5 · calidad máxima</option><option value="gen-4-turbo">Gen-4 Turbo · económico</option></select></label><span class="imgcost" id="rvCost"></span></div>
-      <div class="meta"><button class="ghost" id="btnRv" disabled>🎬 Generar video con Runway</button><button class="ghost" id="btnRvStop" hidden>■ Cancelar</button></div>
-      <p class="imgcost" id="rvNote"></p>
-      <div id="rvOut"></div>` : ""}
-      <div class="meta"><button class="ghost" id="cpAllP"${prompts.length || video ? "" : " hidden"}>⧉ Copiar todos los prompts</button><button class="ghost" id="regenViz">↻ Otra interpretación visual</button></div>`;
-    showScene(0); setPlaying(true);
-    $("#prevS").onclick = () => { showScene(vizIdx - 1); setPlaying(vizPlaying); };
-    $("#nextS").onclick = () => { showScene(vizIdx + 1); setPlaying(vizPlaying); };
-    $("#playS").onclick = () => setPlaying(!vizPlaying);
-    document.querySelectorAll(".sdot").forEach(d => d.onclick = () => { showScene(+d.dataset.k); setPlaying(vizPlaying); });
-    $("#fsS").onclick = async () => { try { await $("#stage").requestFullscreen(); } catch { toast("Tu navegador no permitió la pantalla completa"); } };
-    $("#stage").onclick = () => { if (document.fullscreenElement) { showScene(vizIdx + 1); setPlaying(vizPlaying); } };
+      <div class="meta"><button class="ghost" id="cpAllP">⧉ Copiar todos los prompts</button><button class="ghost" id="regenViz">↻ Otra interpretación</button></div>`;
     const wireCard = (card, item, okMsg) => {
       let en = false;
       const txt = card.querySelector(".ptxt"), lang = card.querySelector(".lang"), tgl = card.querySelector(".tgl");
@@ -1560,8 +1238,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     if (video) wireCard($("#vcard"), video, "Prompt de video copiado");
     $("#cpAllP").onclick = async () => toast((await copy(prompts.map((p, k) => `IMAGEN ${k + 1}: ${p.title}\nEspañol: ${p.prompt}` + (p.en ? `\nEnglish: ${p.en}` : "")).concat(video ? [`VIDEO: ${video.title}\nEspañol: ${video.prompt}` + (video.en ? `\nEnglish: ${video.en}` : "")] : []).join("\n\n"))) ? "Prompts copiados" : "No se pudo copiar");
     $("#regenViz").onclick = visualize;
-    if (prompts.length) initRunway(prompts);
-    if (shots && shots.length) initRunwayVideo(shots);
+    initRunway(prompts);
   }
   /* ---- Imágenes con el conector de Runway ML ---- */
   const RW = "Runway ML";
@@ -1600,7 +1277,6 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     } else if (st.status === "error") {
       fr.innerHTML = `<div class="error" style="width:100%">${esc(st.error || "No se pudo generar la imagen.")}</div>`;
     } else fr.textContent = rwMcp ? "Pulsa «Generar las 3 imágenes con Runway»." : "No disponible: esta función necesita el conector Runway ML.";
-    if (typeof rvRefresh === "function") rvRefresh();
   }
   /* Parámetros por modelo: se prueban en orden; si Runway rechaza el formato o el tamaño, se pasa al siguiente. */
   const RW_MODELS = {
@@ -1693,245 +1369,11 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     btn.onclick = async () => { btn.disabled = true; rwStop = false; rwImgs.forEach((_, k) => { rwImgs[k] = { status: "idle" }; }); await rwRunAll($("#rwModel").value); btn.disabled = false; };
   }
 
-  /* ---- Video con Runway: 1 toma por imagen + unión en un solo video ---- */
-  const RV_MODELS = {
-    "gen-4.5": { durs: [{ ds: [6, 5, 6], tr: "crossfade" }, { ds: [5, 5, 5], tr: "cut" }], perSec: 12, label: "Gen-4.5" },
-    "gen-4-turbo": { durs: [{ ds: [5, 5, 5], tr: "cut" }], perSec: 5, label: "Gen-4 Turbo" },
-  };
-  const RV_XFADE = 0.5;
-  let rvRunning = false, rvArmUntil = 0, rvStop = false;
-  const rvTotal = (d) => d.ds.reduce((a, b) => a + b, 0) - (d.tr === "crossfade" ? RV_XFADE * (d.ds.length - 1) : 0);
-  function rvCostText() {
-    const m = RV_MODELS[$("#rvModel").value], d = m.durs[0], secs = d.ds.reduce((a, b) => a + b, 0);
-    return `Duración final ≈ ${rvTotal(d)} s en 720p horizontal. Costo estimado ≈ ${m.perSec * secs} créditos (${m.perSec} por segundo de cada toma; cifra sin confirmar). Después de generar verás el costo medido.`;
-  }
-  function rvRefresh() {
-    const b = $("#btnRv"), n = $("#rvNote"); if (!b) return;
-    const ready = rwImgs.length === 3 && rwImgs.every(x => x.status === "ok" && x.taskId);
-    b.disabled = !rwMcp || !ready || rvRunning;
-    if (n && !rvRunning) n.textContent = !rwMcp ? "Esta función necesita el conector Runway ML." : (ready ? "Las 3 imágenes están listas. Revisa los textos y pulsa el botón." : "Primero genera las 3 imágenes con Runway (se usan como primer fotograma de cada toma).");
-  }
-  function initRunwayVideo(shots) {
-    rvStop = false; rvRunning = false;
-    shots.forEach((p, k) => { const t = $(`#shot${k}`); if (t) t.value = p.en || p.prompt; });
-    $("#rvModel").onchange = () => { $("#rvCost").textContent = rvCostText(); };
-    $("#rvCost").textContent = rvCostText();
-    $("#btnRvStop").onclick = () => { rvStop = true; };
-    $("#btnRv").onclick = () => {
-      const b = $("#btnRv");
-      if (Date.now() > rvArmUntil) { rvArmUntil = Date.now() + 6000; b.textContent = "¿Seguro? Gasta créditos de Runway. Clic otra vez"; setTimeout(() => { if (Date.now() >= rvArmUntil) b.textContent = "🎬 Generar video con Runway"; }, 6100); return; }
-      rvArmUntil = 0; b.textContent = "🎬 Generar video con Runway"; rvGenerate();
-    };
-    rvRefresh();
-  }
-  /* Estado de la última generación: se conserva para poder reintentar solo la toma que falle. */
-  const RV_RATIOS = ["1280:720", "16:9", null];
-  let rv = null;
-  function rvReset(model, texts) {
-    rv = { model, texts, ids: [null, null, null], work: null, credits: [],
-      clips: [0, 1, 2].map(k => ({ state: "en espera", url: "", err: "" })), stitch: { state: "en espera", url: "", err: "" } };
-  }
-  function rvPaint(extra) {
-    const out = $("#rvOut"); if (!out || !rv) return;
-    const spent = rv.credits.length ? `Créditos restantes en Runway: ${rv.credits[rv.credits.length - 1]}` + (rwCreditsLast != null ? ` · gasto aproximado de las tomas enviadas: ${rwCreditsLast - rv.credits[rv.credits.length - 1]} créditos` : "") : "";
-    const busy = rvRunning;
-    out.innerHTML = `<div class="rvlist">${rv.clips.map((c, k) => `<div class="rvline"><b>Toma ${k + 1}</b> · ${esc(c.state)}${c.url ? ` · <a class="lnk2" href="${esc(c.url)}" target="_blank" rel="noopener">↗ Abrir toma</a>` : ""}${c.err ? `<div class="error" style="margin:6px 0">${esc(c.err)}</div><button class="ghost rvretry" data-k="${k}"${busy ? " disabled" : ""}>↻ Reintentar solo la toma ${k + 1}</button>` : ""}</div>`).join("")}<div class="rvline"><b>Video final</b> · ${esc(rv.stitch.state)}${rv.stitch.url ? ` · <a class="ghost lnk" href="${esc(rv.stitch.url)}" target="_blank" rel="noopener">↗ Abrir video final</a>` : ""}${rv.stitch.err ? `<div class="error" style="margin:6px 0">${esc(rv.stitch.err)}</div><button class="ghost rvretryS"${busy ? " disabled" : ""}>↻ Reintentar la unión</button>` : ""}</div></div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}${extra ? `<p class="imgcost">${esc(extra)}</p>` : ""}`;
-    out.querySelectorAll(".rvretry").forEach(b => b.onclick = () => rvRetry(+b.dataset.k));
-    const rs = out.querySelector(".rvretryS"); if (rs) rs.onclick = () => rvRetryStitch();
-  }
-  async function rvPoll(id, label, onProgress) {
-    const t0 = Date.now();
-    for (;;) {
-      if (rvStop) throw { code: "cancelled" };
-      await new Promise(r => setTimeout(r, 8000));
-      const r = await rwMcp.callTool(RW, "get_task", { id }, { cache: false });
-      const d = r.payload && typeof r.payload === "object" ? r.payload : {};
-      const url = typeof d.url === "string" && d.url ? d.url : null;
-      if (url && !/task_pending/.test(String(d.kind || ""))) return { url, d };
-      const st = String(d.status || "").toUpperCase();
-      if (["FAILED", "CANCELED", "CANCELLED", "ERROR"].includes(st) || /fail|error/i.test(String(d.kind || ""))) {
-        const why = d.failure || d.error || d.message || d.reason || "";
-        throw { message: `${label}: Runway marcó la tarea como fallida${st ? " (" + st + ")" : ""}.${why ? " Motivo: " + (typeof why === "string" ? why : JSON.stringify(why)) : ""}` };
-      }
-      if (typeof d.progressPercent === "number") onProgress(Math.round(d.progressPercent));
-      if (Date.now() - t0 > 14 * 60 * 1000) throw { message: `${label}: Runway tardó demasiado. Revisa tu galería de Runway.` };
-    }
-  }
-  async function rvSubmitShot(k) {
-    const cfgM = RV_MODELS[rv.model], c = rv.clips[k];
-    c.state = "enviando…"; c.err = ""; c.url = ""; rvPaint();
-    const combos = rv.work ? [rv.work] : cfgM.durs.flatMap(d => RV_RATIOS.map(r => ({ d, r })));
-    const badD = new Set(), badR = new Set();
-    for (let i = 0; i < combos.length; i++) {
-      const { d, r } = combos[i];
-      if (badD.has(d) || badR.has(r)) continue;
-      const input = { promptText: rv.texts[k], model: rv.model, startFrame: { taskId: rwImgs[k].taskId }, duration: d.ds[k], rationale: "Toma " + (k + 1) + " de 3 de un video cinematográfico horizontal 720p que cuenta una historia de futuro con 3 imágenes." };
-      if (r) input.ratio = r;
-      try {
-        const g = await rwMcp.callTool(RW, "generate_video", input, { cache: false });
-        const id = rwTaskId(g); if (!id) throw { message: "Runway no devolvió el número de tarea." };
-        rv.ids[k] = id; if (!rv.work) rv.work = { d, r };
-        if (g.payload && typeof g.payload.creditsRemaining === "number") rv.credits.push(g.payload.creditsRemaining);
-        c.state = "en cola…"; rvPaint(); return;
-      } catch (e) {
-        const msg = (e && e.message) || "";
-        if (!(e && e.code === "tool_error" && /ratio|duration|aspect|resolution|invalid|unsupported|not supported/i.test(msg)) || i === combos.length - 1) throw e;
-        const isR = /(^|[^a-z])ratio([^a-z]|$)|aspect/i.test(msg), isD = /duration/i.test(msg);
-        if (isD && !isR) badD.add(d); else if (isR && !isD) badR.add(r);
-      }
-    }
-  }
-  async function rvPollShot(k) {
-    const c = rv.clips[k];
-    try { const r = await rvPoll(rv.ids[k], `Toma ${k + 1}`, p => { c.state = `generando… ${p}%`; rvPaint(); }); c.url = r.url; c.state = "lista"; c.err = ""; }
-    catch (e) { c.state = e && e.code === "cancelled" ? "cancelada" : "falló"; c.err = e && e.code === "cancelled" ? "Se canceló la espera. La toma puede seguir en Runway y gastar créditos." : rwErr(e) + (rv.ids[k] ? ` (tarea ${String(rv.ids[k]).slice(0, 8)})` : ""); }
-    rvPaint();
-  }
-  async function rvStitch() {
-    const st = rv.stitch, secs = rv.work.d.ds, trans = rv.work.d.tr;
-    st.state = "uniendo las 3 tomas…"; st.err = ""; st.url = ""; rvPaint();
-    try {
-      const tryStitch = (clips) => rwMcp.callTool(RW, "stitch_videos", Object.assign({ clips, transition: trans, rationale: "Unir las 3 tomas en un solo video cinematográfico." }, trans === "crossfade" ? { crossfadeSeconds: RV_XFADE } : {}), { cache: false });
-      let sg;
-      try { sg = await tryStitch(rv.ids.map(id => ({ taskId: id }))); }
-      catch (e) { if (e && e.code === "tool_error") sg = await tryStitch(rv.clips.map((c, k) => ({ url: c.url, durationSeconds: secs[k] }))); else throw e; }
-      const sp = sg.payload && typeof sg.payload === "object" ? sg.payload : {};
-      let finalUrl = typeof sp.url === "string" && sp.url && !/task_pending/.test(String(sp.kind || "")) ? sp.url : null;
-      if (!finalUrl) {
-        const sid = rwTaskId(sg); if (!sid) throw { message: "Runway no devolvió el número de tarea de la unión." };
-        finalUrl = (await rvPoll(sid, "Unión", p => { st.state = `uniendo… ${p}%`; rvPaint(); })).url;
-      }
-      st.state = `listo (≈ ${rvTotal(rv.work.d)} s)`; st.url = finalUrl;
-    } catch (e) { st.state = "falló"; st.err = e && e.code === "cancelled" ? "Se canceló la unión." : rwErr(e) + " Las tomas sí están listas: puedes abrirlas con sus enlaces o reintentar la unión."; }
-    rvPaint();
-  }
-  async function rvFinish() {
-    if (rv.clips.every(c => c.url)) await rvStitch();
-    else rvPaint("Algunas tomas no se completaron. Las que sí terminaron se conservan: reintenta solo las que fallaron y la página las unirá.");
-  }
-  function rvBusy(on) {
-    rvRunning = on; const b = $("#btnRv"), sb = $("#btnRvStop");
-    if (b && on) b.disabled = true; if (sb) sb.hidden = !on;
-    if (!on) { rvPaint(); rvRefresh(); }
-  }
-  async function rvGenerate() {
-    const model = $("#rvModel").value;
-    const texts = [0, 1, 2].map(k => ($(`#shot${k}`).value || "").trim());
-    if (texts.some(t => !t)) { toast("Falta el texto de alguna toma"); return; }
-    rvStop = false; rvReset(model, texts); rvBusy(true); $("#btnRv").disabled = true; rvPaint();
-    try {
-      for (let k = 0; k < 3; k++) {            // se envían una por una; si una falla al enviarse, las demás siguen
-        try { await rvSubmitShot(k); } catch (e) { rv.clips[k].state = "falló"; rv.clips[k].err = rwErr(e); rvPaint(); }
-      }
-      await Promise.all([0, 1, 2].map(k => rv.ids[k] && !rv.clips[k].err ? rvPollShot(k) : null));
-      await rvFinish();
-    } finally { rvBusy(false); }
-  }
-  async function rvRetry(k) {
-    if (rvRunning || !rv) return;
-    rvStop = false; rv.texts[k] = ($(`#shot${k}`).value || "").trim() || rv.texts[k]; rvBusy(true); $("#btnRv").disabled = true;
-    try {
-      try { await rvSubmitShot(k); await rvPollShot(k); } catch (e) { rv.clips[k].state = "falló"; rv.clips[k].err = rwErr(e); rvPaint(); }
-      await rvFinish();
-    } finally { rvBusy(false); }
-  }
-  async function rvRetryStitch() {
-    if (rvRunning || !rv || !rv.clips.every(c => c.url)) return;
-    rvStop = false; rvBusy(true); $("#btnRv").disabled = true;
-    try { await rvStitch(); } finally { rvBusy(false); }
-  }
-
-  /* ============ Video Multi-Shot de Runway: guion hecho por Claude a partir de la historia ============ */
-  let msStop = false, msRunning = false, msData = null, msArm = 0;
+  let msStop = false;
   async function msGetMcp() {
     if (rwMcp) return rwMcp;
     try { rwMcp = await window.claude?.use("mcp"); } catch { rwMcp = null; }
     return rwMcp;
-  }
-  function buildMsPrompt() {
-    const sel = selection(), notes = ($("#notes").value || "").trim();
-    return `Eres director de cine y analista de prospectiva en un centro de estudios del futuro. A partir de la narración, vas a imaginar cómo se vive en ese futuro y a escribir el guion de un video corto de 15 segundos con 3 tomas, para el generador de video multi-shot de Runway.
-
-NARRACIÓN
-Título: ${lastStory.title}
-${lastStory.body}
-
-CARTAS ELEGIDAS: ${sel.map(x => x.cat + ": " + x.text).join(" | ")}
-IDEAS DE LA PERSONA PARTICIPANTE: ${notes || "(sin comentarios)"}
-
-QUÉ DEBES HACER
-1. "vida": en 2 o 3 frases sencillas en español, explica cómo se vive en ese futuro (rutinas, lugares, objetos, reglas, qué cambió). Usa solo lo que dice o sugiere la narración.
-2. "situacion": en 1 o 2 frases, la situación específica de la historia que mostrará el video.
-3. "emociones": de 3 a 5 emociones de los personajes o elementos importantes, cada una como {"quien","emocion"}.
-4. "shots": exactamente 3 tomas de unos 5 segundos que juntas forman un cortometraje de 15 segundos con inicio, desarrollo y cierre:
-   - Toma 1: el contexto de la vida cotidiana en ese futuro (lugar, año ${sel[1].text}, objetos, rutina).
-   - Toma 2: la situación específica de la historia.
-   - Toma 3: la emoción y el momento de mayor intensidad, con gestos y rostros visibles.
-   Cada toma lleva "title", "prompt" en español natural y "prompt_en" en inglés (la misma descripción, de 40 a 70 palabras) con movimiento de cámara, acción, luz y las emociones visibles. Describe a los personajes igual en las 3 tomas (edad, rasgos, ropa) y mantén el mismo lugar. Estilo cinematográfico hiperrealista. Sin texto en pantalla ni logotipos. Evita nombres de personas reales, marcas y violencia explícita, para que los filtros de contenido no lo rechacen.
-5. "story" y "story_en": un solo texto (de 70 a 110 palabras, en español y en inglés) que resuma el video completo en sus 3 momentos, para el modo automático.
-
-El JSON debe ser válido: dentro de los textos no uses comillas dobles (usa « » o comillas simples), no pongas saltos de línea dentro de los textos y no dejes comas al final de una lista.
-
-RESPONDE SOLO CON ESTE JSON, sin texto adicional:
-{"title":"...","vida":"...","situacion":"...","emociones":[{"quien":"...","emocion":"..."}],"shots":[{"title":"...","prompt":"...","prompt_en":"..."}],"story":"...","story_en":"..."}`;
-  }
-  function msShell(inner) { const m = $("#mshot"); m.hidden = false; m.innerHTML = `<h2>Video multi-shot · 15 s · 720p</h2>${inner}`; }
-  function openMs() {
-    if (!lastStory || generating) return;
-    msStop = false; msData = null;
-    msShell(`<p class="help">Claude lee la historia, resume cómo se vive en ese futuro y escribe el guion de un video de 3 tomas conectadas: el contexto de la vida, una situación concreta y la emoción del momento. Después Runway lo genera en un solo video horizontal de 15 segundos en 720p.</p>
-      <div class="meta"><button class="ghost" id="btnMsA">✦ Analizar la historia y crear el guion</button></div><div id="msBody"></div>`);
-    $("#btnMsA").onclick = msAnalyze;
-    $("#mshot").scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-  async function msAnalyze() {
-    const btn = $("#btnMsA"), body = $("#msBody");
-    btn.disabled = true;
-    body.innerHTML = `<div class="loading"><div class="spin"></div><span id="msWait">Claude está leyendo la historia y escribiendo el guion… puede tardar hasta un minuto.</span></div>`;
-    try {
-      const sample = await window.claude?.use("sample");
-      if (!sample) throw { message: "Esta función solo está disponible al abrir la página como Artifact en claude.ai, con la sesión iniciada." };
-      const ask = (extra) => sample(buildMsPrompt() + (extra || ""), { cache: false });
-      let data; const r = await ask();
-      try { data = parseJSON(r.text); }
-      catch (e1) { const w = $("#msWait"); if (w) w.textContent = "Ajustando el formato… segundo intento"; data = parseJSON((await ask(RETRY_NOTE)).text); }
-      const shots = arr(data.shots).filter(x => x && (x.prompt_en || x.prompt)).slice(0, 3);
-      if (shots.length < 3) throw { message: "Claude no devolvió las 3 tomas. Inténtalo de nuevo." };
-      msData = { title: String(data.title || lastStory.title).slice(0, 90), vida: String(data.vida || ""), situacion: String(data.situacion || ""),
-        emociones: arr(data.emociones).filter(x => x && x.emocion).slice(0, 5).map(x => ({ quien: String(x.quien || "").slice(0, 60), emocion: String(x.emocion).slice(0, 40) })),
-        shots: shots.map((x, k) => ({ title: String(x.title || "Toma " + (k + 1)).slice(0, 60), es: String(x.prompt || "").slice(0, 900), en: String(x.prompt_en || x.prompt || "").slice(0, 900) })),
-        story: String(data.story || ""), storyEn: String(data.story_en || data.story || "") };
-      msRender();
-    } catch (e) {
-      const m = { not_granted: "No diste permiso para que la página consulte a Claude.", rate_limited: "Se alcanzó el límite de uso. Espera un momento e inténtalo de nuevo.", invalid_json: "La respuesta de Claude no tenía el formato esperado. Inténtalo de nuevo." }[e && e.code];
-      body.innerHTML = `<div class="error">${esc(m || String((e && e.message) || e))}</div>`;
-    } finally { btn.disabled = false; btn.textContent = "↻ Analizar de nuevo"; }
-  }
-  function msRender() {
-    const d = msData, body = $("#msBody");
-    const img1 = rwImgs[0] && rwImgs[0].status === "ok" && rwImgs[0].url;
-    body.innerHTML = `<h3 class="ph">${esc(d.title)}</h3>
-      <div class="msgrid">
-        <div class="msinfo"><b>Cómo se vive en ese futuro</b><p>${esc(d.vida)}</p></div>
-        <div class="msinfo"><b>Situación que muestra el video</b><p>${esc(d.situacion)}</p></div>
-        <div class="msinfo"><b>Emociones</b><p>${d.emociones.map(x => `<span class="chip2">${esc(x.quien ? x.quien + ": " : "")}${esc(x.emocion)}</span>`).join(" ") || "—"}</p></div>
-      </div>
-      <div class="rwbar"><label><input type="radio" name="msMode" value="custom" checked> Por tomas (3 textos, recomendado)</label><label><input type="radio" name="msMode" value="auto"> Automático (un solo texto)</label></div>
-      <div id="msCustom"><div class="shots">${d.shots.map((x, k) => `<div class="shot"><div class="shot-h"><span>${k + 1}</span><b>${esc(x.title)}</b></div><p class="shot-es">${esc(x.es)}</p><textarea class="vtxt" id="msShot${k}" rows="5" spellcheck="true" aria-label="Prompt en inglés de la toma ${k + 1}, editable"></textarea></div>`).join("")}</div></div>
-      <div id="msAuto" hidden><p class="shot-es">${esc(d.story)}</p><textarea class="vtxt" id="msStory" rows="6" spellcheck="true" aria-label="Historia completa en inglés, editable"></textarea></div>
-      <div class="rwbar"><label><input type="checkbox" id="msSound" checked> Con sonido</label><label><input type="checkbox" id="msAnchor"${img1 ? "" : " disabled"}> Usar la imagen 1 de Runway como primer cuadro${img1 ? "" : " (primero genera las imágenes)"}</label></div>
-      <p class="imgcost" id="msCost">Duración 15 segundos, horizontal 16:9, 720p. El costo en créditos se mide al enviar y se muestra después.</p>
-      <div class="meta"><button class="ghost" id="btnMsG">🎬 Generar video multi-shot</button><button class="ghost" id="btnMsStop" hidden>■ Dejar de esperar</button></div>
-      <div id="msOut"></div>`;
-    d.shots.forEach((x, k) => { $(`#msShot${k}`).value = x.en; });
-    $("#msStory").value = d.storyEn;
-    document.querySelectorAll('input[name="msMode"]').forEach(r => r.onchange = () => { const a = r.value === "auto" && r.checked; $("#msCustom").hidden = a; $("#msAuto").hidden = !a; });
-    $("#btnMsStop").onclick = () => { msStop = true; };
-    $("#btnMsG").onclick = () => {
-      const b = $("#btnMsG");
-      if (Date.now() > msArm) { msArm = Date.now() + 6000; b.textContent = "¿Seguro? Gasta créditos de Runway. Clic otra vez"; setTimeout(() => { if (Date.now() >= msArm) b.textContent = "🎬 Generar video multi-shot"; }, 6100); return; }
-      msArm = 0; b.textContent = "🎬 Generar video multi-shot"; msGenerate();
-    };
   }
   async function msPoll(id, onProgress) {
     const t0 = Date.now();
@@ -1953,38 +1395,6 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     }
   }
   const msCredits = async () => { try { const w = await rwMcp.callTool(RW, "whoami", {}, { cache: false }); const t = w.payload && w.payload.credits && w.payload.credits.total; return typeof t === "number" ? t : null; } catch { return null; } };
-  async function msGenerate() {
-    if (msRunning) return;
-    const mcp = await msGetMcp(); const out = $("#msOut");
-    if (!mcp) { out.innerHTML = `<div class="error">Esta función necesita el conector Runway ML conectado en claude.ai.</div>`; return; }
-    const mode = (document.querySelector('input[name="msMode"]:checked') || {}).value || "custom";
-    const input = { duration: 15, aspectRatio: "16:9", resolution: "720p", sound: $("#msSound").checked, rationale: "Video multi-shot de 15 segundos y 720p que muestra cómo se vive en un futuro imaginado y una situación de su historia, pedido desde el generador de escenarios de futuro." };
-    if (mode === "auto") {
-      const t = ($("#msStory").value || "").trim(); if (!t) { toast("Falta el texto de la historia"); return; }
-      input.mode = "auto"; input.storyPrompt = t;
-    } else {
-      const ts = [0, 1, 2].map(k => ($(`#msShot${k}`).value || "").trim()); if (ts.some(t => !t)) { toast("Falta el texto de alguna toma"); return; }
-      input.mode = "custom"; input.shots = ts.map(prompt => ({ prompt }));
-    }
-    if ($("#msAnchor").checked && rwImgs[0] && rwImgs[0].url) input.firstSceneImage = { url: rwImgs[0].url };
-    msRunning = true; msStop = false; trStop = false; $("#btnMsG").disabled = true; $("#btnMsStop").hidden = false;
-    const status = (t, extra) => { out.innerHTML = `<div class="loading"><div class="spin"></div><span>${esc(t)}</span></div>${extra ? `<p class="imgcost">${esc(extra)}</p>` : ""}`; };
-    let spent = "";
-    try {
-      status("Enviando el guion a Runway…");
-      const before = await msCredits();
-      const g = await mcp.callTool(RW, "generate_multishot_video", input, { cache: false });
-      const id = rwTaskId(g); if (!id) throw { message: "Runway no devolvió el número de tarea. Respuesta: " + JSON.stringify(g.payload != null ? g.payload : g.content).slice(0, 200) };
-      const left = g.payload && typeof g.payload.creditsRemaining === "number" ? g.payload.creditsRemaining : await msCredits();
-      if (before != null && left != null) spent = `Créditos restantes: ${left} · costo medido del video: ≈ ${before - left} créditos`; else if (left != null) spent = `Créditos restantes: ${left}`;
-      status("Runway está generando el video multi-shot… suele tardar de 5 a 10 minutos.", spent);
-      const r = await msPoll(id, (pct, secs) => status(`Generando el video multi-shot… ${pct != null ? pct + "% · " : ""}${Math.floor(secs / 60)} min ${secs % 60} s`, spent));
-      out.innerHTML = `<div class="rvline"><b>Video multi-shot</b> · listo · <a class="ghost lnk" href="${esc(r.url)}" target="_blank" rel="noopener">↗ Abrir video</a></div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}<p class="imgcost">El enlace es temporal (vence en unos días). Descarga el video desde esa pestaña para conservarlo.</p>`;
-    } catch (e) {
-      out.innerHTML = `<div class="error">${esc(e && e.code === "cancelled" ? "Dejaste de esperar. El video puede seguir generándose en Runway y gastar créditos." : rwErr(e))}</div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}`;
-    } finally { msRunning = false; $("#btnMsG").disabled = false; $("#btnMsStop").hidden = true; }
-  }
-
   /* ============ Tráiler cinematográfico (prueba con Seedance 2.5): primero borrador y luego versión final ============ */
   let trStop = false, trRunning = false, trData = null, trArm = 0, trArm2 = 0, trDraft = null;
   const TR_SECS = 30;
@@ -2119,7 +1529,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       const b = $("#btnTrF"); if (b) b.disabled = false;
     } finally { trRunning = false; $("#btnTrStop").hidden = true; }
   }
-  function clearViz() { rwStop = true; rvStop = true; msStop = true; trStop = true; { const t = $("#trailer"); if (t) { t.hidden = true; t.innerHTML = ""; } } stopViz(); viz.hidden = true; viz.innerHTML = ""; const m = $("#mshot"); if (m) { m.hidden = true; m.innerHTML = ""; } }
+  function clearViz() { rwStop = true; msStop = true; trStop = true; stopViz(); viz.hidden = true; viz.innerHTML = ""; const t = $("#trailer"); if (t) { t.hidden = true; t.innerHTML = ""; } }
 
   $("#btnGenerate").addEventListener("click", generate);
 

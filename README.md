@@ -5,8 +5,9 @@ Dinámica de cartas para el Centro de Estudios del Futuro. Se eligen 5 cartas
 agregan ideas y Claude escribe una versión breve (2 párrafos) y una extendida
 (4 párrafos: contexto, conflicto, solución y cierre, sin títulos) que resaltan
 qué es diferente a la actualidad; un interruptor cambia entre las dos. La versión
-local sigue con la narrativa larga anterior. Después se puede
-visualizar con escenas animadas y generar prompts de imagen y de video.
+local sigue con la narrativa larga anterior. Después se pueden generar
+imágenes con Runway, prompts de imagen y de video, y un tráiler cinematográfico
+(versión Artifact). La versión local conserva la escena animada.
 
 ## Dos versiones
 
