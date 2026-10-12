@@ -168,6 +168,13 @@
   #story h3 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.5rem, 2.6vw, 2.2rem); font-weight: 400; margin: 6px 0 16px; letter-spacing: .01em; }
   #story .body p { font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.1rem, 1.5vw, 1.35rem); line-height: 1.75; margin: 0 0 1em; color: #dfe4f5; }
   #story .meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  #story .lenrow { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font-size: .9rem; }
+  #story .lenlbl { cursor: pointer; opacity: .55; transition: opacity .2s; user-select: none; }
+  #story .lenlbl.on { opacity: 1; font-weight: 600; }
+  #story .lensw { position: relative; width: 46px; height: 26px; border-radius: 999px; border: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; padding: 0; opacity: .85; }
+  #story .lensw i { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: currentColor; transition: transform .25s; }
+  #story .lensw[aria-checked="true"] i { transform: translateX(20px); }
+  #story .body[hidden] { display: none; }
   .loading { color: var(--muted); display: flex; align-items: center; gap: 12px; padding: 20px 0; }
   .spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #3a4478; border-top-color: #a78bfa; animation: sp 0.8s linear infinite; }
   @keyframes sp { to { transform: rotate(360deg); } }
@@ -537,6 +544,13 @@
   #story h3 { font-family: "New York", Georgia, "Times New Roman", serif; font-size: clamp(1.6rem, 2.8vw, 2.4rem); font-weight: 600; margin: 6px 0 16px; letter-spacing: -.01em; }
   #story .body p { font-family: "New York", Georgia, "Times New Roman", serif; font-size: clamp(1.1rem, 1.5vw, 1.35rem); line-height: 1.75; margin: 0 0 1em; color: #2a2b3d; }
   #story .meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  #story .lenrow { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font-size: .9rem; }
+  #story .lenlbl { cursor: pointer; opacity: .55; transition: opacity .2s; user-select: none; }
+  #story .lenlbl.on { opacity: 1; font-weight: 600; }
+  #story .lensw { position: relative; width: 46px; height: 26px; border-radius: 999px; border: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; padding: 0; opacity: .85; }
+  #story .lensw i { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: currentColor; transition: transform .25s; }
+  #story .lensw[aria-checked="true"] i { transform: translateX(20px); }
+  #story .body[hidden] { display: none; }
   .loading { color: var(--muted); display: flex; align-items: center; gap: 12px; padding: 20px 0; }
   .spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(10,132,255,.25); border-top-color: #0a84ff; animation: sp .8s linear infinite; }
   @keyframes sp { to { transform: rotate(360deg); } }
@@ -991,15 +1005,17 @@ ${notes ? notes : "(No añadió comentarios; usa tu criterio dentro de los pará
 
 Premisa: imagina que en el año ${s[1].text}, en el ámbito de «${s[2].text}», ya es realidad que «${s[3].text}», y que esto afecta sobre todo a «${s[4].text}». Escribe una síntesis creativa e imaginativa de ese futuro: que quede clara la idea de cómo se vería y cómo se vive, y cómo se relacionan y viven ahí todos los elementos de las cartas y las ideas de la persona participante.
 
-Estructura: EXACTAMENTE 4 párrafos, en este orden. No pongas títulos ni nombres de sección: la estructura queda implícita.
+Vas a escribir DOS versiones de la misma historia (mismos personajes, mismo mundo y mismos hechos), para públicos distintos. No pongas títulos ni nombres de sección dentro de los párrafos: la estructura queda implícita.
+- VERSIÓN BREVE: exactamente 2 párrafos (de 45 a 60 palabras cada uno). El primero resume el contexto y el conflicto; el segundo, el clímax o solución y el cierre.
+- VERSIÓN EXTENDIDA: exactamente 4 párrafos, en este orden:
 1. Contexto: pinta el mundo de ese año con una imagen concreta y un personaje o grupo que sirva de hilo conductor; deja ver qué cambió para que esto fuera posible.
 2. Conflicto: la tensión que aparece cuando esto se vuelve real (un dilema, un efecto no previsto, una desigualdad, una dependencia o una resistencia ligada a lo elegido).
 3. Solución: cómo se enfrenta o resuelve esa tensión, en una escena concreta y de mayor intensidad; es el punto más alto de la historia.
 4. Cierre: la nueva normalidad que deja ese futuro y una consecuencia duradera o una pregunta abierta que invite a pensar.
 
 Requisitos:
-- Extensión: unas 250 a 300 palabras en total; cada párrafo de 3 a 4 oraciones.
-- Lo diferente a la actualidad: dentro de los mismos 4 párrafos, y sin crear una sección aparte, haz notar con claridad qué es distinto de hoy. Usa contrastes naturales como «hoy… pero en ese futuro…» o «antes se… ahora ya no». Que cada párrafo deje ver al menos un cambio respecto al presente.
+- Extensión: la versión breve, de 90 a 120 palabras; la extendida, de 250 a 300 palabras (cada párrafo de 3 a 4 oraciones).
+- Lo diferente a la actualidad: en las dos versiones, dentro de los mismos párrafos y sin crear una sección aparte, haz notar con claridad qué es distinto de hoy. Usa contrastes naturales como «hoy… pero en ese futuro…» o «antes se… ahora ya no». Que cada párrafo de la versión extendida y los dos de la breve dejen ver al menos un cambio respecto al presente.
 - Sé creativo e imaginativo: incluye un detalle sorprendente de la vida diaria y escenas con imágenes concretas, evitando clichés de ciencia ficción.
 - Usa lo que aportó la persona participante (comentarios, ideas y preguntas de la consulta) como hechos o rasgos de ese mundo, integrados en la historia.
 - Lenguaje sencillo: palabras de todos los días y oraciones cortas (unas 20 palabras o menos), una sola idea por oración, sin tecnicismos ni anglicismos. Si necesitas una idea técnica, cuéntala con una comparación de la vida diaria. Que lo entienda una niña o un niño de 10 años.
@@ -1007,7 +1023,7 @@ Requisitos:
 - Tono cálido y narrativo, para todo público. Plausible, sin soluciones mágicas. Que el tipo de historia (${s[0].text}) defina la atmósfera, sin caricatura de utopía o distopía.
 - Usa lugares, objetos, sonidos y gestos específicos del año ${s[1].text}.
 - No moralices ni expliques el método.
-- Primera línea: un título breve, sin comillas ni símbolos de formato. Después una línea en blanco y los 4 párrafos, separados por una línea en blanco.`;
+- Formato exacto: primera línea, un título breve sin comillas ni símbolos de formato; una línea en blanco; los 2 párrafos de la versión breve separados por una línea en blanco; luego una línea que contenga solo ---EXTENDIDA---; otra línea en blanco; y los 4 párrafos de la versión extendida separados por una línea en blanco. No escribas ningún otro rótulo.`;
     return { system, user };
   }
 
@@ -1042,11 +1058,22 @@ Requisitos:
   function showStory(html) { story.innerHTML = html; story.classList.add("show"); story.scrollIntoView({ behavior: "smooth", block: "start" }); }
   const esc = (t) => t.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 
+  let storyLong = false;
+  function splitStory(text) {
+    const m = text.split(/\n[ \t]*-{2,}[ \t]*EXTENDIDA[ \t]*-{2,}[ \t]*(?:\n|$)/i);
+    const paras = (t) => t.trim().split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
+    const sp = paras(m[0]);
+    const title = (sp.shift() || "").replace(/^[#*\s"“]+|[*"”\s]+$/g, "");
+    const lp = m.length > 1 ? paras(m.slice(1).join("\n")) : [];
+    return { title, short: sp, long: lp };
+  }
   function renderStory(text, final) {
-    const parts = text.trim().split(/\n\s*\n/);
-    const title = parts.shift().replace(/^[#*\s"“]+|[*"”\s]+$/g, "");
+    const { title, short, long } = splitStory(text);
+    const both = final && long.length > 0;
     story.innerHTML = `<h2>Narrativa del futuro</h2><h3>${esc(title)}</h3>
-      <div class="body">${parts.map(p => `<p>${esc(p.trim())}</p>`).join("")}</div>` +
+      ${both ? `<div class="lenrow"><span class="lenlbl" id="lenS">Breve</span><button class="lensw" id="lenSw" role="switch" aria-checked="${storyLong}" aria-label="Mostrar la versión extendida de la historia"><i></i></button><span class="lenlbl" id="lenL">Extendida</span></div>` : ""}
+      <div class="body" id="bodyShort"${both && storyLong ? " hidden" : ""}>${short.map(p => `<p>${esc(p)}</p>`).join("")}</div>
+      ${both ? `<div class="body" id="bodyLong"${storyLong ? "" : " hidden"}>${long.map(p => `<p>${esc(p)}</p>`).join("")}</div>` : ""}` +
       (final ? `<div class="meta">
         <button class="ghost" id="cpStory">⧉ Copiar narrativa</button>
         <button class="ghost" id="regen">↻ Generar otra versión</button>
@@ -1055,9 +1082,17 @@ Requisitos:
         <button class="ghost viz" id="btnTr">🎞 Tráiler cinematográfico (prueba)</button>
       </div>` : "");
     if (final) {
-      $("#cpStory").onclick = async () => toast((await copy(title + "\n\n" + parts.join("\n\n"))) ? "Narrativa copiada" : "No se pudo copiar");
+      const shown = () => (both && storyLong ? long : short);
+      const sync = () => {
+        if (!both) return;
+        $("#bodyShort").hidden = storyLong; $("#bodyLong").hidden = !storyLong;
+        $("#lenSw").setAttribute("aria-checked", String(storyLong));
+        $("#lenS").classList.toggle("on", !storyLong); $("#lenL").classList.toggle("on", storyLong);
+      };
+      if (both) { $("#lenSw").onclick = () => { storyLong = !storyLong; sync(); }; $("#lenS").onclick = () => { storyLong = false; sync(); }; $("#lenL").onclick = () => { storyLong = true; sync(); }; sync(); }
+      $("#cpStory").onclick = async () => toast((await copy(title + "\n\n" + shown().join("\n\n"))) ? "Narrativa copiada" : "No se pudo copiar");
       $("#regen").onclick = generate;
-      lastStory = { title, body: parts.join("\n\n") };
+      lastStory = { title, body: (long.length ? long : short).join("\n\n") };   // los videos y escenas usan la versión más completa
       $("#btnViz").onclick = visualize;
       $("#btnMs").onclick = openMs;
       $("#btnTr").onclick = openTr;
@@ -1070,7 +1105,7 @@ Requisitos:
 
   async function generate() {
     if (generating || selection().some(x => !x)) return;
-    generating = true; refresh(); clearViz(); lastStory = null;
+    generating = true; refresh(); clearViz(); lastStory = null; storyLong = false;
     $("#btnGenerate").textContent = "✦ Escribiendo…";
     showStory(`<div class="loading"><div class="spin"></div>Tejiendo tu futuro…</div>`);
     try {
@@ -1952,7 +1987,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
 
   /* ============ Tráiler cinematográfico (prueba con Seedance 2.5): primero borrador y luego versión final ============ */
   let trStop = false, trRunning = false, trData = null, trArm = 0, trArm2 = 0, trDraft = null;
-  const TR_SECS = 20;
+  const TR_SECS = 30;
   function buildTrPrompt() {
     const sel = selection(), notes = ($("#notes").value || "").trim();
     return `Eres director de cine y de tráilers, y a la vez analista de prospectiva en un centro de estudios del futuro. Con la narración siguiente vas a escribir el guion de un TRÁILER cinematográfico de ${TR_SECS} segundos: un adelanto de película que muestra cómo se ve y se vive ese futuro, para que el público quiera ver «la película».
@@ -1966,7 +2001,7 @@ IDEAS DE LA PERSONA PARTICIPANTE: ${notes || "(sin comentarios)"}
 
 QUÉ DEBES HACER
 1. "tagline": una frase de gancho de máximo 10 palabras, como la de un cartel de cine.
-2. "shots": de 7 a 9 tomas cortas (de 2 a 3 segundos cada una; suman exactamente ${TR_SECS} s) con ritmo de tráiler: apertura misteriosa y atmosférica, presentación del mundo y del personaje, subida de tensión con el conflicto, cortes más rápidos, clímax espectacular y un último plano memorable con el título. Cada toma lleva "t" (rango de tiempo, por ejemplo «0-3s»), "title", "prompt" en español natural y "prompt_en" en inglés (la misma descripción, 25 a 45 palabras) con tipo de plano, movimiento de cámara, acción, luz y emoción visible. Cada toma debe tener una intención visual clara y mostrar algo distinto del presente (el año ${sel[1].text}).
+2. "shots": de 10 a 12 tomas cortas (de 2 a 3 segundos cada una; suman exactamente ${TR_SECS} s) con ritmo de tráiler: apertura misteriosa y atmosférica, presentación del mundo y del personaje, subida de tensión con el conflicto, cortes más rápidos, clímax espectacular y un último plano memorable con el título. Cada toma lleva "t" (rango de tiempo, por ejemplo «0-3s»), "title", "prompt" en español natural y "prompt_en" en inglés (la misma descripción, 25 a 45 palabras) con tipo de plano, movimiento de cámara, acción, luz y emoción visible. Cada toma debe tener una intención visual clara y mostrar algo distinto del presente (el año ${sel[1].text}).
 3. Mantén el mismo personaje principal (edad, rasgos, ropa) y el mismo mundo en todas las tomas. Estilo de película de estreno: cinematográfico, hiperrealista, óptica anamórfica, colores de gradación de cine. No pongas texto en pantalla ni logotipos. Evita nombres de personas reales, marcas y violencia explícita para no activar los filtros.
 4. "audio_en": en inglés, una dirección de sonido de tráiler en 1 o 2 frases: música (por ejemplo pulso grave que crece hasta un clímax orquestal), efectos concretos de ese mundo y un golpe final. Sin diálogos largos; a lo mucho una voz en off breve de una frase.
 
@@ -2000,8 +2035,8 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       let data; const r = await ask();
       try { data = parseJSON(r.text); }
       catch (e1) { const w = $("#trWait"); if (w) w.textContent = "Ajustando el formato… segundo intento"; data = parseJSON((await ask(RETRY_NOTE)).text); }
-      const shots = arr(data.shots).filter(x => x && (x.prompt_en || x.prompt)).slice(0, 9);
-      if (shots.length < 5) throw { message: "Claude no devolvió suficientes tomas. Inténtalo de nuevo." };
+      const shots = arr(data.shots).filter(x => x && (x.prompt_en || x.prompt)).slice(0, 12);
+      if (shots.length < 6) throw { message: "Claude no devolvió suficientes tomas. Inténtalo de nuevo." };
       trData = { title: String(data.title || lastStory.title).slice(0, 90), tagline: String(data.tagline || "").slice(0, 120), audio: String(data.audio_en || "Deep rising pulse, orchestral crescendo, a final impact hit.").slice(0, 400),
         shots: shots.map((x, k) => ({ t: String(x.t || "").slice(0, 12), title: String(x.title || "Toma " + (k + 1)).slice(0, 60), es: String(x.prompt || "").slice(0, 500), en: String(x.prompt_en || x.prompt || "").slice(0, 500) })) };
       trRender();
@@ -2034,7 +2069,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     const mcp = await msGetMcp(); const out = $("#trOut");
     if (!mcp) { out.innerHTML = `<div class="error">Esta función necesita el conector Runway ML conectado en claude.ai.</div>`; return; }
     const text = ($("#trPrompt").value || "").trim(); if (!text) { toast("Falta el texto del tráiler"); return; }
-    const input = { model: "seedance-2.5", draft: true, duration: TR_SECS, ratio: "16:9", generateAudio: true, promptText: text, rationale: "Borrador (480p) de un tráiler cinematográfico de 20 segundos con audio que muestra cómo se vive un futuro imaginado, pedido desde el generador de escenarios de futuro." };
+    const input = { model: "seedance-2.5", draft: true, duration: TR_SECS, ratio: "16:9", generateAudio: true, promptText: text, rationale: "Borrador (480p) de un tráiler cinematográfico de 30 segundos con audio que muestra cómo se vive un futuro imaginado, pedido desde el generador de escenarios de futuro." };
     if ($("#trRefs") && $("#trRefs").checked) { const refs = rwImgs.filter(i => i && i.status === "ok" && i.url).slice(0, 3).map((i, k) => ({ url: i.url, tag: "img" + (k + 1) })); if (refs.length) input.referenceImages = refs; }
     trRunning = true; trStop = false; msStop = false; trDraft = null; $("#btnTrG").disabled = true; $("#btnTrStop").hidden = false;
     const status = (t, extra) => { out.innerHTML = `<div class="loading"><div class="spin"></div><span>${esc(t)}</span></div>${extra ? `<p class="imgcost">${esc(extra)}</p>` : ""}`; };
@@ -2070,7 +2105,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     try {
       status("Enviando a Runway la versión final…");
       const before = await msCredits();
-      const fin = Object.assign({}, trDraft.input, { resolution: "720p", rationale: "Versión final en 720p del tráiler cinematográfico de 20 segundos que el usuario aprobó como borrador, con el mismo guion y referencias." });
+      const fin = Object.assign({}, trDraft.input, { resolution: "720p", rationale: "Versión final en 720p del tráiler cinematográfico de 30 segundos que el usuario aprobó como borrador, con el mismo guion y referencias." });
       delete fin.draft;
       const g = await mcp.callTool(RW, "generate_video", fin, { cache: false });
       const id = rwTaskId(g); if (!id) throw { message: "Runway no devolvió el número de tarea. Respuesta: " + JSON.stringify(g.payload != null ? g.payload : g.content).slice(0, 300) };

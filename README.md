@@ -2,9 +2,10 @@
 
 Dinámica de cartas para el Centro de Estudios del Futuro. Se eligen 5 cartas
 (tipo de historia, horizonte, temática, evento y a quién o dónde le sucede), se
-agregan ideas y Claude escribe una síntesis sencilla en 4 párrafos
-(contexto, conflicto, solución y cierre, sin títulos) que resalta qué es
-diferente a la actualidad. En la versión local el texto sigue siendo más largo. Después se puede
+agregan ideas y Claude escribe una versión breve (2 párrafos) y una extendida
+(4 párrafos: contexto, conflicto, solución y cierre, sin títulos) que resaltan
+qué es diferente a la actualidad; un interruptor cambia entre las dos. La versión
+local sigue con la narrativa larga anterior. Después se puede
 visualizar con escenas animadas y generar prompts de imagen y de video.
 
 ## Dos versiones
