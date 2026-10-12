@@ -2018,7 +2018,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       <p class="help">Texto que se envía a Runway (en inglés, editable):</p>
       <textarea class="vtxt" id="trPrompt" rows="14" spellcheck="true" aria-label="Prompt completo del tráiler, editable"></textarea>
       <div class="rwbar"><label><input type="checkbox" id="trRefs"${nImg ? " checked" : " disabled"}> Usar las imágenes de Runway como referencia${nImg ? " (" + nImg + ")" : " (primero genera las imágenes)"}</label></div>
-      <p class="imgcost" id="trCost">${TR_SECS} segundos, horizontal 16:9, con música y efectos. El borrador se hace en 480p; la versión final se renderiza en 1080p. Seedance 2.5 es un modelo caro (la versión final cuesta unos 68 créditos por segundo): el costo real se mide al enviar.</p>
+      <p class="imgcost" id="trCost">${TR_SECS} segundos, horizontal 16:9, con música y efectos. El borrador se hace en 480p y la versión final en 720p, con el mismo guion. Seedance 2.5 es un modelo caro: el costo real de cada paso se mide al enviar y se muestra.</p>
       <div class="meta"><button class="ghost" id="btnTrG">🎞 Generar borrador</button><button class="ghost" id="btnTrStop" hidden>■ Dejar de esperar</button></div>
       <div id="trOut"></div>`;
     $("#trPrompt").value = trComposePrompt(d);
@@ -2048,14 +2048,14 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       if (before != null && left != null) spent = `Créditos restantes: ${left} · costo medido del borrador: ≈ ${before - left} créditos`; else if (left != null) spent = `Créditos restantes: ${left}`;
       status("Runway está generando el borrador del tráiler…", spent);
       const r = await msPoll(id, (pct, secs) => status(`Generando el borrador… ${pct != null ? pct + "% · " : ""}${Math.floor(secs / 60)} min ${secs % 60} s`, spent));
-      trDraft = { id, url: r.url, spent };
+      trDraft = { id, url: r.url, spent, input };
       out.innerHTML = `<div class="rvline"><b>Borrador del tráiler (480p)</b> · listo · <a class="ghost lnk" href="${esc(r.url)}" target="_blank" rel="noopener">↗ Abrir borrador</a></div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}
-        <p class="imgcost">Si te gusta, renderízalo en calidad final (1080p). Cuesta como un video nuevo completo y el borrador no se devuelve en créditos. Si quieres cambiar algo, edita el texto y genera otro borrador.</p>
-        <div class="meta"><button class="ghost" id="btnTrF">✨ Renderizar versión final (1080p)</button></div><div id="trFinal"></div>`;
+        <p class="imgcost">Si te gusta, genera la versión final en 720p con el mismo guion. Es un video nuevo completo (el borrador no se devuelve en créditos) y su costo se mide al enviar. Si quieres cambiar algo, edita el texto y genera otro borrador.</p>
+        <div class="meta"><button class="ghost" id="btnTrF">✨ Generar versión final (720p)</button></div><div id="trFinal"></div>`;
       $("#btnTrF").onclick = () => {
         const b = $("#btnTrF");
-        if (Date.now() > trArm2) { trArm2 = Date.now() + 6000; b.textContent = "¿Seguro? Es el paso más caro. Clic otra vez"; setTimeout(() => { if (Date.now() >= trArm2) b.textContent = "✨ Renderizar versión final (1080p)"; }, 6100); return; }
-        trArm2 = 0; b.textContent = "✨ Renderizar versión final (1080p)"; trFinal();
+        if (Date.now() > trArm2) { trArm2 = Date.now() + 6000; b.textContent = "¿Seguro? Gasta créditos. Clic otra vez"; setTimeout(() => { if (Date.now() >= trArm2) b.textContent = "✨ Generar versión final (720p)"; }, 6100); return; }
+        trArm2 = 0; b.textContent = "✨ Generar versión final (720p)"; trFinal();
       };
     } catch (e) {
       out.innerHTML = `<div class="error">${esc(e && e.code === "cancelled" ? "Dejaste de esperar. El video puede seguir generándose en Runway y gastar créditos." : rwErr(e))}</div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}`;
@@ -2070,13 +2070,15 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     try {
       status("Enviando a Runway la versión final…");
       const before = await msCredits();
-      const g = await mcp.callTool(RW, "enhance_video_draft", { taskId: trDraft.id, rationale: "Versión final en 1080p del tráiler cinematográfico que el usuario aprobó como borrador." }, { cache: false });
+      const fin = Object.assign({}, trDraft.input, { resolution: "720p", rationale: "Versión final en 720p del tráiler cinematográfico de 20 segundos que el usuario aprobó como borrador, con el mismo guion y referencias." });
+      delete fin.draft;
+      const g = await mcp.callTool(RW, "generate_video", fin, { cache: false });
       const id = rwTaskId(g); if (!id) throw { message: "Runway no devolvió el número de tarea. Respuesta: " + JSON.stringify(g.payload != null ? g.payload : g.content).slice(0, 300) };
       const left = g.payload && typeof g.payload.creditsRemaining === "number" ? g.payload.creditsRemaining : await msCredits();
       if (before != null && left != null) spent = `Créditos restantes: ${left} · costo medido de la versión final: ≈ ${before - left} créditos`; else if (left != null) spent = `Créditos restantes: ${left}`;
-      status("Runway está renderizando la versión final…", spent);
-      const r = await msPoll(id, (pct, secs) => status(`Renderizando la versión final… ${pct != null ? pct + "% · " : ""}${Math.floor(secs / 60)} min ${secs % 60} s`, spent));
-      out.innerHTML = `<div class="rvline"><b>Tráiler final (1080p)</b> · listo · <a class="ghost lnk" href="${esc(r.url)}" target="_blank" rel="noopener">↗ Abrir tráiler</a></div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}<p class="imgcost">El enlace es temporal (vence en unos días). Descarga el video desde esa pestaña para conservarlo.</p>`;
+      status("Runway está generando la versión final (720p)…", spent);
+      const r = await msPoll(id, (pct, secs) => status(`Generando la versión final… ${pct != null ? pct + "% · " : ""}${Math.floor(secs / 60)} min ${secs % 60} s`, spent));
+      out.innerHTML = `<div class="rvline"><b>Tráiler final (720p)</b> · listo · <a class="ghost lnk" href="${esc(r.url)}" target="_blank" rel="noopener">↗ Abrir tráiler</a></div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}<p class="imgcost">El enlace es temporal (vence en unos días). Descarga el video desde esa pestaña para conservarlo.</p>`;
     } catch (e) {
       out.innerHTML = `<div class="error">${esc(e && e.code === "cancelled" ? "Dejaste de esperar. La versión final puede seguir generándose en Runway y gastar créditos." : rwErr(e))}</div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}`;
       const b = $("#btnTrF"); if (b) b.disabled = false;
