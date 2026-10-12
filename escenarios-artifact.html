@@ -95,6 +95,9 @@
   }
   .deck:not(.flipped) .back:hover { box-shadow: 0 12px 36px rgba(0,0,0,.55), 0 0 28px color-mix(in srgb, var(--c) 40%, transparent); transform: translateY(-4px); }
   .back:focus-visible { outline: 2px solid var(--c); outline-offset: 4px; }
+  .glyph svg, .corner svg { width: 1em; height: 1em; display: block; }
+  .glyph svg { filter: drop-shadow(0 0 10px var(--c)); }
+  .glyph svg, .corner svg { width: 1em; height: 1em; display: block; }
   .glyph { font-size: clamp(3rem, 6vw, 4.6rem); line-height: 1; color: var(--c); text-shadow: 0 0 24px var(--c); }
   .back .name { font-size: .85rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink); text-align: center; padding: 0 16px; font-weight: 600; }
   .back .hint { font-size: .72rem; color: var(--muted); letter-spacing: .08em; }
@@ -809,7 +812,6 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
 
 <div class="fab-wrap">
   <button class="fab sec" id="btnCopyPrompt" disabled title="Copia el prompt para usarlo en cualquier IA">⧉ Copiar prompt</button>
-  <a class="fab sec" id="lnkClaude" target="_blank" rel="noopener" aria-disabled="true" title="Abre un chat nuevo en Claude con el prompt ya escrito">↗ Abrir en Claude</a>
   <button class="fab" id="btnGenerate" disabled>✦ Generar narrativa</button>
 </div>
 
@@ -832,18 +834,18 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
 (() => {
   /* ============ Contenido de las cartas (editable) ============ */
   const DECKS = [
-    { id: "tipo",    name: "Tipo de historia", glyph: "♠", color: "#a78bfa",
+    { id: "tipo",    name: "Tipo de historia", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l2.2 6.3 6.3 2.2-6.3 2.2L12 19.5l-2.2-6.3-6.3-2.2 6.3-2.2z"/><path d="M19 3v4M17 5h4"/></svg>`, color: "#a78bfa",
       items: ["Inspiradora", "Misteriosa", "Utópica", "Surrealista"] },
-    { id: "year",    name: "Horizonte", glyph: "♦", color: "#22d3ee", big: true,
+    { id: "year",    name: "Horizonte", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.5V12l3.6 2.2"/><path d="M3 12h2M19 12h2"/></svg>`, color: "#22d3ee", big: true,
       items: ["2045", "2055", "2074", "2099"] },
-    { id: "tema",    name: "Temática", glyph: "♣", color: "#4ade80",
+    { id: "tema",    name: "Temática", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1.8"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg>`, color: "#4ade80",
       items: ["Sociedad", "Tecnología", "Ecología"] },
-    { id: "evento",  name: "¿Qué sucede?", glyph: "♥", color: "#fbbf24",
+    { id: "evento",  name: "¿Qué sucede?", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5c3.2 2.4 4.6 6 4.2 10l2.3 3.2-3.7.6L12 21l-2.8-4.7-3.7-.6 2.3-3.2c-.4-4 1-7.6 4.2-10z"/><circle cx="12" cy="9.5" r="1.7"/></svg>`, color: "#fbbf24",
       items: ["Todos los alimentos se imprimen en casa con impresoras 3D",
               "Especies extintas son resucitadas y reintroducidas en sus hábitats",
               "Los humanos pueden comunicarse sin hablar ni escribir",
               "Los humanos habitan Marte de forma permanente"] },
-    { id: "quien",   name: "¿A quién / dónde?", glyph: "★", color: "#f472b6",
+    { id: "quien",   name: "¿A quién / dónde?", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5.2"/><path d="M2.8 15.5c-.9-2 3.5-5.8 9.2-8.2s10.5-2.4 9.4-.3"/><path d="M21.2 8.5c.9 2-3.5 5.8-9.2 8.2"/></svg>`, color: "#f472b6",
       items: ["Fábricas automatizadas",
               "Personas con más de 120 años",
               "Una ciudad flotante que viaja por los océanos",
@@ -967,9 +969,6 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
     $("#btnGenerate").disabled = !ok || generating;
     $("#btnCopyPrompt").disabled = !ok;
     $("#btnGenerate").title = ok ? "" : "Elige una carta de cada mazo";
-    const lk = $("#lnkClaude");
-    if (ok) { lk.href = claudeUrl(joinPrompt(buildPrompt())); lk.removeAttribute("aria-disabled"); }
-    else { lk.removeAttribute("href"); lk.setAttribute("aria-disabled", "true"); }
   }
 
   /* ============ Prompt ============ */
@@ -1016,7 +1015,7 @@ Requisitos:
   const claudeUrl = (text) => "https://claude.ai/new?q=" + encodeURIComponent(text);
   const claudeLink = (text, label) => `<a class="ghost lnk" href="${claudeUrl(text)}" target="_blank" rel="noopener" data-copy="1">${label || "↗ Abrir en Claude"}</a>`;
   document.addEventListener("click", (e) => {
-    const a = e.target.closest && e.target.closest("a[data-copy], #lnkClaude");
+    const a = e.target.closest && e.target.closest("a[data-copy]");
     if (!a) return;
     if (a.getAttribute("aria-disabled") === "true") { e.preventDefault(); return; }
     // copia el prompt por si el chat nuevo no lo recibe prellenado
