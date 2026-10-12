@@ -370,7 +370,7 @@
   .msinfo b { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
   .msinfo p { margin: 6px 0 0; line-height: 1.5; font-size: .95rem; }
   .chip2 { display: inline-block; padding: 3px 10px; border-radius: 999px; margin: 2px 2px 2px 0; font-size: .82rem; border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); }
-  #mshot { margin-top: 26px; }
+  #mshot, #trailer { margin-top: 26px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <style id="css-light" media="not all">
@@ -764,7 +764,7 @@
   .msinfo b { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
   .msinfo p { margin: 6px 0 0; line-height: 1.5; font-size: .95rem; }
   .chip2 { display: inline-block; padding: 3px 10px; border-radius: 999px; margin: 2px 2px 2px 0; font-size: .82rem; border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); }
-  #mshot { margin-top: 26px; }
+  #mshot, #trailer { margin-top: 26px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <script>
@@ -808,6 +808,7 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
   <section class="panel" id="story" aria-live="polite"></section>
   <section class="panel" id="visual" hidden></section>
   <section class="panel" id="mshot" hidden></section>
+  <section class="panel" id="trailer" hidden></section>
 </div>
 
 <div class="fab-wrap">
@@ -1051,6 +1052,7 @@ Requisitos:
         <button class="ghost" id="regen">↻ Generar otra versión</button>
         <button class="ghost viz" id="btnViz">🎞 Visualizar escena</button>
         <button class="ghost viz" id="btnMs">🎬 Video multi-shot (15 s)</button>
+        <button class="ghost viz" id="btnTr">🎞 Tráiler cinematográfico (prueba)</button>
       </div>` : "");
     if (final) {
       $("#cpStory").onclick = async () => toast((await copy(title + "\n\n" + parts.join("\n\n"))) ? "Narrativa copiada" : "No se pudo copiar");
@@ -1058,6 +1060,7 @@ Requisitos:
       lastStory = { title, body: parts.join("\n\n") };
       $("#btnViz").onclick = visualize;
       $("#btnMs").onclick = openMs;
+      $("#btnTr").onclick = openTr;
     }
   }
   function showError(msg) {
@@ -1898,7 +1901,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
   async function msPoll(id, onProgress) {
     const t0 = Date.now();
     for (;;) {
-      if (msStop) throw { code: "cancelled" };
+      if (msStop || trStop) throw { code: "cancelled" };
       await new Promise(r => setTimeout(r, 10000));
       const r = await rwMcp.callTool(RW, "get_task", { id }, { cache: false });
       const p = r.payload, d = p && typeof p === "object" ? p : {};
@@ -1929,7 +1932,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       input.mode = "custom"; input.shots = ts.map(prompt => ({ prompt }));
     }
     if ($("#msAnchor").checked && rwImgs[0] && rwImgs[0].url) input.firstSceneImage = { url: rwImgs[0].url };
-    msRunning = true; msStop = false; $("#btnMsG").disabled = true; $("#btnMsStop").hidden = false;
+    msRunning = true; msStop = false; trStop = false; $("#btnMsG").disabled = true; $("#btnMsStop").hidden = false;
     const status = (t, extra) => { out.innerHTML = `<div class="loading"><div class="spin"></div><span>${esc(t)}</span></div>${extra ? `<p class="imgcost">${esc(extra)}</p>` : ""}`; };
     let spent = "";
     try {
@@ -1946,7 +1949,140 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
       out.innerHTML = `<div class="error">${esc(e && e.code === "cancelled" ? "Dejaste de esperar. El video puede seguir generándose en Runway y gastar créditos." : rwErr(e))}</div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}`;
     } finally { msRunning = false; $("#btnMsG").disabled = false; $("#btnMsStop").hidden = true; }
   }
-  function clearViz() { rwStop = true; rvStop = true; msStop = true; stopViz(); viz.hidden = true; viz.innerHTML = ""; const m = $("#mshot"); if (m) { m.hidden = true; m.innerHTML = ""; } }
+
+  /* ============ Tráiler cinematográfico (prueba con Seedance 2.5): primero borrador y luego versión final ============ */
+  let trStop = false, trRunning = false, trData = null, trArm = 0, trArm2 = 0, trDraft = null;
+  const TR_SECS = 20;
+  function buildTrPrompt() {
+    const sel = selection(), notes = ($("#notes").value || "").trim();
+    return `Eres director de cine y de tráilers, y a la vez analista de prospectiva en un centro de estudios del futuro. Con la narración siguiente vas a escribir el guion de un TRÁILER cinematográfico de ${TR_SECS} segundos: un adelanto de película que muestra cómo se ve y se vive ese futuro, para que el público quiera ver «la película».
+
+NARRACIÓN
+Título: ${lastStory.title}
+${lastStory.body}
+
+CARTAS ELEGIDAS: ${sel.map(x => x.cat + ": " + x.text).join(" | ")}
+IDEAS DE LA PERSONA PARTICIPANTE: ${notes || "(sin comentarios)"}
+
+QUÉ DEBES HACER
+1. "tagline": una frase de gancho de máximo 10 palabras, como la de un cartel de cine.
+2. "shots": de 7 a 9 tomas cortas (de 2 a 3 segundos cada una; suman exactamente ${TR_SECS} s) con ritmo de tráiler: apertura misteriosa y atmosférica, presentación del mundo y del personaje, subida de tensión con el conflicto, cortes más rápidos, clímax espectacular y un último plano memorable con el título. Cada toma lleva "t" (rango de tiempo, por ejemplo «0-3s»), "title", "prompt" en español natural y "prompt_en" en inglés (la misma descripción, 25 a 45 palabras) con tipo de plano, movimiento de cámara, acción, luz y emoción visible. Cada toma debe tener una intención visual clara y mostrar algo distinto del presente (el año ${sel[1].text}).
+3. Mantén el mismo personaje principal (edad, rasgos, ropa) y el mismo mundo en todas las tomas. Estilo de película de estreno: cinematográfico, hiperrealista, óptica anamórfica, colores de gradación de cine. No pongas texto en pantalla ni logotipos. Evita nombres de personas reales, marcas y violencia explícita para no activar los filtros.
+4. "audio_en": en inglés, una dirección de sonido de tráiler en 1 o 2 frases: música (por ejemplo pulso grave que crece hasta un clímax orquestal), efectos concretos de ese mundo y un golpe final. Sin diálogos largos; a lo mucho una voz en off breve de una frase.
+
+El JSON debe ser válido: dentro de los textos no uses comillas dobles (usa « » o comillas simples), no pongas saltos de línea dentro de los textos y no dejes comas al final de una lista.
+
+RESPONDE SOLO CON ESTE JSON, sin texto adicional:
+{"title":"...","tagline":"...","shots":[{"t":"0-3s","title":"...","prompt":"...","prompt_en":"..."}],"audio_en":"..."}`;
+  }
+  function trComposePrompt(d) {
+    return `Cinematic movie trailer, ${TR_SECS} seconds, 16:9, hyper-realistic, anamorphic lens, film color grading, fast trailer pacing with quick cuts. No on-screen text, no logos, no subtitles. The same main character and world in every shot.\n\n` +
+      d.shots.map(x => `${x.t}: ${x.en}`).join("\n") +
+      `\n\nSound design: ${d.audio}`;
+  }
+  function trShell(inner) { const m = $("#trailer"); m.hidden = false; m.innerHTML = `<h2>Tráiler cinematográfico · ${TR_SECS} s · prueba</h2>${inner}`; }
+  function openTr() {
+    if (!lastStory || generating) return;
+    trStop = false; trData = null; trDraft = null;
+    trShell(`<p class="help">Claude convierte la historia en un guion de tráiler de ${TR_SECS} segundos (varias tomas cortas, música y efectos). Runway lo genera primero como borrador económico; si te gusta, se vuelve a generar en calidad final.</p>
+      <div class="meta"><button class="ghost" id="btnTrA">✦ Escribir el guion del tráiler</button></div><div id="trBody"></div>`);
+    $("#btnTrA").onclick = trAnalyze;
+    $("#trailer").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  async function trAnalyze() {
+    const btn = $("#btnTrA"), body = $("#trBody");
+    btn.disabled = true;
+    body.innerHTML = `<div class="loading"><div class="spin"></div><span id="trWait">Claude está escribiendo el guion del tráiler… puede tardar hasta un minuto.</span></div>`;
+    try {
+      const sample = await window.claude?.use("sample");
+      if (!sample) throw { message: "Esta función solo está disponible al abrir la página como Artifact en claude.ai, con la sesión iniciada." };
+      const ask = (extra) => sample(buildTrPrompt() + (extra || ""), { cache: false });
+      let data; const r = await ask();
+      try { data = parseJSON(r.text); }
+      catch (e1) { const w = $("#trWait"); if (w) w.textContent = "Ajustando el formato… segundo intento"; data = parseJSON((await ask(RETRY_NOTE)).text); }
+      const shots = arr(data.shots).filter(x => x && (x.prompt_en || x.prompt)).slice(0, 9);
+      if (shots.length < 5) throw { message: "Claude no devolvió suficientes tomas. Inténtalo de nuevo." };
+      trData = { title: String(data.title || lastStory.title).slice(0, 90), tagline: String(data.tagline || "").slice(0, 120), audio: String(data.audio_en || "Deep rising pulse, orchestral crescendo, a final impact hit.").slice(0, 400),
+        shots: shots.map((x, k) => ({ t: String(x.t || "").slice(0, 12), title: String(x.title || "Toma " + (k + 1)).slice(0, 60), es: String(x.prompt || "").slice(0, 500), en: String(x.prompt_en || x.prompt || "").slice(0, 500) })) };
+      trRender();
+    } catch (e) {
+      const m = { not_granted: "No diste permiso para que la página consulte a Claude.", rate_limited: "Se alcanzó el límite de uso. Espera un momento e inténtalo de nuevo.", invalid_json: "La respuesta de Claude no tenía el formato esperado. Inténtalo de nuevo." }[e && e.code];
+      body.innerHTML = `<div class="error">${esc(m || String((e && e.message) || e))}</div>`;
+    } finally { btn.disabled = false; btn.textContent = "↻ Escribir de nuevo"; }
+  }
+  function trRender() {
+    const d = trData, body = $("#trBody");
+    const nImg = rwImgs.filter(i => i && i.status === "ok" && i.url).length;
+    body.innerHTML = `<h3 class="ph">${esc(d.title)}</h3>${d.tagline ? `<p class="shot-es"><i>«${esc(d.tagline)}»</i></p>` : ""}
+      <div class="shots">${d.shots.map((x, k) => `<div class="shot"><div class="shot-h"><span>${k + 1}</span><b>${esc((x.t ? x.t + " · " : "") + x.title)}</b></div><p class="shot-es">${esc(x.es)}</p></div>`).join("")}</div>
+      <p class="help">Texto que se envía a Runway (en inglés, editable):</p>
+      <textarea class="vtxt" id="trPrompt" rows="14" spellcheck="true" aria-label="Prompt completo del tráiler, editable"></textarea>
+      <div class="rwbar"><label><input type="checkbox" id="trRefs"${nImg ? " checked" : " disabled"}> Usar las imágenes de Runway como referencia${nImg ? " (" + nImg + ")" : " (primero genera las imágenes)"}</label></div>
+      <p class="imgcost" id="trCost">${TR_SECS} segundos, horizontal 16:9, con música y efectos. El borrador se hace en 480p; la versión final se renderiza en 1080p. Seedance 2.5 es un modelo caro (la versión final cuesta unos 68 créditos por segundo): el costo real se mide al enviar.</p>
+      <div class="meta"><button class="ghost" id="btnTrG">🎞 Generar borrador</button><button class="ghost" id="btnTrStop" hidden>■ Dejar de esperar</button></div>
+      <div id="trOut"></div>`;
+    $("#trPrompt").value = trComposePrompt(d);
+    $("#btnTrStop").onclick = () => { trStop = true; };
+    $("#btnTrG").onclick = () => {
+      const b = $("#btnTrG");
+      if (Date.now() > trArm) { trArm = Date.now() + 6000; b.textContent = "¿Seguro? Gasta créditos de Runway. Clic otra vez"; setTimeout(() => { if (Date.now() >= trArm) b.textContent = "🎞 Generar borrador"; }, 6100); return; }
+      trArm = 0; b.textContent = "🎞 Generar borrador"; trGenerate();
+    };
+  }
+  async function trGenerate() {
+    if (trRunning) return;
+    const mcp = await msGetMcp(); const out = $("#trOut");
+    if (!mcp) { out.innerHTML = `<div class="error">Esta función necesita el conector Runway ML conectado en claude.ai.</div>`; return; }
+    const text = ($("#trPrompt").value || "").trim(); if (!text) { toast("Falta el texto del tráiler"); return; }
+    const input = { model: "seedance-2.5", draft: true, duration: TR_SECS, ratio: "16:9", generateAudio: true, promptText: text, rationale: "Borrador (480p) de un tráiler cinematográfico de 20 segundos con audio que muestra cómo se vive un futuro imaginado, pedido desde el generador de escenarios de futuro." };
+    if ($("#trRefs") && $("#trRefs").checked) { const refs = rwImgs.filter(i => i && i.status === "ok" && i.url).slice(0, 3).map((i, k) => ({ url: i.url, tag: "img" + (k + 1) })); if (refs.length) input.referenceImages = refs; }
+    trRunning = true; trStop = false; msStop = false; trDraft = null; $("#btnTrG").disabled = true; $("#btnTrStop").hidden = false;
+    const status = (t, extra) => { out.innerHTML = `<div class="loading"><div class="spin"></div><span>${esc(t)}</span></div>${extra ? `<p class="imgcost">${esc(extra)}</p>` : ""}`; };
+    let spent = "";
+    try {
+      status("Enviando el guion a Runway…");
+      const before = await msCredits();
+      const g = await mcp.callTool(RW, "generate_video", input, { cache: false });
+      const id = rwTaskId(g); if (!id) throw { message: "Runway no devolvió el número de tarea. Respuesta: " + JSON.stringify(g.payload != null ? g.payload : g.content).slice(0, 300) };
+      const left = g.payload && typeof g.payload.creditsRemaining === "number" ? g.payload.creditsRemaining : await msCredits();
+      if (before != null && left != null) spent = `Créditos restantes: ${left} · costo medido del borrador: ≈ ${before - left} créditos`; else if (left != null) spent = `Créditos restantes: ${left}`;
+      status("Runway está generando el borrador del tráiler…", spent);
+      const r = await msPoll(id, (pct, secs) => status(`Generando el borrador… ${pct != null ? pct + "% · " : ""}${Math.floor(secs / 60)} min ${secs % 60} s`, spent));
+      trDraft = { id, url: r.url, spent };
+      out.innerHTML = `<div class="rvline"><b>Borrador del tráiler (480p)</b> · listo · <a class="ghost lnk" href="${esc(r.url)}" target="_blank" rel="noopener">↗ Abrir borrador</a></div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}
+        <p class="imgcost">Si te gusta, renderízalo en calidad final (1080p). Cuesta como un video nuevo completo y el borrador no se devuelve en créditos. Si quieres cambiar algo, edita el texto y genera otro borrador.</p>
+        <div class="meta"><button class="ghost" id="btnTrF">✨ Renderizar versión final (1080p)</button></div><div id="trFinal"></div>`;
+      $("#btnTrF").onclick = () => {
+        const b = $("#btnTrF");
+        if (Date.now() > trArm2) { trArm2 = Date.now() + 6000; b.textContent = "¿Seguro? Es el paso más caro. Clic otra vez"; setTimeout(() => { if (Date.now() >= trArm2) b.textContent = "✨ Renderizar versión final (1080p)"; }, 6100); return; }
+        trArm2 = 0; b.textContent = "✨ Renderizar versión final (1080p)"; trFinal();
+      };
+    } catch (e) {
+      out.innerHTML = `<div class="error">${esc(e && e.code === "cancelled" ? "Dejaste de esperar. El video puede seguir generándose en Runway y gastar créditos." : rwErr(e))}</div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}`;
+    } finally { trRunning = false; $("#btnTrG").disabled = false; $("#btnTrStop").hidden = true; }
+  }
+  async function trFinal() {
+    if (trRunning || !trDraft) return;
+    const mcp = await msGetMcp(); const out = $("#trFinal");
+    trRunning = true; trStop = false; msStop = false; $("#btnTrF").disabled = true; $("#btnTrStop").hidden = false;
+    const status = (t, extra) => { out.innerHTML = `<div class="loading"><div class="spin"></div><span>${esc(t)}</span></div>${extra ? `<p class="imgcost">${esc(extra)}</p>` : ""}`; };
+    let spent = "";
+    try {
+      status("Enviando a Runway la versión final…");
+      const before = await msCredits();
+      const g = await mcp.callTool(RW, "enhance_video_draft", { taskId: trDraft.id, rationale: "Versión final en 1080p del tráiler cinematográfico que el usuario aprobó como borrador." }, { cache: false });
+      const id = rwTaskId(g); if (!id) throw { message: "Runway no devolvió el número de tarea. Respuesta: " + JSON.stringify(g.payload != null ? g.payload : g.content).slice(0, 300) };
+      const left = g.payload && typeof g.payload.creditsRemaining === "number" ? g.payload.creditsRemaining : await msCredits();
+      if (before != null && left != null) spent = `Créditos restantes: ${left} · costo medido de la versión final: ≈ ${before - left} créditos`; else if (left != null) spent = `Créditos restantes: ${left}`;
+      status("Runway está renderizando la versión final…", spent);
+      const r = await msPoll(id, (pct, secs) => status(`Renderizando la versión final… ${pct != null ? pct + "% · " : ""}${Math.floor(secs / 60)} min ${secs % 60} s`, spent));
+      out.innerHTML = `<div class="rvline"><b>Tráiler final (1080p)</b> · listo · <a class="ghost lnk" href="${esc(r.url)}" target="_blank" rel="noopener">↗ Abrir tráiler</a></div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}<p class="imgcost">El enlace es temporal (vence en unos días). Descarga el video desde esa pestaña para conservarlo.</p>`;
+    } catch (e) {
+      out.innerHTML = `<div class="error">${esc(e && e.code === "cancelled" ? "Dejaste de esperar. La versión final puede seguir generándose en Runway y gastar créditos." : rwErr(e))}</div>${spent ? `<p class="imgcost">${esc(spent)}</p>` : ""}`;
+      const b = $("#btnTrF"); if (b) b.disabled = false;
+    } finally { trRunning = false; $("#btnTrStop").hidden = true; }
+  }
+  function clearViz() { rwStop = true; rvStop = true; msStop = true; trStop = true; { const t = $("#trailer"); if (t) { t.hidden = true; t.innerHTML = ""; } } stopViz(); viz.hidden = true; viz.innerHTML = ""; const m = $("#mshot"); if (m) { m.hidden = true; m.innerHTML = ""; } }
 
   $("#btnGenerate").addEventListener("click", generate);
 
