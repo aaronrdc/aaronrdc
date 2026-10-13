@@ -1040,35 +1040,17 @@ ${notes ? notes : "(No añadieron comentarios; usa tu criterio dentro de los par
 
 Premisa: en el año ${s[1].text}, en el ámbito de «${s[2].text}», ya es realidad que «${s[3].text}», y esto se vive en Monterrey y su zona metropolitana, y quienes lo viven son los protagonistas: «${s[4].text}». Monterrey es siempre el escenario principal. Si el planteamiento involucra otro sitio (la Luna, Marte, el mar, un mundo virtual), muestra cómo se relaciona Monterrey con eso: vínculos, comercio, familias, empresas, viajes, noticias o cambios en la ciudad.
 
-Escribe lo siguiente, en este orden exacto. Cada sección empieza con una línea que contiene solo la marca indicada, y no uses otros títulos ni símbolos de formato:
+Escribe UNA sola narrativa, en dos versiones (breve y extendida) de la misma historia, con este formato exacto: primero un título breve para este Monterrey (sin comillas) y una línea en blanco; luego una línea que contenga solo @@ BREVE y la versión breve; luego una línea que contenga solo @@ EXTENDIDA y la versión extendida. No uses otros títulos, rótulos, listas ni símbolos de formato.
 
-Primera línea: un título breve para este Monterrey (sin comillas). Luego una línea en blanco.
+El primer párrafo de cada versión funciona como un resumen de Monterrey en el año ${s[1].text}: cómo se ve (el paisaje, el cerro, el río, el centro, los barrios, los objetos) y cómo se vive (un día normal, el trabajo, el agua y el calor, cómo se mueve la gente), con detalles concretos y reconocibles. En ese mismo párrafo deja claro qué es diferente a hoy (con contrastes naturales como «hoy… pero en ese Monterrey…») y cómo se relacionan con la ciudad las cartas elegidas y las ideas del público. Después, el resto de los párrafos cuenta la historia concreta de los protagonistas en un lugar reconocible de la ciudad.
 
-@@ SE VE
-Un párrafo de 50 a 70 palabras: cómo se ve Monterrey en el año ${s[1].text} (el paisaje, el cerro, el río, el centro, los barrios, la gente, los objetos), con detalles concretos y reconocibles.
-
-@@ SE VIVE
-Un párrafo de 50 a 70 palabras: cómo se vive: un día normal, el trabajo, el agua y el calor, cómo se mueve la gente, qué se come, cómo conviven las personas.
-
-@@ CAMBIOS
-Exactamente 3 líneas, cada una empieza con «- » y tiene el formato «Hoy…, pero en ese Monterrey…» (máximo 30 palabras). Son lo más importante que es diferente a la actualidad.
-
-@@ CONEXIONES
-Una línea por cada carta y por cada idea de las personas participantes, cada una empieza con «- » y tiene el formato «Nombre de la carta o idea: efecto concreto en Monterrey» (máximo 30 palabras). Deben ser 5 líneas de cartas y una más por cada idea que añadieron. Explica con claridad cómo se relaciona cada elemento con la ciudad.
-
-@@ BREVE
-Una historia breve y concreta que ocurre en un lugar reconocible de este Monterrey, con una persona o grupo como hilo conductor, que muestra una de las conexiones anteriores. Exactamente 2 párrafos de 90 a 110 palabras (180 a 220 en total). El primero resume contexto y conflicto; el segundo, el clímax o solución y el cierre.
-
-@@ EXTENDIDA
-La misma historia, más desarrollada: exactamente 4 párrafos, de 75 a 100 palabras cada uno (300 a 400 en total), en este orden, sin nombrar las fases: contexto, conflicto, solución (el punto más alto) y cierre (la nueva normalidad y una pregunta abierta).
-
-@@ PREGUNTAS
-Exactamente 3 líneas, cada una empieza con «- »: preguntas abiertas para conversar sobre este Monterrey (quién gana, quién pierde, qué decisión conviene tomar desde hoy).
+- VERSIÓN BREVE: exactamente 2 párrafos de 90 a 110 palabras cada uno (180 a 220 en total). El primero es el resumen de Monterrey descrito arriba. El segundo cuenta la historia: el conflicto, la solución y el cierre.
+- VERSIÓN EXTENDIDA: exactamente 4 párrafos de 75 a 100 palabras cada uno (300 a 400 en total), en este orden, sin nombrar las fases: (1) el resumen de Monterrey descrito arriba, que es el contexto; (2) el conflicto; (3) la solución, el punto más alto; (4) el cierre, con la nueva normalidad y una pregunta abierta.
 
 Requisitos:
 - Lenguaje sencillo: palabras de todos los días y oraciones cortas (unas 20 palabras o menos), una sola idea por oración, sin tecnicismos. Si necesitas una idea técnica, cuéntala con una comparación de la vida diaria.
-- Coherencia: las 5 cartas y las ideas aparecen y se conectan; el año, los lugares y los personajes son los mismos en todas las secciones. Antes de escribir, piensa en silencio cómo se relacionan, sin mostrarlo.
-- Que el tipo de historia (${s[0].text}) defina el tono de la historia, sin caricatura de utopía o distopía. Plausible, sin soluciones mágicas.
+- Coherencia: las 5 cartas y las ideas aparecen y se conectan; el año, los lugares y los personajes son los mismos en las dos versiones. Antes de escribir, piensa en silencio cómo se relacionan, sin mostrarlo.
+- Que el tipo de historia (${s[0].text}) defina el tono, sin caricatura de utopía o distopía. Plausible, sin soluciones mágicas.
 - Todo es un escenario imaginado de Monterrey; no afirmes datos ni cifras reales.
 - No moralices ni expliques el método.`;
     return { system, user };
@@ -1106,7 +1088,6 @@ Requisitos:
   const esc = (t) => t.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 
   let storyLong = false;
-  const bullets = (t) => t.split("\n").map(x => x.replace(/^\s*[-•*]\s*/, "").trim()).filter(Boolean);
   const paras = (t) => t.trim().split(/\n\s*\n/).map(x => x.replace(/\s*\n\s*/g, " ").trim()).filter(Boolean);
   function parseStory(text) {
     const parts = text.replace(/\r/g, "").split(/^[ \t]*@@[ \t]*([A-ZÁÉÍÓÚÑ ]+?)[ \t]*$/m);
@@ -1120,19 +1101,10 @@ Requisitos:
     const year = (selection()[1] || {}).text || "";
     const short = sec.BREVE ? paras(sec.BREVE) : [], long = final && sec.EXTENDIDA ? paras(sec.EXTENDIDA) : [];
     const both = final && long.length > 0 && short.length > 0;
-    const blk = (label, html) => html ? `<div class="fblk"><b>${label}</b>${html}</div>` : "";
-    const lst = (t) => `<ul>${bullets(t).map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
-    const fichaHtml = blk("Cómo se ve", sec["SE VE"] ? `<p>${esc(paras(sec["SE VE"]).join(" "))}</p>` : "")
-      + blk("Cómo se vive", sec["SE VIVE"] ? `<p>${esc(paras(sec["SE VIVE"]).join(" "))}</p>` : "")
-      + blk("Qué cambió respecto a hoy", sec.CAMBIOS ? lst(sec.CAMBIOS) : "")
-      + blk("Cómo se conectan las tarjetas y las ideas", sec.CONEXIONES ? lst(sec.CONEXIONES) : "");
     story.innerHTML = `<h2>Monterrey en el futuro <span class="fict">Escenario ficticio</span></h2><h3>${esc(title)}</h3>
-      ${fichaHtml ? `<section class="ficha"><h4>Monterrey en el año ${esc(year)}</h4>${fichaHtml}</section>` : ""}
-      ${short.length ? `<h4 class="hh">Una historia en este Monterrey</h4>
-      ${both ? `<div class="lenrow"><span class="lenlbl" id="lenS">Breve</span><button class="lensw" id="lenSw" role="switch" aria-checked="${storyLong}" aria-label="Mostrar la versión extendida de la historia"><i></i></button><span class="lenlbl" id="lenL">Extendida</span></div>` : ""}
+      ${short.length ? `${both ? `<div class="lenrow"><span class="lenlbl" id="lenS">Breve</span><button class="lensw" id="lenSw" role="switch" aria-checked="${storyLong}" aria-label="Mostrar la versión extendida de la historia"><i></i></button><span class="lenlbl" id="lenL">Extendida</span></div>` : ""}
       <div class="body" id="bodyShort"${both && storyLong ? " hidden" : ""}>${short.map(p => `<p>${esc(p)}</p>`).join("")}</div>
-      ${both ? `<div class="body" id="bodyLong"${storyLong ? "" : " hidden"}>${long.map(p => `<p>${esc(p)}</p>`).join("")}</div>` : ""}` : ""}
-      ${final && sec.PREGUNTAS ? `<section class="ficha qs"><h4>Para conversar</h4>${lst(sec.PREGUNTAS)}</section>` : ""}` +
+      ${both ? `<div class="body" id="bodyLong"${storyLong ? "" : " hidden"}>${long.map(p => `<p>${esc(p)}</p>`).join("")}</div>` : ""}` : ""}` +
       (final ? `<div class="meta">
         <button class="ghost" id="cpStory">⧉ Copiar</button>
         <button class="ghost" id="regen">↻ Generar otra versión</button>
@@ -1146,11 +1118,9 @@ Requisitos:
         $("#lenS").classList.toggle("on", !storyLong); $("#lenL").classList.toggle("on", storyLong);
       };
       if (both) { $("#lenSw").onclick = () => { storyLong = !storyLong; sync(); }; $("#lenS").onclick = () => { storyLong = false; sync(); }; $("#lenL").onclick = () => { storyLong = true; sync(); }; sync(); }
-      const flat = (t) => bullets(t).map(x => "- " + x).join("\n");
-      const ctx = `MONTERREY EN EL AÑO ${year}\nCómo se ve: ${paras(sec["SE VE"] || "").join(" ")}\nCómo se vive: ${paras(sec["SE VIVE"] || "").join(" ")}\nQué cambió respecto a hoy:\n${flat(sec.CAMBIOS || "")}\nCómo se conectan las tarjetas y las ideas:\n${flat(sec.CONEXIONES || "")}`;
-      $("#cpStory").onclick = async () => toast((await copy(`${title}\n\n${ctx}\n\nHISTORIA\n${shown().join("\n\n")}` + (sec.PREGUNTAS ? `\n\nPARA CONVERSAR\n${flat(sec.PREGUNTAS)}` : ""))) ? "Texto copiado" : "No se pudo copiar");
+      $("#cpStory").onclick = async () => toast((await copy(`${title}\n\n${shown().join("\n\n")}`)) ? "Texto copiado" : "No se pudo copiar");
       $("#regen").onclick = generate;
-      lastStory = { title, body: `${ctx}\n\nHISTORIA\n${(long.length ? long : short).join("\n\n")}` };   // los prompts de imagen y video usan la ficha y la historia completa
+      lastStory = { title, body: `MONTERREY EN EL AÑO ${year}\n${(long.length ? long : short).join("\n\n")}` };   // los prompts de imagen y video usan la narrativa más completa
     }
   }
   function showError(msg) {
@@ -1197,16 +1167,16 @@ Requisitos:
 
   function buildVizPrompt() {
     const s = selection();
-    return `Eres director de arte de cine. Con la ficha de Monterrey y la historia siguientes, escribe 3 prompts para un generador de imágenes y en 1 prompt para un generador de video.
+    return `Eres director de arte de cine. Con la narrativa de Monterrey siguiente, escribe 3 prompts para un generador de imágenes y en 1 prompt para un generador de video.
 
-FICHA DE MONTERREY E HISTORIA
+NARRATIVA DE MONTERREY
 Título: ${lastStory.title}
 ${lastStory.body}
 
 PARÁMETROS ELEGIDOS: ${s.map(x => x.cat + ": " + x.text).join(" | ")}
 
 PROMPTS DE IMAGEN
-Escribe 3 prompts, uno por escena, en el orden de la narración (inicio, desarrollo, cierre), listos para pegar en Midjourney, DALL·E o Gemini. Cada uno va en dos idiomas: "prompt" en español natural y claro (lo leerá el público de una feria del libro, todo hispanohablante) y "prompt_en" en inglés (la misma descripción, para el generador de imágenes). Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo fotográfico hiperrealista (fotografía cinematográfica de alta definición, con texturas, piel, materiales y luz realistas), el mismo en los 3 prompts. Todas las imágenes muestran Monterrey, Nuevo León, México, en el año ${s[1].text}: incluye referencias locales reconocibles cuando encajen (por ejemplo el Cerro de la Silla al fondo, el río Santa Catarina, el Paseo Santa Lucía, la Macroplaza, la Fundidora, el Obispado, barrios y calles regias), mostrando cómo se ve y se vive esa ciudad según la ficha y la historia. Respeta fielmente lo que dicen (lugar, momento del día, personajes, objetos y tecnología) y no añadas nada que no sugieran. Mantén los mismos personajes (edad, rasgos y ropa) y el mismo lugar en las 3 imágenes. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
+Escribe 3 prompts, uno por escena, en el orden de la narración (inicio, desarrollo, cierre), listos para pegar en Midjourney, DALL·E o Gemini. Cada uno va en dos idiomas: "prompt" en español natural y claro (lo leerá el público de una feria del libro, todo hispanohablante) y "prompt_en" en inglés (la misma descripción, para el generador de imágenes). Cada uno es completo y autónomo: sujeto y acción, escenario, año ${s[1].text}, hora del día y luz, composición (tipo de plano), atmósfera, paleta y un estilo fotográfico hiperrealista (fotografía cinematográfica de alta definición, con texturas, piel, materiales y luz realistas), el mismo en los 3 prompts. Todas las imágenes muestran Monterrey, Nuevo León, México, en el año ${s[1].text}: incluye referencias locales reconocibles cuando encajen (por ejemplo el Cerro de la Silla al fondo, el río Santa Catarina, el Paseo Santa Lucía, la Macroplaza, la Fundidora, el Obispado, barrios y calles regias), mostrando cómo se ve y se vive esa ciudad según la narrativa. Respeta fielmente lo que dicen (lugar, momento del día, personajes, objetos y tecnología) y no añadas nada que no sugieran. Mantén los mismos personajes (edad, rasgos y ropa) y el mismo lugar en las 3 imágenes. Formato horizontal 16:9, sin texto ni logotipos. De 40 a 80 palabras cada uno.
 
 PROMPT DE VIDEO
 Escribe 1 prompt para Google Veo y Runway, en dos idiomas: "prompt" en español natural y claro (lo leerá el público) y "prompt_en" en inglés (la misma descripción, para el generador de video): un solo plano continuo de unos 8 segundos, sin cortes, del momento más representativo de la narración, con el mismo estilo hiperrealista y los mismos personajes y lugar de las imágenes. Estructúralo en este orden: (1) sujeto y escenario con año ${s[1].text}, (2) acción y movimiento concretos de personajes y elementos, (3) movimiento de cámara (por ejemplo slow push-in, dolly lateral, crane up o drone aéreo), (4) luz, atmósfera y estilo cinematográfico, (5) una última frase que empiece con "Audio:" y describa sonido ambiente y efectos, sin diálogos ni música con letra. Sin texto en pantalla ni logotipos. De 70 a 120 palabras.
@@ -1473,9 +1443,9 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
   const TR_SECS = 30;
   function buildTrPrompt() {
     const sel = selection(), notes = ($("#notes").value || "").trim();
-    return `Eres director de cine y de tráilers, y a la vez analista de prospectiva en un centro de estudios del futuro. Con la ficha de Monterrey y la historia siguientes vas a escribir el guion de un TRÁILER cinematográfico de ${TR_SECS} segundos: un adelanto de película que muestra cómo se ve y se vive Monterrey, Nuevo León, en el año ${sel[1].text}, para que el público quiera ver «la película». La ciudad debe ser reconocible (por ejemplo el Cerro de la Silla, el río Santa Catarina, la Macroplaza, la Fundidora, el Paseo Santa Lucía) cuando encaje con lo que dicen la ficha y la historia.
+    return `Eres director de cine y de tráilers, y a la vez analista de prospectiva en un centro de estudios del futuro. Con la narrativa de Monterrey siguiente vas a escribir el guion de un TRÁILER cinematográfico de ${TR_SECS} segundos: un adelanto de película que muestra cómo se ve y se vive Monterrey, Nuevo León, en el año ${sel[1].text}, para que el público quiera ver «la película». La ciudad debe ser reconocible (por ejemplo el Cerro de la Silla, el río Santa Catarina, la Macroplaza, la Fundidora, el Paseo Santa Lucía) cuando encaje con lo que dice la narrativa.
 
-FICHA DE MONTERREY E HISTORIA
+NARRATIVA DE MONTERREY
 Título: ${lastStory.title}
 ${lastStory.body}
 
