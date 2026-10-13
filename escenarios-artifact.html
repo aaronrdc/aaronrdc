@@ -1441,8 +1441,36 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
   /* ============ Tráiler cinematográfico (prueba con Seedance 2.5): primero borrador y luego versión final ============ */
   let trTok = 0, trStop = false, trRunning = false, trData = null, trArm = 0, trArm2 = 0, trDraft = null;
   const TR_SECS = 30;
+  /* Tono del tráiler según la carta «Tipo de historia»: siempre live action; cambian el ritmo, la cámara, la luz, la música y los diálogos. */
+  const TR_GENRES = {
+    "Graciosa": {
+      es: "Comedia ligera y simpática. Ritmo ágil con cortes rápidos y «golpes de humor» bien cronometrados: planteamiento, enredo que crece, reacciones exageradas pero creíbles en los rostros y un remate final con chiste. Encuadres abiertos que dejan ver el gag, planos de reacción, cámara juguetona. Luz cálida, colores vivos y saturados. Música juguetona (ukulele, pizzicato, marimba, percusión traviesa, funk ligero) con paradas en seco para el chiste; efectos de sonido divertidos y sutiles. Diálogos: 1 o 2 líneas cortas y ocurrentes de los personajes, en español natural de Monterrey, y un remate final.",
+      en: "Live-action feel-good comedy trailer: warm bright saturated colors, playful camera with wide gag-friendly framing and reaction close-ups, snappy comedic timing with quick cuts and a punchline at the end, light and charming tone, photorealistic live action."
+    },
+    "Inspiradora": {
+      es: "Drama de superación y esperanza. Ritmo que sube poco a poco: inicio sereno, esfuerzo y obstáculos, y un clímax emotivo y triunfal. Planos amplios y ascendentes (grúa, dron), cámara lenta en los momentos de logro, siluetas a contraluz, gente que se une. Luz dorada de amanecer y atardecer, colores cálidos. Música de piano y cuerdas que crece hasta un clímax orquestal con coro; efectos de ambiente que se abren al final. Sin chistes; una voz en off breve y esperanzadora o una línea de diálogo emotiva. Cierre con un plano abierto de la ciudad iluminada.",
+      en: "Live-action inspirational drama trailer: golden-hour light, warm hopeful color grade, sweeping crane and drone shots rising upward, slow motion at moments of achievement, backlit silhouettes, steadily building pace toward a triumphant emotional peak, photorealistic live action."
+    },
+    "Dramática": {
+      es: "Drama intenso y emocional. Ritmo medio con silencios cargados y crescendos, conflicto humano en primer plano. Primeros planos de rostros y manos, cámara en mano contenida, claroscuro y contrastes marcados, tonos cálidos y fríos en tensión. Música de violonchelo, piano y cuerdas que crece con golpes graves; ambiente real con silencios. Diálogos: una o dos líneas intensas, dichas con voz contenida, o una voz en off grave. Cierre con un plano sostenido sobre una decisión difícil.",
+      en: "Live-action emotional drama trailer: intimate close-ups of faces and hands, restrained handheld camera, chiaroscuro lighting with strong contrast, muted color palette, measured pacing with loaded silences and swelling cues, photorealistic live action."
+    },
+    "Trágica": {
+      es: "Tragedia sobria y melancólica. Ritmo lento y contemplativo, planos largos, cámara lenta, belleza triste; algo valioso se pierde. Tonos fríos y desaturados, lluvia, neblina o luz de atardecer que se apaga, reflejos. Música de piano solo y cuerdas melancólicas, mucho silencio y sonido ambiente apagado; sin remate heroico. Diálogos mínimos: una voz en off breve y serena, o ninguno. Cierre en silencio y fundido a negro.",
+      en: "Live-action tragic drama trailer: cold desaturated palette, rain or mist and fading dusk light, slow contemplative long takes and slow motion, muted ambient sound with solo piano and mournful strings, long silences, no heroic payoff, ends in silence and fade to black, photorealistic live action."
+    },
+    "Misteriosa": {
+      es: "Misterio y suspenso. Ritmo con cortes bruscos intercalados con silencios largos, pistas que no se explican, algo que se revela a medias. Luz baja y sombras, haces de luz, neblina, neones lejanos; planos subjetivos, planos de detalle de objetos, revelaciones lentas de la cámara y algún ángulo inclinado sutil; destellos de glitch muy discretos. Sonido: silencios, drones graves, latido, susurros lejanos, golpes secos (stingers) y pulsos de sintetizador que suben y se cortan de golpe. Diálogos: un susurro o una pregunta sin respuesta. Cierre con corte abrupto a negro y una pregunta abierta.",
+      en: "Live-action mystery thriller trailer: low-key lighting with deep shadows, shafts of light, haze and distant neon, subjective POV shots and extreme detail close-ups, slow reveals, abrupt hard cuts alternating with long silences, deep drones, heartbeat, whispers and sharp stingers, subtle glitch accents, ends with a hard cut to black, photorealistic live action."
+    },
+    "Utópica": {
+      es: "Futuro luminoso y esperanzador. Ritmo fluido y elegante, sin sobresaltos; la ciudad ideal vista con asombro, gente colaborando y sonriendo. Planos amplios y deslizantes (steadicam, dron), ciudad verde y limpia, luz brillante y clara, azules, verdes y blancos luminosos. Música luminosa de arpa, cuerdas, sintetizador etéreo y coro suave que crece con calma; sonidos de ambiente naturales y tecnología silenciosa. Una voz en off serena. Hacia el final, un detalle sutil que deje la pregunta de a qué costo y para quién.",
+      en: "Live-action utopian future trailer: bright clean daylight, luminous blues greens and whites, smooth gliding steadicam and drone shots over a green clean city, people collaborating and smiling, fluid graceful pacing, airy harp strings and ethereal choir, serene tone with one subtle unsettling detail at the end, photorealistic live action."
+    },
+  };
+  const trGenre = () => { const g = (selection()[0] || {}).text; return { name: g, ...(TR_GENRES[g] || TR_GENRES["Dramática"]) }; };
   function buildTrPrompt() {
-    const sel = selection(), notes = ($("#notes").value || "").trim();
+    const sel = selection(), notes = ($("#notes").value || "").trim(), gen = trGenre();
     return `Eres director de cine y de tráilers, y a la vez analista de prospectiva en un centro de estudios del futuro. Con la narrativa de Monterrey siguiente vas a escribir el guion de un TRÁILER cinematográfico de ${TR_SECS} segundos: un adelanto de película que muestra cómo se ve y se vive Monterrey, Nuevo León, en el año ${sel[1].text}, para que el público quiera ver «la película». La ciudad debe ser reconocible (por ejemplo el Cerro de la Silla, el río Santa Catarina, la Macroplaza, la Fundidora, el Paseo Santa Lucía) cuando encaje con lo que dice la narrativa.
 
 NARRATIVA DE MONTERREY
@@ -1452,11 +1480,14 @@ ${lastStory.body}
 CARTAS ELEGIDAS: ${sel.map(x => x.cat + ": " + x.text).join(" | ")}
 IDEAS DE LA PERSONA PARTICIPANTE: ${notes || "(sin comentarios)"}
 
+TONO DEL TRÁILER (tipo de historia elegido: ${gen.name})
+El tráiler es siempre de acción real (live action), fotorrealista, nunca animación. Adapta el montaje, la cámara, la luz, la música, los efectos y los diálogos a este género: ${gen.es}
+
 QUÉ DEBES HACER
-1. "tagline": una frase de gancho de máximo 10 palabras, como la de un cartel de cine.
-2. "shots": de 10 a 12 tomas cortas (de 2 a 3 segundos cada una; suman exactamente ${TR_SECS} s) con ritmo de tráiler: apertura misteriosa y atmosférica, presentación del mundo y del personaje, subida de tensión con el conflicto, cortes más rápidos, clímax espectacular y un último plano memorable con el título. Cada toma lleva "t" (rango de tiempo, por ejemplo «0-3s»), "title", "prompt" en español natural y "prompt_en" en inglés (la misma descripción, 25 a 45 palabras) con tipo de plano, movimiento de cámara, acción, luz y emoción visible. Cada toma debe tener una intención visual clara y mostrar algo distinto del presente (el año ${sel[1].text}).
-3. Mantén el mismo personaje principal (edad, rasgos, ropa) y el mismo mundo en todas las tomas. Estilo de película de estreno: cinematográfico, hiperrealista, óptica anamórfica, colores de gradación de cine. No pongas texto en pantalla ni logotipos. Evita nombres de personas reales, marcas y violencia explícita para no activar los filtros.
-4. "audio_en": en inglés, una dirección de sonido de tráiler en 1 o 2 frases: música (por ejemplo pulso grave que crece hasta un clímax orquestal), efectos concretos de ese mundo y un golpe final. Sin diálogos largos; a lo mucho una voz en off breve de una frase.
+1. "tagline": una frase de gancho de máximo 10 palabras, como la de un cartel de cine, con el tono del género.
+2. "shots": de 10 a 12 tomas cortas (de 2 a 3 segundos cada una; suman exactamente ${TR_SECS} s) con ritmo de tráiler según el tono indicado: apertura, presentación del mundo y del personaje, desarrollo del conflicto, clímax y un último plano memorable con el título. El tipo de plano, el movimiento de cámara y la duración de cada toma deben seguir el tono (por ejemplo cortes rápidos en comedia, planos largos en tragedia, silencios y revelaciones en misterio). Cada toma lleva "t" (rango de tiempo, por ejemplo «0-3s»), "title", "prompt" en español natural y "prompt_en" en inglés (la misma descripción, 25 a 45 palabras) con tipo de plano, movimiento de cámara, acción, luz y emoción visible. Cada toma debe tener una intención visual clara y mostrar algo distinto del presente (el año ${sel[1].text}).
+3. Mantén el mismo personaje principal (edad, rasgos, ropa) y el mismo mundo en todas las tomas. Acción real (live action) fotorrealista de película de estreno, con la luz y la gradación de color propias del tono indicado. No pongas texto en pantalla ni logotipos. Evita nombres de personas reales, marcas y violencia explícita para no activar los filtros.
+4. "audio_en": en inglés, la dirección de sonido del tráiler en 2 o 3 frases, según el tono indicado: la música (instrumentos y cómo evoluciona), los efectos y silencios, y los diálogos o la voz en off que pida ese género. Si hay diálogo, escríbelo en español entre comillas simples dentro del texto, con una frase como «A character says in Spanish: '…'», máximo 2 líneas cortas en total.
 
 El JSON debe ser válido: dentro de los textos no uses comillas dobles (usa « » o comillas simples), no pongas saltos de línea dentro de los textos y no dejes comas al final de una lista.
 
@@ -1464,7 +1495,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
 {"title":"...","tagline":"...","shots":[{"t":"0-3s","title":"...","prompt":"...","prompt_en":"..."}],"audio_en":"..."}`;
   }
   function trComposePrompt(d) {
-    return `Cinematic movie trailer, ${TR_SECS} seconds, 16:9, hyper-realistic, anamorphic lens, film color grading, fast trailer pacing with quick cuts. No on-screen text, no logos, no subtitles. The same main character and world in every shot.\n\n` +
+    return `Cinematic live-action movie trailer, ${TR_SECS} seconds, 16:9, photorealistic, anamorphic lens, film color grading. Tone and style: ${trGenre().en} No on-screen text, no logos, no subtitles. The same main character and world in every shot.\n\n` +
       d.shots.map(x => `${x.t}: ${x.en}`).join("\n") +
       `\n\nSound design: ${d.audio}`;
   }
@@ -1505,6 +1536,7 @@ RESPONDE SOLO CON ESTE JSON, sin texto adicional:
     const nImg = rwImgs.filter(i => i && i.status === "ok" && i.url).length;
     body.innerHTML = `<h3 class="ph">${esc(d.title)}</h3>${d.tagline ? `<p class="shot-es"><i>«${esc(d.tagline)}»</i></p>` : ""}
       <div class="shots">${d.shots.map((x, k) => `<div class="shot"><div class="shot-h"><span>${k + 1}</span><b>${esc((x.t ? x.t + " · " : "") + x.title)}</b></div><p class="shot-es">${esc(x.es)}</p></div>`).join("")}</div>
+      <p class="help">Tono del tráiler según tu carta de tipo de historia: <b>${esc(trGenre().name || "")}</b>. El guion ajusta ritmo, cámara, música y diálogos a ese género.</p>
       <p class="help">Texto que se envía a Runway (en inglés, editable):</p>
       <textarea class="vtxt" id="trPrompt" rows="14" spellcheck="true" aria-label="Prompt completo del tráiler, editable"></textarea>
       <div class="rwbar"><label><input type="checkbox" id="trRefs"${nImg ? " checked" : " disabled"}> Usar las imágenes de Runway como referencia${nImg ? " (" + nImg + ")" : " (primero genera las imágenes)"}</label></div>
