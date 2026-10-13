@@ -849,22 +849,31 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
   /* ============ Contenido de las cartas (editable) ============ */
   const DECKS = [
     { id: "tipo",    name: "Tipo de historia", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l2.2 6.3 6.3 2.2-6.3 2.2L12 19.5l-2.2-6.3-6.3-2.2 6.3-2.2z"/><path d="M19 3v4M17 5h4"/></svg>`, color: "#a78bfa",
-      items: ["Inspiradora", "Misteriosa", "Utópica", "Surrealista"] },
-    { id: "year",    name: "Horizonte", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.5V12l3.6 2.2"/><path d="M3 12h2M19 12h2"/></svg>`, color: "#22d3ee", big: true,
-      items: ["2045", "2055", "2074", "2099"] },
+      items: ["Graciosa", "Inspiradora", "Dramática", "Trágica", "Misteriosa", "Utópica"] },
+    { id: "year",    name: "Año", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6.5V12l3.6 2.2"/><path d="M3 12h2M19 12h2"/></svg>`, color: "#22d3ee", big: true,
+      items: ["2045", "2062", "2083", "2099", "2133"] },
     { id: "tema",    name: "Temática", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1.8"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg>`, color: "#4ade80",
-      items: ["Sociedad", "Tecnología", "Ecología"] },
-    { id: "evento",  name: "¿Qué sucede?", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5c3.2 2.4 4.6 6 4.2 10l2.3 3.2-3.7.6L12 21l-2.8-4.7-3.7-.6 2.3-3.2c-.4-4 1-7.6 4.2-10z"/><circle cx="12" cy="9.5" r="1.7"/></svg>`, color: "#fbbf24",
-      items: ["Todos los alimentos se imprimen en casa con impresoras 3D",
+      items: ["Sociedad", "Tecnología", "Economía", "Ecología"] },
+    { id: "evento",  name: "Planteamiento", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5c3.2 2.4 4.6 6 4.2 10l2.3 3.2-3.7.6L12 21l-2.8-4.7-3.7-.6 2.3-3.2c-.4-4 1-7.6 4.2-10z"/><circle cx="12" cy="9.5" r="1.7"/></svg>`, color: "#fbbf24",
+      items: ["Robots remplazan por completo a humanos en el ámbito militar",
+              "Los humanos habitan Marte permanentemente",
+              "Las mascotas son totalmente robóticas o virtuales",
+              "Todos los alimentos se imprimen en casa con impresoras 3D",
               "Especies extintas son resucitadas y reintroducidas en sus hábitats",
-              "Los humanos pueden comunicarse sin hablar ni escribir",
-              "Los humanos habitan Marte de forma permanente"] },
-    { id: "quien",   name: "¿A quién / dónde?", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="10.5" ry="3.4" transform="rotate(-22 12 12)"/></svg>`, color: "#f472b6",
-      items: ["Fábricas automatizadas",
-              "Personas con más de 120 años",
+              "Las guerras se combaten en mundos virtuales",
+              "Los vehículos terrestres son obsoletos, todos son aéreos",
+              "Los océanos son convertidos en hábitats flotantes para humanos"] },
+    { id: "quien",   name: "Lugar o persona", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="10.5" ry="3.4" transform="rotate(-22 12 12)"/></svg>`, color: "#f472b6",
+      items: ["Refugios submarinos",
+              "Una ciudad en la Luna",
+              "Niños y niñas menores de 10 años",
+              "Escuelas ubicadas en Marte",
+              "Tribu indígena que ha logrado mantener su autonomía",
+              "Personas que optaron por vivir con cuerpos robóticos",
+              "Ancianos rejuvenecidos gracias a la biotecnología",
+              "Personas que viven permanentemente en realidades virtuales",
               "Una ciudad flotante que viaja por los océanos",
-              "Personas que optaron por vivir en cuerpos robóticos",
-              "Niños y niñas menores de 10 años"] },
+              "Fábricas de robots ubicadas en la Luna"] },
   ];
   
   /* ============ Modo oscuro / claro ============ */
@@ -880,26 +889,39 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
 
   /* ============ Descripciones al pasar el cursor ============ */
   const DESC = {
+    "Graciosa": "Un futuro que hace reír: situaciones absurdas, malentendidos y humor que deja ver cómo cambió la vida.",
     "Inspiradora": "Un futuro que motiva: muestra logros, esperanza y personas que se atreven a cambiar las cosas.",
+    "Dramática": "Un futuro de emociones fuertes: decisiones difíciles, conflictos y personas que viven el cambio con intensidad.",
+    "Trágica": "Un futuro que deja una pérdida o un costo muy alto: algo valioso se pierde y nos obliga a reflexionar.",
     "Misteriosa": "Un futuro lleno de preguntas: secretos, hallazgos y cosas que no se explican del todo.",
     "Utópica": "Un futuro ideal, donde la sociedad resolvió sus grandes problemas. La pregunta es a qué costo y para quién.",
-    "Surrealista": "Un futuro con lógica de sueño: lo imposible se vuelve cotidiano y la realidad se dobla sin avisar.",
     "2045": "Futuro cercano, a unos 20 años: lo que hoy son señales débiles ya es parte de la vida diaria.",
-    "2055": "Una generación adelante, a unos 30 años: quienes nacen hoy ya son adultos y las tecnologías actuales maduraron.",
-    "2074": "Largo plazo, a casi 50 años: instituciones, costumbres y tecnologías muy distintas a las de hoy.",
+    "2062": "A unos 35 años: quienes nacen hoy ya son adultos y las tecnologías actuales maduraron.",
+    "2083": "A unos 55 años: instituciones, costumbres y tecnologías muy distintas a las de hoy.",
     "2099": "Fin de siglo, a más de 70 años: un mundo difícil de reconocer, donde se ven los efectos de largo plazo.",
+    "2133": "A más de 100 años: un futuro lejano, tan distinto que casi nada de la vida actual sigue igual.",
     "Sociedad": "Cómo vivimos juntos: comunidades, trabajo, educación, gobierno, cuidados y desigualdades.",
     "Tecnología": "Herramientas e inventos que cambian lo que podemos hacer, y quién puede hacerlo.",
+    "Economía": "Cómo se produce, se compra y se reparte lo que necesitamos: trabajo, dinero, comercio y riqueza.",
     "Ecología": "La relación con la naturaleza: clima, especies, recursos y el cuidado del planeta.",
+    "Robots remplazan por completo a humanos en el ámbito militar": "Las máquinas hacen el trabajo militar. Cambian la defensa, la responsabilidad ante los errores y el costo humano de los conflictos.",
+    "Los humanos habitan Marte permanentemente": "La humanidad vive en más de un planeta: nuevas comunidades, leyes y formas de vida lejos de la Tierra.",
+    "Las mascotas son totalmente robóticas o virtuales": "Los animales de compañía ya no son de carne y hueso. Cambian el cariño, el cuidado y la relación con los animales reales.",
     "Todos los alimentos se imprimen en casa con impresoras 3D": "La comida se produce en cada hogar. Cambia la cocina, el comercio, la agricultura y quién controla los alimentos.",
     "Especies extintas son resucitadas y reintroducidas en sus hábitats": "Se recupera la vida perdida. Abre debates sobre ética, ecosistemas y qué significa conservar.",
-    "Los humanos pueden comunicarse sin hablar ni escribir": "Las mentes se conectan de forma directa. Cambian la privacidad, el lenguaje y las relaciones.",
-    "Los humanos habitan Marte de forma permanente": "La humanidad vive en más de un planeta: nuevas comunidades, leyes y formas de vida lejos de la Tierra.",
-    "Fábricas automatizadas": "Lugares donde las máquinas producen casi todo. ¿Qué pasa con el trabajo, la producción y quienes dependen de ellas?",
-    "Personas con más de 120 años": "Vidas muy largas que cambian la familia, el trabajo, la memoria y la relación entre generaciones.",
-    "Una ciudad flotante que viaja por los océanos": "Una comunidad móvil sobre el mar, sin territorio fijo y con sus propias reglas y recursos.",
-    "Personas que optaron por vivir en cuerpos robóticos": "Personas que dejaron el cuerpo biológico. Plantean preguntas sobre identidad, derechos y qué es ser humano.",
+    "Las guerras se combaten en mundos virtuales": "Los conflictos se pelean en espacios digitales. ¿Siguen siendo reales sus consecuencias y quién decide quién gana?",
+    "Los vehículos terrestres son obsoletos, todos son aéreos": "Las personas y las cosas se mueven por el aire. Cambian las ciudades, el ruido, el trabajo y las reglas de tránsito.",
+    "Los océanos son convertidos en hábitats flotantes para humanos": "Se vive sobre el mar. Cambian la vivienda, la pesca, la relación con el océano y quién tiene derecho a ese espacio.",
+    "Refugios submarinos": "Lugares bajo el agua donde la gente se protege y vive. ¿De qué se refugian y cómo es la vida allá abajo?",
+    "Una ciudad en la Luna": "Una comunidad humana en otro mundo, con sus propias reglas, recursos y vínculos con la Tierra.",
     "Niños y niñas menores de 10 años": "La primera generación que crece en ese futuro y lo vive como lo normal.",
+    "Escuelas ubicadas en Marte": "Aprender lejos de la Tierra: qué se enseña, quién enseña y cómo crece una infancia en otro planeta.",
+    "Tribu indígena que ha logrado mantener su autonomía": "Un pueblo que conserva su cultura, su territorio y sus decisiones frente a un mundo que cambió.",
+    "Personas que optaron por vivir con cuerpos robóticos": "Personas que dejaron el cuerpo biológico. Plantean preguntas sobre identidad, derechos y qué es ser humano.",
+    "Ancianos rejuvenecidos gracias a la biotecnología": "Personas mayores que recuperan la juventud. Cambian la familia, el trabajo, la memoria y las generaciones.",
+    "Personas que viven permanentemente en realidades virtuales": "Vidas que transcurren dentro de mundos digitales. ¿Qué es real, qué se gana y qué se pierde?",
+    "Una ciudad flotante que viaja por los océanos": "Una comunidad móvil sobre el mar, sin territorio fijo y con sus propias reglas y recursos.",
+    "Fábricas de robots ubicadas en la Luna": "Lugares donde las máquinas fabrican más máquinas lejos de la Tierra. ¿Quién las controla y para quién producen?",
   };
   const tip = $("#tip");
   function showTip(btn, d) {
@@ -994,7 +1016,7 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
 `Una persona participante de un taller de estudios de futuros eligió estas cartas y es co-creadora de la historia:
 
 - Tipo de historia: ${s[0].text}
-- Horizonte temporal (año en que ocurre): ${s[1].text}
+- Año en que ocurre: ${s[1].text}
 - Temática: ${s[2].text}
 - Lo que sucede: ${s[3].text}
 - A quién o dónde le sucede: ${s[4].text}
