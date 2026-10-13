@@ -879,17 +879,16 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
               "Las guerras se combaten en mundos virtuales",
               "Los vehículos terrestres son obsoletos, todos son aéreos",
               "Los océanos son convertidos en hábitats flotantes para humanos"] },
-    { id: "quien",   name: "Lugar o persona", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="10.5" ry="3.4" transform="rotate(-22 12 12)"/></svg>`, color: "#f472b6",
-      items: ["Refugios submarinos",
-              "Una ciudad en la Luna",
-              "Niños y niñas menores de 10 años",
-              "Escuelas ubicadas en Marte",
-              "Tribu indígena que ha logrado mantener su autonomía",
-              "Personas que optaron por vivir con cuerpos robóticos",
-              "Ancianos rejuvenecidos gracias a la biotecnología",
+    { id: "quien",   name: "Protagonista", glyph: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 21c.6-4.4 3.7-7 7.5-7s6.9 2.6 7.5 7"/></svg>`, color: "#f472b6",
+      items: ["Regiomontanos que optaron por vivir con cuerpos robóticos",
+              "Científicos que fusionaron su mente con una IA",
               "Personas que viven permanentemente en realidades virtuales",
-              "Una ciudad flotante que viaja por los océanos",
-              "Fábricas de robots ubicadas en la Luna"] },
+              "Niñas y niños regios menores de 10 años",
+              "Personas mayores rejuvenecidas gracias a la biotecnología",
+              "Jóvenes que nacieron en ese futuro y nunca conocieron el Monterrey de hoy",
+              "Obreros y técnicos de la industria regia",
+              "Familias de las colonias populares de la periferia",
+              "Migrantes y recién llegados a Monterrey"] },
   ];
   
   /* ============ Modo oscuro / claro ============ */
@@ -928,16 +927,15 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
     "Las guerras se combaten en mundos virtuales": "Los conflictos se pelean en espacios digitales. ¿Siguen siendo reales sus consecuencias y quién decide quién gana?",
     "Los vehículos terrestres son obsoletos, todos son aéreos": "Las personas y las cosas se mueven por el aire. Cambian las ciudades, el ruido, el trabajo y las reglas de tránsito.",
     "Los océanos son convertidos en hábitats flotantes para humanos": "Se vive sobre el mar. Cambian la vivienda, la pesca, la relación con el océano y quién tiene derecho a ese espacio.",
-    "Refugios submarinos": "Lugares bajo el agua donde la gente se protege y vive. ¿De qué se refugian y cómo es la vida allá abajo?",
-    "Una ciudad en la Luna": "Una comunidad humana en otro mundo, con sus propias reglas, recursos y vínculos con la Tierra.",
-    "Niños y niñas menores de 10 años": "La primera generación que crece en ese futuro y lo vive como lo normal.",
-    "Escuelas ubicadas en Marte": "Aprender lejos de la Tierra: qué se enseña, quién enseña y cómo crece una infancia en otro planeta.",
-    "Tribu indígena que ha logrado mantener su autonomía": "Un pueblo que conserva su cultura, su territorio y sus decisiones frente a un mundo que cambió.",
-    "Personas que optaron por vivir con cuerpos robóticos": "Personas que dejaron el cuerpo biológico. Plantean preguntas sobre identidad, derechos y qué es ser humano.",
-    "Ancianos rejuvenecidos gracias a la biotecnología": "Personas mayores que recuperan la juventud. Cambian la familia, el trabajo, la memoria y las generaciones.",
+    "Regiomontanos que optaron por vivir con cuerpos robóticos": "Personas de Monterrey que dejaron el cuerpo biológico. Plantean preguntas sobre identidad, derechos y qué es ser humano.",
+    "Científicos que fusionaron su mente con una IA": "Gente de ciencia cuya mente trabaja junto con una inteligencia artificial. ¿Quién decide, ellos o la máquina?",
     "Personas que viven permanentemente en realidades virtuales": "Vidas que transcurren dentro de mundos digitales. ¿Qué es real, qué se gana y qué se pierde?",
-    "Una ciudad flotante que viaja por los océanos": "Una comunidad móvil sobre el mar, sin territorio fijo y con sus propias reglas y recursos.",
-    "Fábricas de robots ubicadas en la Luna": "Lugares donde las máquinas fabrican más máquinas lejos de la Tierra. ¿Quién las controla y para quién producen?",
+    "Niñas y niños regios menores de 10 años": "La primera generación que crece en ese Monterrey y lo vive como lo normal.",
+    "Personas mayores rejuvenecidas gracias a la biotecnología": "Personas mayores que recuperan la juventud. Cambian la familia, el trabajo, la memoria y las generaciones.",
+    "Jóvenes que nacieron en ese futuro y nunca conocieron el Monterrey de hoy": "Una generación sin recuerdos del presente. Ven como normal lo que hoy nos sorprendería.",
+    "Obreros y técnicos de la industria regia": "Quienes hacen funcionar las fábricas y los talleres de la ciudad. ¿Qué pasa con su trabajo cuando todo cambia?",
+    "Familias de las colonias populares de la periferia": "Hogares de las orillas de la zona metropolitana. ¿Quién llega primero al futuro y quién se queda atrás?",
+    "Migrantes y recién llegados a Monterrey": "Personas que llegan de otros lugares a buscar una vida mejor, como la ciudad ha vivido siempre.",
   };
   const tip = $("#tip");
   function showTip(btn, d) {
@@ -1035,12 +1033,12 @@ document.getElementById("css-light").media=m==="light"?"all":"not all";})();
 - Año: ${s[1].text}
 - Temática: ${s[2].text}
 - Planteamiento (lo que sucede): ${s[3].text}
-- Lugar o persona: ${s[4].text}
+- Protagonista: ${s[4].text}
 
 Ideas y comentarios de la persona participante y del público (incorpóralos como hechos o rasgos de ese Monterrey y respétalos):
 ${notes ? notes : "(No añadieron comentarios; usa tu criterio dentro de los parámetros anteriores.)"}
 
-Premisa: en el año ${s[1].text}, en el ámbito de «${s[2].text}», ya es realidad que «${s[3].text}», y esto se vive en Monterrey y su zona metropolitana, con especial efecto en «${s[4].text}». Monterrey es siempre el escenario principal. Si el planteamiento o el lugar son de otro sitio (la Luna, Marte, el mar, un mundo virtual), muestra cómo se relaciona Monterrey con eso: vínculos, comercio, familias, empresas, viajes, noticias o cambios en la ciudad.
+Premisa: en el año ${s[1].text}, en el ámbito de «${s[2].text}», ya es realidad que «${s[3].text}», y esto se vive en Monterrey y su zona metropolitana, y quienes lo viven son los protagonistas: «${s[4].text}». Monterrey es siempre el escenario principal. Si el planteamiento involucra otro sitio (la Luna, Marte, el mar, un mundo virtual), muestra cómo se relaciona Monterrey con eso: vínculos, comercio, familias, empresas, viajes, noticias o cambios en la ciudad.
 
 Escribe lo siguiente, en este orden exacto. Cada sección empieza con una línea que contiene solo la marca indicada, y no uses otros títulos ni símbolos de formato:
 
