@@ -1,6 +1,6 @@
 # Generador de escenarios de futuro
 
-Dinámica de cartas para el Centro de Estudios del Futuro. Se eligen 5 cartas
+Dinámica de cartas para el Centro de Estudios del Futuro: imaginar cómo será Monterrey en el futuro. Se eligen 5 cartas
 (tipo de historia, horizonte, temática, evento y a quién o dónde le sucede), se
 agregan ideas y Claude escribe una versión breve (2 párrafos) y una extendida
 (4 párrafos: contexto, conflicto, solución y cierre, sin títulos) que resaltan
